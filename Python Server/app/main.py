@@ -1,5 +1,5 @@
 from flask import *
-
+import json
 import os
 import argparse
 from NotionAI import *
@@ -74,8 +74,9 @@ def handle_data():
         'url': notion_url,
         'token': notion_token
     }
-
-    notion.run(options)
+    with open('data.json', 'w') as outfile:
+        json.dump(options, outfile)
+    notion.run()
     print(notion.options)
     return """
     <h1>Notion AI My Mind</h1>

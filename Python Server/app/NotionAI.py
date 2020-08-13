@@ -2,17 +2,33 @@ from notion.client import NotionClient
 from notion.block import ImageBlock,EmbedBlock,BookmarkBlock,VideoBlock,TweetBlock,TextBlock
 
 import validators
-
+import os
 from utils import crawl, fix_list
 from custom_errors import OnImageNotFound,OnImageUrlNotValid,EmbedableContentNotFound
 from website_types import *
 import requests
+import json
 
 class NotionAI:
     def __init__(self):
         print("Init NotionAI")
-    def run(self,options):
+        if os.path.isfile('data.json'):
+            print("Initiating with a found config file.")
+            options = {}
+            with open('data.json') as json_file:
+                options = json.load(json_file)
+                
+            self.client = NotionClient(token_v2=options['token'])
+            self.options = options
+            print("Running notionAI with " + str(self.options))
+        else:
+            print("You should go to the homepage and set the config.")
+    def run(self):
         # Obtain the `token_v2` value by inspecting your browser cookies on a logged-in session on Notion.so
+        options = {}
+        with open('data.json') as json_file:
+            options = json.load(json_file)
+            
         self.client = NotionClient(token_v2=options['token'])
         self.options = options
         print("Running notionAI with " + str(self.options))
