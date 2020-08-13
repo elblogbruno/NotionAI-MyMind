@@ -3,24 +3,23 @@ from notion.block import ImageBlock,EmbedBlock,BookmarkBlock,VideoBlock,TweetBlo
 
 import validators
 
-from flask import *
 from utils import crawl, fix_list
 from custom_errors import OnImageNotFound,OnImageUrlNotValid,EmbedableContentNotFound
 from website_types import *
 import requests
-app = Flask(__name__)
-
 
 class NotionAI:
-    def __init__(self, config, app):
+    def __init__(self):
+        print("Init NotionAI")
+    def run(self,options):
         # Obtain the `token_v2` value by inspecting your browser cookies on a logged-in session on Notion.so
-        self.client = NotionClient(token_v2=config['token'])
+        self.client = NotionClient(token_v2=options['token'])
         self.options = options
-        self.statusCode = 200 #at start we asume everything will go ok
+        print("Running notionAI with " + str(self.options))
     def add_url_to_database(self, url):
         print("The url is " +url)
         
-
+        self.statusCode = 200 #at start we asume everything will go ok
         cv = self.client.get_collection_view(self.options['url'])
         row = cv.collection.add_row()
         self.row = row
@@ -66,6 +65,7 @@ class NotionAI:
             bookmark.set_new_link(url)
             row.icon = bookmark.bookmark_icon
             url_embed_info = [bookmark.title, bookmark.description,bookmark.bookmark_icon,bookmark.bookmark_cover]
+            print(url_embed_info)
             if len(url_embed_info) == 0:
                 raise EmbedableContentNotFound("Could not embed this url and get info",self)
             else:
@@ -116,7 +116,7 @@ class NotionAI:
             
     def add_text_to_database(self, text,url):
         print("The text is " + text + " context: "+ url)
-
+        self.statusCode = 200 #at start we asume everything will go ok
         cv = self.client.get_collection_view(self.options['url'])
         row = cv.collection.add_row()
         self.row = row
@@ -131,58 +131,3 @@ class NotionAI:
         except requests.exceptions.HTTPError as invalidUrl:
             print(invalidUrl)
             self.statusCode = 500
-    
-options = {
-    'url': "https://www.notion.so/glassear/d4e43dbfe7244e0a83f18e14506e74ae?v=2b6755006a15418c978d5067180baae0",
-    'token': "5574622b5cd318cf4107d1e088041e1c2482be80a5889c12fa8264641836e14d785d528a0cea0a82b9904251019795029dfa4e6fab65d518d7d905f9854ba2fdbed19c2df98f5d68cf918a8d9afd"
-}
-
-notion = NotionAI(options, app)
-
-
-@app.route('/add_url_to_mind')
-def add_url_to_mind():
-    url = request.args.get('url')
-    notion.add_url_to_database(url)
-    print(str(notion.statusCode))
-    return str(notion.statusCode)
-
-@app.route('/add_text_to_mind')
-def add_text_to_mind():
-    url = request.args.get('url')
-    text = request.args.get('text')
-    notion.add_text_to_database(str(text),str(url))
-    print(str(notion.statusCode))
-    return str(notion.statusCode)
-
-@app.route('/add_image_to_mind')
-def add_image_to_mind():
-    url = request.args.get('url')
-    image_src = request.args.get('image_src')
-    image_src_url = request.args.get('image_src_url')
-    
-    # notion.add_text_to_database(str(url),str(text))
-    # print(str(notion.statusCode))
-    return str(notion.statusCode)
-
-@app.route('/add_video_to_mind')
-def add_video_to_mind():
-    url = request.args.get('url')
-    video_src = request.args.get('video_src')
-    video_src_url = request.args.get('video_src_url')
-
-    # notion.add_text_to_database(str(url),str(text))
-    # print(str(notion.statusCode))
-    return str(notion.statusCode)
-
-@app.route('/add_audio_to_mind')
-def add_audio_to_mind():
-    url = request.args.get('url')
-    audio_src = request.args.get('audio_src')
-    audio_src_url = request.args.get('audio_src_url')
-
-    # notion.add_text_to_database(str(url),str(text))
-    # print(str(notion.statusCode))
-    return str(notion.statusCode)
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=80)
