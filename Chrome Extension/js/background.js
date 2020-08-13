@@ -73,32 +73,32 @@ chrome.contextMenus.create({
 });
 chrome.contextMenus.onClicked.addListener(getword)
 
-chrome.menus.create({
-  id: "open-popup",
-  title: "open popup",
-  contexts: ["all"]
-});
+// chrome.menus.create({
+//   id: "open-popup",
+//   title: "open popup",
+//   contexts: ["all"]
+// });
 
-chrome.menus.onClicked.addListener(() => {
-  browser.browserAction.openPopup();
-});
-function showPage(content) {
+// chrome.menus.onClicked.addListener(() => {
+//   browser.browserAction.openPopup();
+// });
+// function showPage(content) {
 
 
-  document.getElementById("message-status").innerHTML  = content;
-  document.getElementById("loader").style.display = "none";
-  document.getElementById("awmt-notification").style.display = "block";
-}
+//   document.getElementById("message-status").innerHTML  = content;
+//   document.getElementById("loader").style.display = "none";
+//   document.getElementById("awmt-notification").style.display = "block";
+// }
 
-function showLoader() {
-  // const i = document.createElement('iframe')
+// function showLoader() {
+//   // const i = document.createElement('iframe')
   
-  // chrome.runtime.sendMessage({ open: true }, (response) => {
-  //   i.src = response
-  //   p.appendChild(i)
-  // })
+//   // chrome.runtime.sendMessage({ open: true }, (response) => {
+//   //   i.src = response
+//   //   p.appendChild(i)
+//   // })
 
-  // document.getElementById("loader").style.display = "block";
-  // document.getElementById("awmt-notification").style.display = "none";
-  chrome.browserAction.openPopup();
-}
+//   // document.getElementById("loader").style.display = "block";
+//   // document.getElementById("awmt-notification").style.display = "none";
+//   chrome.browserAction.openPopup();
+// }
