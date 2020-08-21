@@ -11,6 +11,24 @@ Also, adding image and article tagging capabilities thanks to AI, so you can sim
 
 Right now, there's a working but work in progress Python Local Server, that receives all the data from the extension and the app, and publishes it to Notion. So it is 100% open source and fully private!
 
+# Obtaining Credentials
+
+Right now there is no official way of accessing the Notion API but there is a little work-around to get your credentials.
+
+## Prerequisites
+
+You need to have an account on [Notion.so](https://notion.so/) and need to be logged in.
+
+## Getting your credentials
+
+Most of the modern web browsers support inspecting cookies visually using the browser's devtools.
+You can read how to do it in your browser here:
+
+- [Chrome](https://developers.google.com/web/tools/chrome-devtools/manage-data/cookies)
+- [Firefox](https://developer.mozilla.org/en-US/docs/Tools/Storage_Inspector)
+
+After you found the Notion.so cookie, look for an entry called `token_v2`. It is the necessary credential for the Python server. 
+
 ### Love to try it?
 
 - Step 1. Simply clone this repo.
