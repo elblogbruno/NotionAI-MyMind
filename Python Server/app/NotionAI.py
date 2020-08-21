@@ -4,10 +4,13 @@ from notion.block import ImageBlock,EmbedBlock,BookmarkBlock,VideoBlock,TweetBlo
 import validators
 import os
 from utils import crawl, fix_list
-from custom_errors import OnImageNotFound,OnImageUrlNotValid,EmbedableContentNotFound
+from custom_errors import OnImageNotFound,OnImageUrlNotValid,EmbedableContentNotFound,NoTagsFound
 from website_types import *
 import requests
 import json
+from ClarifaiAI import *
+from uuid import uuid1
+from random import choice
 
 class NotionAI:
     def __init__(self):
@@ -20,6 +23,7 @@ class NotionAI:
                 
             self.client = NotionClient(token_v2=options['token'])
             self.options = options
+            self.clarifai = ClarifaiAI(options['clarifai_key'])
             print("Running notionAI with " + str(self.options))
         else:
             print("You should go to the homepage and set the config.")
@@ -31,6 +35,7 @@ class NotionAI:
             
         self.client = NotionClient(token_v2=options['token'])
         self.options = options
+        self.clarifai = ClarifaiAI(options['clarifai_key'])
         print("Running notionAI with " + str(self.options))
     def add_url_to_database(self, url):
         print("The url is " +url)
@@ -38,6 +43,7 @@ class NotionAI:
         self.statusCode = 200 #at start we asume everything will go ok
         cv = self.client.get_collection_view(self.options['url'])
         row = cv.collection.add_row()
+        self.collection = cv.collection
         self.row = row
 
         try:
@@ -59,11 +65,14 @@ class NotionAI:
                 #img_block.upload_file("C:/Users/elblo/Desktop/slide.jpg")
                 row.icon = img_block.source 
                 #TO-DO PROCESS IMAGE LIKE THIS AND SET TAGS
-                # try:
-                #     row.tags = image_processing.getTags(cover_url)
-                # except NoTagsFound as e:
-                #     pass
-                
+                try:
+                    tags = self.clarifai.getTags(cover_url)
+                    print(tags)
+                    self.add_new_multi_select_value("AITags",tags)
+                except NoTagsFound as e:
+                    print(e)
+                except ValueError as e:
+                    print(e)
             except OnImageNotFound as e:
                 print(e)
             except OnImageUrlNotValid as e:
@@ -73,7 +82,48 @@ class NotionAI:
         except EmbedableContentNotFound as e:
             print(e)
             pass
-             
+    def add_new_multi_select_value(self,prop, value, color=None):
+        colors = [
+            "default",
+            "gray",
+            "brown",
+            "orange",
+            "yellow",
+            "green",
+            "blue",
+            "purple",
+            "pink",
+            "red",
+        ]
+
+        """`prop` is the name of the multi select property."""
+        if color is None:
+            color = choice(colors)
+
+        collection_schema = self.collection.get("schema")
+        prop_schema = next(
+            (v for k, v in collection_schema.items() if v["name"] == prop), None
+        )
+        if not prop_schema:
+            raise ValueError(
+                f'"{prop}" property does not exist on the collection!'
+            )
+        if prop_schema["type"] != "multi_select":
+            raise ValueError(f'"{prop}" is not a multi select property!')
+        
+        if "options" not in prop_schema: 
+            prop_schema["options"] = []
+        
+        dupe = next(
+            (o for o in prop_schema["options"] if o["value"] == value), None
+        )
+        if dupe:
+            raise ValueError(f'"{value}" already exists in the schema!')
+
+        prop_schema["options"].append(
+            {"id": str(uuid1()), "value": value, "color": color}
+        )
+        self.collection.set("schema", collection_schema)         
     def get_embedable_from_url(self,url,row):
         url_embed_info = []
         bookmark = row.children.add_new(BookmarkBlock)

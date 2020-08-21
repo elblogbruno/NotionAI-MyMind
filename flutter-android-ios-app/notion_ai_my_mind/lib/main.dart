@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/io_client.dart';
+import 'package:notion_ai_my_mind/settings.dart';
 import 'dart:async';
 
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
@@ -134,7 +135,10 @@ class _MyAppState extends State<MyHomePage> {
           alignment: Alignment.bottomCenter,
           child: FloatingActionButton(
             onPressed: () {
-
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => settings()),
+              );
             },
             tooltip: 'Increment',
             child: Icon(Icons.settings),

@@ -69,10 +69,12 @@ def show_settings_home_menu():
 def handle_data():
     notion_url = request.form['notion_url']
     notion_token = request.form['notion_token']
-
+    clarifai_key = request.form['clarifai_key']
+    
     options = {
         'url': notion_url,
-        'token': notion_token
+        'token': notion_token,
+        'clarifai_key': clarifai_key
     }
     with open('data.json', 'w') as outfile:
         json.dump(options, outfile)
