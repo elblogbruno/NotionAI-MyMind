@@ -29,6 +29,8 @@ You can read how to do it in your browser here:
 
 After you found the Notion.so cookie, look for an entry called `token_v2`. It is the necessary credential for the Python server. 
 
+For AI Tagging you need to create a free account at [Clarifai](https://www.clarifai.com/) and create an Application named whatever you want and get the API key.
+
 ### Love to try it?
 
 - Step 1. Simply clone this repo.
@@ -43,16 +45,22 @@ cd NotionAI-MyMind && pip -r install requirements.txt
 ```
 python main.py \\Python 3.5 or up needed.
 ```
-- Step 4. Go to your servers IP and fill the data needed.
+- Step 4. Create Notion Database.
+![Notion Screen](/doc/notion-database-howto.png)
+```
+python main.py \\Python 3.5 or up needed.
+```
+- Step 5. Go to your servers IP and fill the data needed (Token, Notion Database URL and clarifai api key).
+
 ![Options Screen](/doc/options_python.png)
 
-- Step 5. Load the extension on your chromium Browser.
-![Options Screen](/doc/extension_howto.png)
+- Step 6. Load the extension on your chromium Browser.
+![Extension Screen](/doc/extension_howto.png)
 
-- Step 6. Change the config of your extension to your local server IP.
-![Options Screen](/doc/settings_howto.png)
+- Step 7. Change the config of your extension to your local server IP.
+![Settings Screen](/doc/settings_howto.png)
 
-- Step 7. ENJOY!
+- Step 8. ENJOY!
 
 
 # TODO
