@@ -31,6 +31,9 @@ After you found the Notion.so cookie, look for an entry called `token_v2`. It is
 
 For AI Tagging you need to create a free account at [Clarifai](https://www.clarifai.com/) and create an Application named whatever you want and get the API key.
 
+![Clarifai Screen](/doc/clarifai.png)
+
+
 ### Love to try it?
 
 - Step 1. Simply clone this repo.
@@ -47,9 +50,7 @@ python main.py \\Python 3.5 or up needed.
 ```
 - Step 4. Create Notion Database.
 ![Notion Screen](/doc/notion-database-howto.png)
-```
-python main.py \\Python 3.5 or up needed.
-```
+
 - Step 5. Go to your servers IP and fill the data needed (Token, Notion Database URL and clarifai api key).
 
 ![Options Screen](/doc/options_python.png)
