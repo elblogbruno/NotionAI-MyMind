@@ -10,7 +10,8 @@ notion = NotionAI()
 @app.route('/add_url_to_mind')
 def add_url_to_mind():
     url = request.args.get('url')
-    notion.add_url_to_database(url)
+    title = request.args.get('title')
+    notion.add_url_to_database(url,title)
     print(str(notion.statusCode))
     return str(notion.statusCode)
 

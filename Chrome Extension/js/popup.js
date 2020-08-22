@@ -13,7 +13,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const baseUrl = ip;
         
             var url = tab.url;
-            const urlParams = `add_url_to_mind?url=${url}`;
+            var title = tab.title;
+            const urlParams = `add_url_to_mind?url=${url}&title=${title}`;
         
             req.open("GET", baseUrl+urlParams, true);
           // req.setRequestHeader("Access-Control-Allow-Origin",baseUrl);

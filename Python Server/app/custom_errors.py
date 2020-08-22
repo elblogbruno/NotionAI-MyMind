@@ -10,7 +10,7 @@ class OnImageNotFound(Exception):
                 return 'OnImageNotFound, {0} '.format(self.message)
         else :
                 return 'OnImageNotFound has been raised'
-class OnImageUrlNotValid(Exception):
+class OnUrlNotValid(Exception):
     def __init__(self, * args):
         if args:
                 self.message = args[0]
