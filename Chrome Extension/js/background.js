@@ -3,7 +3,6 @@ function getword(info,tab) {
   if (info.menuItemId !== CONTEXT_MENU_ID) {
     return;
   }
-  showLoader();
   const req = new XMLHttpRequest();
   chrome.storage.sync.get("serverIP", function(items) {
     if (!chrome.runtime.error) {
@@ -46,19 +45,19 @@ function getword(info,tab) {
               console.log(this.responseText)
               switch (this.responseText) {
                 case '200':
-                  showPage("Added to your mind")
+                  alert("Added to your mind")
                   break;
                 case '409':
-                  showPage("Could not be added to your mind. (This content is invalid)")
+                  alert("Could not be added to your mind. (This content is invalid)")
                   break;
                 case '500':
-                  showPage("This url is invalid")
+                  alert("This url is invalid")
                   break;
                 default:
                   break;
               }
           } else {
-            showPage("Error during accessing server. Make sure the ip/port are corrects, and the server is running.");
+            console.log("Error during accessing server. Make sure the ip/port are corrects, and the server is running.");
           }
       }
     }

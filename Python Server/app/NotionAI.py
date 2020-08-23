@@ -239,14 +239,70 @@ class NotionAI:
         cv = self.client.get_collection_view(self.options['url'])
         row = cv.collection.add_row()
         self.row = row
-
         try:
             #embedable_content = self.get_embedable_from_url(url,row)
-            row.name = "Extract from " + url
-            text_block = row.children.add_new(TextBlock)
-            text_block.title  = text
+            if url == "" or text == "":
+                self.statusCode = 409
+            else:
+                row.name = "Extract from " + url
+                text_block = row.children.add_new(TextBlock)
+                text_block.title  = text
+                row.person = self.client.current_user
+                row.url = url
+        except requests.exceptions.HTTPError as invalidUrl:
+            print(invalidUrl)
+            self.statusCode = 500
+    
+    def add_image_to_database(self,url, image_src,image_src_url):
+        print("The Image is " + image_src + " context: "+ image_src_url)
+        self.statusCode = 200 #at start we asume everything will go ok
+        cv = self.client.get_collection_view(self.options['url'])
+        row = cv.collection.add_row()
+        self.row = row
+
+        try:
+            row.name = "Image from " + image_src_url
+            row.url = image_src_url
+            img_block  = row.children.add_new(ImageBlock)
+            img_block.source = image_src
+            #img_block.upload_file("C:/Users/elblo/Desktop/slide.jpg")
+            row.icon = img_block.source 
             row.person = self.client.current_user
-            row.url = url
+            try:
+                tags = self.clarifai.getTags(image_src)
+                print(tags)
+                row.AITagsText = tags
+                self.add_new_multi_select_value("AITags",tags)
+            except NoTagsFound as e:
+                print(e)
+            except ValueError as e:
+                print(e)
+        except requests.exceptions.HTTPError as invalidUrl:
+            print(invalidUrl)
+            self.statusCode = 500
+    def add_image_to_database_by_post(self, image_src):
+        print("The Image is " + image_src)
+        self.statusCode = 200 #at start we asume everything will go ok
+        cv = self.client.get_collection_view(self.options['url'])
+        row = cv.collection.add_row()
+        self.row = row
+
+        try:
+            row.name = "Image from " + image_src
+            row.url = image_src
+            img_block  = row.children.add_new(ImageBlock)
+            img_block.upload_file(image_src)
+            row.icon = img_block.source 
+            row.person = self.client.current_user
+            try:
+                tags = self.clarifai.getTags(img_block.source)
+                print(tags)
+                row.AITagsText = tags
+                self.add_new_multi_select_value("AITags",tags)
+            except NoTagsFound as e:
+                print(e)
+            except ValueError as e:
+                print(e)
         except requests.exceptions.HTTPError as invalidUrl:
             print(invalidUrl)
             self.statusCode = 500
