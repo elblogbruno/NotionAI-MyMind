@@ -58,7 +58,7 @@ class NotionAI:
             rowId = self.web_clipper_request(url,title)
             row = self.client.get_block(rowId)
             try:
-                page_content = self.get_content_from_row(row)
+                page_content = self.get_content_from_row(row,0)
                 img_url = self.extract_image_from_content(page_content)
                 try:
                     tags = self.clarifai.getTags(img_url)
@@ -70,6 +70,8 @@ class NotionAI:
                 except ValueError as e:
                     print(e)
             except OnImageNotFound as e:
+                print(e)
+            except EmbedableContentNotFound as e:
                 print(e)
         except OnUrlNotValid as invalidUrl:
             print(invalidUrl)
@@ -132,15 +134,18 @@ class NotionAI:
             print(url)
         return url
 
-    def get_content_from_row(self,row):
+    def get_content_from_row(self,row,n):
         row.refresh()
         content = row.get('content')
-        if content is None:
+        if content is None and n < 15:
             sleep(0.5)
-            print("No content available yet")
-            return self.get_content_from_row(row)
+            print("No content available yet " +str(n))
+            return self.get_content_from_row(row,n+1)
         else:
-            return content
+            if content is None:
+                raise EmbedableContentNotFound("This url had no content to be embeddable",self)
+            else:
+                return content
     
     def web_clipper_request(self,url,title):
 

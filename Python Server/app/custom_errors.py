@@ -29,7 +29,7 @@ class EmbedableContentNotFound(Exception):
         else :
                 self.message = None
         args[1].statusCode = 409
-        args[1].row.remove() #removes the row beacuse it will be blank
+        #args[1].row.remove() #removes the row beacuse it will be blank
     def __str__(self):
         if self.message:
                 return 'EmbedableContentNotFound, {0} '.format(self.message)
