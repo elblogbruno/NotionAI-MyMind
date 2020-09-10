@@ -1,10 +1,13 @@
 import os
+
 from flask import send_from_directory
 from flask import render_template
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug.utils import secure_filename
+
 import json
 import secrets
+
 from NotionAI import *
 
 
@@ -110,14 +113,19 @@ def handle_data():
     }
     with open('data.json', 'w') as outfile:
         json.dump(options, outfile)
-    notion.run()
-    print(notion.options)
-    return """
-    <h1>Notion AI My Mind</h1>
-    <h2>Settings were succesfully saved.</h2>
-    <p>This is a lovely program created by @elblogbruno.</p>
-    <code>Flask is <em>awesome</em></code>
-    """
+    runned = notion.run()
+    if runned:
+        return """
+        <h1>Notion AI My Mind</h1>
+        <h2>Settings were succesfully saved.</h2>
+        <p>This is a lovely program created by @elblogbruno.</p>
+        <code>Flask is <em>awesome</em></code>
+        """
+    else:
+        return """
+        <h1>Notion AI My Mind</h1>
+        <h2>Settings are incorrect, please check the Notion Token is correct.</h2>
+        """
 
 @app.route("/about")
 def about():

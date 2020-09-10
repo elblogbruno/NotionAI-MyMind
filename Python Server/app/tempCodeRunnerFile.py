@@ -1,1 +1,0 @@
-add_image_to_mind

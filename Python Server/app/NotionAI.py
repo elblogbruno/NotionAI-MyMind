@@ -4,7 +4,7 @@ from notion.block import ImageBlock,EmbedBlock,BookmarkBlock,VideoBlock,TweetBlo
 import validators
 import os
 from utils import crawl, fix_list
-from custom_errors import OnImageNotFound,OnUrlNotValid,EmbedableContentNotFound,NoTagsFound
+from custom_errors import OnImageNotFound,OnUrlNotValid,EmbedableContentNotFound,NoTagsFound,OnTokenV2NotValid
 from website_types import *
 import requests
 import json
@@ -17,10 +17,17 @@ class NotionAI:
         print("Init NotionAI")
         if os.path.isfile('data.json'):
             print("Initiating with a found config file.")
-            options = {}
-            with open('data.json') as json_file:
-                options = json.load(json_file)
-                
+            loaded = self.run()
+        else:
+            print("You should go to the homepage and set the config.")
+    
+    def run(self):
+        # Obtain the `token_v2` value by inspecting your browser cookies on a logged-in session on Notion.so
+        loaded = False
+        options = {}
+        with open('data.json') as json_file:
+            options = json.load(json_file)
+        try:
             self.client = NotionClient(token_v2=options['token'])
             mind_page = self.client.get_block(options['url'])
             self.mind_id = mind_page.id
@@ -29,26 +36,13 @@ class NotionAI:
             self.clarifai = ClarifaiAI(options['clarifai_key'])
             
             cv = self.client.get_collection_view(self.options['url'])
+
             self.collection = cv.collection
             print("Running notionAI with " + str(self.options))
-        else:
-            print("You should go to the homepage and set the config.")
-    
-    def run(self):
-        # Obtain the `token_v2` value by inspecting your browser cookies on a logged-in session on Notion.so
-        options = {}
-        with open('data.json') as json_file:
-            options = json.load(json_file)
-            
-        self.client = NotionClient(token_v2=options['token'])
-        mind_page = self.client.get_block(options['url'])
-        self.mind_id = mind_page.id
-        self.options = options
-        self.clarifai = ClarifaiAI(options['clarifai_key'])
-
-        cv = self.client.get_collection_view(self.options['url'])
-        self.collection = cv.collection
-        print("Running notionAI with " + str(self.options))
+            loaded = True
+        except requests.exceptions.HTTPError:
+            print("Incorrect token V2 from notion")
+        return loaded
     
     def add_url_to_database(self, url,title):
         print("The url is " +url)
@@ -61,13 +55,15 @@ class NotionAI:
                 page_content = self.get_content_from_row(row,0)
                 img_url = self.extract_image_from_content(page_content)
                 try:
-                    tags = self.clarifai.getTags(img_url)
+                    tags = self.clarifai.get_tags(img_url)
                     print(tags)
                     row.AITagsText = tags
                     self.add_new_multi_select_value("AITags",tags)
                 except NoTagsFound as e:
                     print(e)
                 except ValueError as e:
+                    print(e)
+                except Exception as e:
                     print(e)
             except OnImageNotFound as e:
                 print(e)
@@ -138,12 +134,12 @@ class NotionAI:
         row.refresh()
         content = row.get('content')
         if content is None and n < 15:
-            sleep(0.5)
+            sleep(0.25)
             print("No content available yet " +str(n))
             return self.get_content_from_row(row,n+1)
         else:
             if content is None:
-                raise EmbedableContentNotFound("This url had no content to be embeddable",self)
+                raise EmbedableContentNotFound("This url had no image to tag, but was added to your mind.",self)
             else:
                 return content
     
@@ -182,51 +178,7 @@ class NotionAI:
         else:
             raise OnUrlNotValid   
 
-    # def get_embedable_from_url(self,url,row):
-    #     url_embed_info = []
-    #     bookmark = row.children.add_new(BookmarkBlock)
-    #     try:
-    #         bookmark.set_new_link(url)
-    #         row.icon = bookmark.bookmark_icon
-    #         url_embed_info = [bookmark.title, bookmark.description,bookmark.bookmark_icon,bookmark.bookmark_cover]
-    #         print(url_embed_info)
-    #         if len(url_embed_info) == 0:
-    #             raise EmbedableContentNotFound("Could not embed this url and get info",self)
-    #         else:
-    #             if "youtube" in url:
-    #                 video = row.children.add_new(VideoBlock, width=1000)
-    #                 video.set_source_url(url)
-    #                 print(video)
-    #                 row.icon = video.display_source 
-    #             elif "twitter" in url:
-    #                 twitter = row.children.add_new(TweetBlock)
-    #                 twitter.set_source_url(url)
-    #                 row.icon = twitter.display_source 
-    #     except requests.exceptions.HTTPError as invalidUrl:
-    #         print(invalidUrl)
-    #         self.statusCode = 500
-
-    #     if len(url_embed_info) == 0 or url_embed_info == None:
-    #         raise EmbedableContentNotFound("Could not embed this url and get info",self)
-    #     else:
-    #         return url_embed_info
-
-    # def get_url_cover(self,embedable_content):
-    #     is_well_formed = False
-    #     if len(embedable_content) > 2:
-    #         if embedable_content[3] != None:
-    #             is_well_formed = validators.url(embedable_content[3])
-    #             if is_well_formed:
-    #                 cover_url = embedable_content[3]
-    #             else:
-    #                 raise OnImageUrlNotValid("Thumbnail Image URL not valid" ,self)
-    #         else:
-    #             raise OnImageNotFound("Thumbnail Image URL not found. Value is None" ,self)
-    #     else:
-    #         raise OnImageNotFound("There are no image url array on the embedable array!",self) 
-    #     return cover_url   
-
-    # def get_url_icon(self,embedable_content):
+    def get_url_icon(self,embedable_content):
         is_well_formed = False
         if len(embedable_content) > 2:
             is_well_formed = validators.url(embedable_content[2])
@@ -241,11 +193,9 @@ class NotionAI:
     def add_text_to_database(self, text,url):
         print("The text is " + text + " context: "+ url)
         self.statusCode = 200 #at start we asume everything will go ok
-        cv = self.client.get_collection_view(self.options['url'])
-        row = cv.collection.add_row()
+        row = self.collection.add_row()
         self.row = row
         try:
-            #embedable_content = self.get_embedable_from_url(url,row)
             if url == "" or text == "":
                 self.statusCode = 409
             else:
@@ -261,8 +211,8 @@ class NotionAI:
     def add_image_to_database(self,url, image_src,image_src_url):
         print("The Image is " + image_src + " context: "+ image_src_url)
         self.statusCode = 200 #at start we asume everything will go ok
-        cv = self.client.get_collection_view(self.options['url'])
-        row = cv.collection.add_row()
+        #cv = self.client.get_collection_view(self.options['url'])
+        row = self.collection.add_row()
         self.row = row
 
         try:
@@ -274,7 +224,7 @@ class NotionAI:
             row.icon = img_block.source 
             row.person = self.client.current_user
             try:
-                tags = self.clarifai.getTags(image_src)
+                tags = self.clarifai.get_tags(image_src)
                 print(tags)
                 row.AITagsText = tags
                 self.add_new_multi_select_value("AITags",tags)
@@ -282,14 +232,17 @@ class NotionAI:
                 print(e)
             except ValueError as e:
                 print(e)
+            except Exception as e:
+                print(e)
         except requests.exceptions.HTTPError as invalidUrl:
             print(invalidUrl)
             self.statusCode = 500
+    
     def add_image_to_database_by_post(self, image_src):
         print("The Image is " + image_src)
         self.statusCode = 200 #at start we asume everything will go ok
-        cv = self.client.get_collection_view(self.options['url'])
-        row = cv.collection.add_row()
+        #cv = self.client.get_collection_view(self.options['url'])
+        row = self.collection.add_row()
         self.row = row
 
         try:
@@ -300,13 +253,15 @@ class NotionAI:
             row.icon = img_block.source 
             row.person = self.client.current_user
             try:
-                tags = self.clarifai.getTags(img_block.source)
+                tags = self.clarifai.get_tags(img_block.source)
                 print(tags)
                 row.AITagsText = tags
                 self.add_new_multi_select_value("AITags",tags)
             except NoTagsFound as e:
                 print(e)
             except ValueError as e:
+                print(e)
+            except Exception as e:
                 print(e)
         except requests.exceptions.HTTPError as invalidUrl:
             print(invalidUrl)

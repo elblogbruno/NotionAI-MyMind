@@ -7,7 +7,7 @@ class ClarifaiAI:
         # Construct one of the channels you want to use
         self.channel = ClarifaiChannel.get_json_channel()
         self.key = key
-    def getTags(self,image_url):
+    def get_tags(self,image_url):
         stub = service_pb2_grpc.V2Stub(self.channel)
 
         request = service_pb2.PostModelOutputsRequest(
