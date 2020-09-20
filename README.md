@@ -11,6 +11,12 @@ Also, adding image and article tagging capabilities thanks to AI, so you can sim
 
 Right now, there's a working but work in progress Python Local Server, that receives all the data from the extension and the app, and publishes it to Notion. So it is 100% open source and fully private!
 
+## Adding text to your mind
+![Adding text from context](doc/example_adding_from_context.png)
+
+## Adding images to your mind
+![Adding text from context](doc/example_adding_from_context_image.png)
+
 # Obtaining Credentials
 
 Right now there is no official way of accessing the Notion API but there is a little work-around to get your credentials.
