@@ -1,37 +1,77 @@
-## Welcome to GitHub Pages
+# NotionAI MyMind
+![Alt Text](doc/header_gif.gif)
 
-You can use the [editor on GitHub](https://github.com/elblogbruno/NotionAI-MyMind/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+This repo uses AI and the wonderful Notion to enable you to add anything on the web to your "Mind" and forget about everything else.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
 
-### Markdown
+### Project Philosophy.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+The idea is to have an extension on the browser, and app on android and Ios, allowing you to add whatever you find on the web in your "Mind".
+Also, adding image and article tagging capabilities thanks to AI, so you can simply search on your "Mind" for what you remember.
 
-```markdown
-Syntax highlighted code block
+Right now, there's a working but work in progress Python Local Server, that receives all the data from the extension and the app, and publishes it to Notion. So it is 100% open source and fully private!
 
-# Header 1
-## Header 2
-### Header 3
+## Adding text to your mind
+![Adding text from context](doc/example_adding_from_context.png)
 
-- Bulleted
-- List
+## Adding images to your mind
+![Adding text from context](doc/example_adding_from_context_image.png)
 
-1. Numbered
-2. List
+# Obtaining Credentials
 
-**Bold** and _Italic_ and `Code` text
+Right now there is no official way of accessing the Notion API but there is a little work-around to get your credentials.
 
-[Link](url) and ![Image](src)
+## Prerequisites
+
+You need to have an account on [Notion.so](https://notion.so/) and need to be logged in.
+
+## Getting your credentials
+
+Most of the modern web browsers support inspecting cookies visually using the browser's devtools.
+You can read how to do it in your browser here:
+
+- [Chrome](https://developers.google.com/web/tools/chrome-devtools/manage-data/cookies)
+- [Firefox](https://developer.mozilla.org/en-US/docs/Tools/Storage_Inspector)
+
+After you found the Notion.so cookie, look for an entry called `token_v2`. It is the necessary credential for the Python server. 
+
+For AI Tagging you need to create a free account at [Clarifai](https://www.clarifai.com/) and create an Application named whatever you want and get the API key.
+
+![Clarifai Screen](/doc/clarifai.png)
+
+
+### Love to try it?
+
+- Step 1. Simply clone this repo.
 ```
+git clone https://github.com/elblogbruno/NotionAI-MyMind
+```
+- Step 2. Install requirements for python server.
+```
+cd NotionAI-MyMind && pip -r install requirements.txt
+```
+- Step 3. Run the server.
+```
+python main.py \\Python 3.5 or up needed.
+```
+- Step 4. Create Notion Database.
+![Notion Screen](/doc/notion-database-howto.png)
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+- Step 5. Go to your servers IP and fill the data needed (Token, Notion Database URL and clarifai api key).
 
-### Jekyll Themes
+![Options Screen](/doc/options_python.png)
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/elblogbruno/NotionAI-MyMind/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+- Step 6. Load the extension on your chromium Browser.
+![Extension Screen](/doc/extension_howto.png)
 
-### Support or Contact
+- Step 7. Change the config of your extension to your local server IP.
+![Settings Screen](/doc/settings_howto.png)
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+- Step 8. ENJOY!
+
+
+# TODO
+- Finish flutter Android and Ios app
+- Fix extension issues
+- Develop extension for Firefox
+- Develop the AI tagging part.
