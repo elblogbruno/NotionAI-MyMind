@@ -3,23 +3,30 @@ from notion.block import ImageBlock,EmbedBlock,BookmarkBlock,VideoBlock,TweetBlo
 
 import validators
 import os
+
 from utils import crawl, fix_list
 from custom_errors import OnImageNotFound,OnUrlNotValid,EmbedableContentNotFound,NoTagsFound,OnTokenV2NotValid
 from website_types import *
+
 import requests
 import json
+
 from ClarifaiAI import *
 from uuid import uuid1
 from random import choice
 from time import sleep
+
 class NotionAI:
-    def __init__(self):
+    def __init__(self,logging):
         print("Init NotionAI")
         if os.path.isfile('data.json'):
             print("Initiating with a found config file.")
+            logging.info("Initiating with a found config file.")
+            self.logging = logging
             loaded = self.run()
         else:
             print("You should go to the homepage and set the config.")
+            logging.info("You should go to the homepage and set the config.")
     
     def run(self):
         # Obtain the `token_v2` value by inspecting your browser cookies on a logged-in session on Notion.so
@@ -39,9 +46,11 @@ class NotionAI:
 
             self.collection = cv.collection
             print("Running notionAI with " + str(self.options))
+            self.logging.info("Running notionAI with " + str(self.options))
             loaded = True
         except requests.exceptions.HTTPError:
             print("Incorrect token V2 from notion")
+            self.logging.info("Incorrect token V2 from notion")
         return loaded
     
     def add_url_to_database(self, url,title):
@@ -57,20 +66,27 @@ class NotionAI:
                 try:
                     tags = self.clarifai.get_tags(img_url)
                     print(tags)
+                    self.logging.info(tags)
                     row.AITagsText = tags
                     self.add_new_multi_select_value("AITags",tags)
                 except NoTagsFound as e:
                     print(e)
+                    self.logging.info(e)
                 except ValueError as e:
                     print(e)
+                    self.logging.info(e)
                 except Exception as e:
                     print(e)
+                    self.logging.info(e)
             except OnImageNotFound as e:
                 print(e)
+                self.logging.info(e)
             except EmbedableContentNotFound as e:
                 print(e)
+                self.logging.info(e)
         except OnUrlNotValid as invalidUrl:
             print(invalidUrl)
+            self.logging.info(invalidUrl)
             self.statusCode = 500
 
     def add_new_multi_select_value(self,prop, value, color=None):
@@ -128,6 +144,7 @@ class NotionAI:
             raise OnImageNotFound("Thumbnail Image URL not found. Value is None" ,self)
         else:
             print(url)
+            self.logging.info(url)
         return url
 
     def get_content_from_row(self,row,n):
@@ -136,6 +153,7 @@ class NotionAI:
         if content is None and n < 15:
             sleep(0.25)
             print("No content available yet " +str(n))
+            self.logging.info("No content available yet " +str(n))
             return self.get_content_from_row(row,n+1)
         else:
             if content is None:
@@ -152,9 +170,9 @@ class NotionAI:
         headers = {
             'Content-Type': 'application/json',
         }
- 
-        data_t = '{"type":"block","blockId":"","property":"P#~d","items":[{"url":"https://gladysassistant.com/en/integrations/","title":"Deconstruyendo SMOOTH CRIMINAL (Michael Jackson) | ShaunTrack"}],"from":"chrome"}'
-
+        if title == None:
+            title = url
+        
         is_well_formed = validators.url(url)
         if is_well_formed:
             url_object = {
@@ -169,10 +187,14 @@ class NotionAI:
                 "from" : "chrome"
             } 
             data = json.dumps(data_dict)
+
+            print (data)
+            self.logging.info(data)
             response = requests.post('https://www.notion.so/api/v3/addWebClipperURLs', headers=headers, cookies=cookies, data=data)
             response_text = response.text
             json_response = json.loads(response_text)
             print(json_response)
+            self.logging.info(json_response)
             rowId = json_response['createdBlockIds'][0]
             return rowId
         else:
@@ -206,6 +228,7 @@ class NotionAI:
                 row.url = url
         except requests.exceptions.HTTPError as invalidUrl:
             print(invalidUrl)
+            self.logging.info(invalidUrl)
             self.statusCode = 500
     
     def add_image_to_database(self,url, image_src,image_src_url):
@@ -226,16 +249,21 @@ class NotionAI:
             try:
                 tags = self.clarifai.get_tags(image_src)
                 print(tags)
+                self.logging.info(tags)
                 row.AITagsText = tags
                 self.add_new_multi_select_value("AITags",tags)
             except NoTagsFound as e:
                 print(e)
+                self.logging.info(e)
             except ValueError as e:
                 print(e)
+                self.logging.info(e)
             except Exception as e:
                 print(e)
+                self.logging.info(e)
         except requests.exceptions.HTTPError as invalidUrl:
             print(invalidUrl)
+            self.logging.info(invalidUrl)
             self.statusCode = 500
     
     def add_image_to_database_by_post(self, image_src):
@@ -259,10 +287,14 @@ class NotionAI:
                 self.add_new_multi_select_value("AITags",tags)
             except NoTagsFound as e:
                 print(e)
+                self.logging.info(e)
             except ValueError as e:
                 print(e)
+                self.logging.info(e)
             except Exception as e:
                 print(e)
+                self.logging.info(e)
         except requests.exceptions.HTTPError as invalidUrl:
             print(invalidUrl)
+            self.logging.info(invalidUrl)
             self.statusCode = 500
