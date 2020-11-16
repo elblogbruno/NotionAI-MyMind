@@ -11,6 +11,14 @@ Also, adding image and article tagging capabilities thanks to AI, so you can sim
 
 Right now, there's a working but work in progress Python Local Server, that receives all the data from the extension and the app, and publishes it to Notion. So it is 100% open source and fully private!
 
+https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 the chromium browsers such as google chrome or microsoft edge can install the extension from the store!
+
+## Adding text to your mind
+![Adding text from context](doc/example_adding_from_context.png)
+
+## Adding images to your mind
+![Adding text from context](doc/example_adding_from_context_image.png)
+
 # Obtaining Credentials
 
 Right now there is no official way of accessing the Notion API but there is a little work-around to get your credentials.
@@ -55,7 +63,7 @@ python main.py \\Python 3.5 or up needed.
 
 ![Options Screen](/doc/options_python.png)
 
-- Step 6. Load the extension on your chromium Browser.
+- Step 6. Load the extension on your chromium Browser or install it from the ![chrome web store](https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0)
 ![Extension Screen](/doc/extension_howto.png)
 
 - Step 7. Change the config of your extension to your local server IP.
