@@ -58,7 +58,7 @@ python server.py \\Python 3.5 or up needed.
 ```
 - Step 4. Create Notion Database.
 It must have this properties selected and add more properties if you want, but the selected ones must exist. 
-![Notion Screen](/doc/notion-database-howto.png)
+![Notion Screen](/doc/notion-database-howto.jpg)
 
 - Step 5. Go to your servers IP and fill the data needed (Token, Notion Database URL and clarifai api key).
 
