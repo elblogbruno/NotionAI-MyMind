@@ -64,7 +64,8 @@ It must have this properties selected and add more properties if you want, but t
 
 ![Options Screen](/doc/options_python.png)
 
-- Step 6. Load the extension on your chromium Browser or install it from the ![chrome web store](https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0)
+- Step 6. Load the extension on your chromium Browser or install it from the https://chrome.google.com/webstore/detail/notion-ai-mymind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 Chrome web store.
+
 ![Extension Screen](/doc/extension_howto.png)
 
 - Step 7. Change the config of your extension to your local server IP.
