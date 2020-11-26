@@ -78,5 +78,4 @@ It must have this properties selected and add more properties if you want, but t
 - Finish flutter Android and Ios app
 - Fix extension issues
 - Develop extension for Firefox
-- Develop the AI tagging part.
-
+- Add offline capabilities so things are saved and pushed to your mind where there is internet available
