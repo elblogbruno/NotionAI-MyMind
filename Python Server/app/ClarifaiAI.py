@@ -17,6 +17,7 @@ class ClarifaiAI:
             inputs=[
             resources_pb2.Input(data=resources_pb2.Data(image=resources_pb2.Image(url=image_url)))
             ])
+
         metadata = (('authorization', 'Key {0}'.format(self.key)),)
 
         response = stub.PostModelOutputs(request, metadata=metadata)
