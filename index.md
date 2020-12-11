@@ -11,6 +11,8 @@ Also, adding image and article tagging capabilities thanks to AI, so you can sim
 
 Right now, there's a working but work in progress Python Local Server, that receives all the data from the extension and the app, and publishes it to Notion. So it is 100% open source and fully private!
 
+https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 the chromium browsers such as google chrome or microsoft edge can install the extension from the store!
+
 ## Adding text to your mind
 ![Adding text from context](doc/example_adding_from_context.png)
 
@@ -52,16 +54,18 @@ cd NotionAI-MyMind && pip -r install requirements.txt
 ```
 - Step 3. Run the server.
 ```
-python main.py \\Python 3.5 or up needed.
+python server.py \\Python 3.5 or up needed.
 ```
 - Step 4. Create Notion Database.
-![Notion Screen](/doc/notion-database-howto.png)
+It must have this properties selected and add more properties if you want, but the selected ones must exist. 
+![Notion Screen](/doc/notion-database-howto.jpg)
 
 - Step 5. Go to your servers IP and fill the data needed (Token, Notion Database URL and clarifai api key).
 
 ![Options Screen](/doc/options_python.png)
 
-- Step 6. Load the extension on your chromium Browser.
+- Step 6. Load the extension on your chromium Browser or install it from the https://chrome.google.com/webstore/detail/notion-ai-mymind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 Chrome web store.
+
 ![Extension Screen](/doc/extension_howto.png)
 
 - Step 7. Change the config of your extension to your local server IP.
@@ -74,4 +78,4 @@ python main.py \\Python 3.5 or up needed.
 - Finish flutter Android and Ios app
 - Fix extension issues
 - Develop extension for Firefox
-- Develop the AI tagging part.
+- Add offline capabilities so things are saved and pushed to your mind where there is internet available
