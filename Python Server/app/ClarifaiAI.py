@@ -3,10 +3,12 @@ from clarifai_grpc.grpc.api.status import status_code_pb2
 from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
 
 class ClarifaiAI:
+
     def __init__(self,key):
         # Construct one of the channels you want to use
         self.channel = ClarifaiChannel.get_json_channel()
         self.key = key
+
     def get_tags(self,image_url):
         stub = service_pb2_grpc.V2Stub(self.channel)
 
@@ -15,7 +17,8 @@ class ClarifaiAI:
             inputs=[
             resources_pb2.Input(data=resources_pb2.Data(image=resources_pb2.Image(url=image_url)))
             ])
-        metadata = (('authorization', 'Key 7d13a00d87c5408b96fa94d16ad3c521'),)
+
+        metadata = (('authorization', 'Key {0}'.format(self.key)),)
 
         response = stub.PostModelOutputs(request, metadata=metadata)
 
