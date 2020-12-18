@@ -1,4 +1,5 @@
 const CONTEXT_MENU_ID = "MY_CONTEXT_MENU";
+const CONTEXT_MENU_ID_COOKIE = "MY_CONTEXT_MENU";
 function getword(info,tab) {
   if (info.menuItemId !== CONTEXT_MENU_ID) {
     return;
@@ -71,7 +72,12 @@ chrome.contextMenus.create({
   id: CONTEXT_MENU_ID
 });
 chrome.contextMenus.onClicked.addListener(getword)
-
+// chrome.contextMenus.create({
+//   title: "Get cookie: %s", 
+//   contexts:["all"], 
+//   id: CONTEXT_MENU_ID_COOKIE
+// });
+// chrome.contextMenus.onClicked.addListener(get)
 // chrome.menus.create({
 //   id: "open-popup",
 //   title: "open popup",

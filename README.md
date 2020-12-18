@@ -25,17 +25,13 @@ Right now there is no official way of accessing the Notion API but there is a li
 
 ## Prerequisites
 
-You need to have an account on [Notion.so](https://notion.so/) and need to be logged in.
+You need to have an account on [Notion.so](https://notion.so/) and need to be logged in your browser.
 
 ## Getting your credentials
 
-Most of the modern web browsers support inspecting cookies visually using the browser's devtools.
-You can read how to do it in your browser here:
+If you go to the chrome extension settings, you can get your needed token_v2! It is the necessary credential for the Python server.  (Hidden in the photo for obvious reasons)
 
-- [Chrome](https://developers.google.com/web/tools/chrome-devtools/manage-data/cookies)
-- [Firefox](https://developer.mozilla.org/en-US/docs/Tools/Storage_Inspector)
-
-After you found the Notion.so cookie, look for an entry called `token_v2`. It is the necessary credential for the Python server. 
+![Options Screen](/doc/getting_cookie.png)
 
 For AI Tagging you need to create a free account at [Clarifai](https://www.clarifai.com/) and create an Application named whatever you want and get the API key.
 
