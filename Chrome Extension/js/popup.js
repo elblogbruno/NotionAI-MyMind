@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         showPage("Added to your mind")
                         break;
                       case '409':
-                        showPage("Could not be added to your mind. (This content is invalid)")
+                        showPage("Could be added to your mind, but with no thumbnail!")
                         break;
                       case '500':
                         showPage("This url is invalid")

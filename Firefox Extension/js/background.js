@@ -1,12 +1,12 @@
 const CONTEXT_MENU_ID = "MY_CONTEXT_MENU";
+const CONTEXT_MENU_ID_COOKIE = "MY_CONTEXT_MENU";
 function getword(info,tab) {
   if (info.menuItemId !== CONTEXT_MENU_ID) {
     return;
   }
-  showLoader();
   const req = new XMLHttpRequest();
   chrome.storage.sync.get("serverIP", function(items) {
-    //if (!browser.runtime.error) {
+    if (!chrome.runtime.error) {
       ip = items["serverIP"];
       console.log(ip);
       const baseUrl = ip;
@@ -46,22 +46,22 @@ function getword(info,tab) {
               console.log(this.responseText)
               switch (this.responseText) {
                 case '200':
-                  showPage("Added to your mind")
+                  alert("Added to your mind")
                   break;
                 case '409':
-                  showPage("Could not be added to your mind. (This content is invalid)")
+                  alert("Could not be added to your mind. (This content is invalid)")
                   break;
                 case '500':
-                  showPage("This url is invalid")
+                  alert("This url is invalid")
                   break;
                 default:
                   break;
               }
           } else {
-            showPage("Error during accessing server. Make sure the ip/port are corrects, and the server is running.");
+            console.log("Error during accessing server. Make sure the ip/port are corrects, and the server is running.");
           }
       }
-    //}
+    }
   
   });
 }
@@ -72,7 +72,12 @@ chrome.contextMenus.create({
   id: CONTEXT_MENU_ID
 });
 chrome.contextMenus.onClicked.addListener(getword)
-
+// chrome.contextMenus.create({
+//   title: "Get cookie: %s", 
+//   contexts:["all"], 
+//   id: CONTEXT_MENU_ID_COOKIE
+// });
+// chrome.contextMenus.onClicked.addListener(get)
 // chrome.menus.create({
 //   id: "open-popup",
 //   title: "open popup",

@@ -2,18 +2,20 @@ var ip;
 document.addEventListener('DOMContentLoaded', function() {
       // var myVar = setTimeout(showPage, 2000);
       showLoader();
-      chrome.tabs.getSelected(null, function(tab) {
+      browser.tabs.query({active:true}).then(function (tab){
         const req = new XMLHttpRequest();
 
 
-        chrome.storage.sync.get("serverIP", function(items) {
-          //if (!browser.runtime.error) {
+        browser.storage.local.get("serverIP", function(items) {
+          if (!browser.runtime.error) {
             ip = items["serverIP"];
             console.log(ip);
+            console.log(tab[0].url);
             const baseUrl = ip;
         
-            var url = tab.url;
-            const urlParams = `add_url_to_mind?url=${url}`;
+            var url = tab[0].url;
+            var title = tab.title;
+            const urlParams = `add_url_to_mind?url=${url}&title=${title}`;
         
             req.open("GET", baseUrl+urlParams, true);
           // req.setRequestHeader("Access-Control-Allow-Origin",baseUrl);
@@ -28,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         showPage("Added to your mind")
                         break;
                       case '409':
-                        showPage("Could not be added to your mind. (This content is invalid)")
+                        showPage("Could be added to your mind, but with no thumbnail!")
                         break;
                       case '500':
                         showPage("This url is invalid")
@@ -40,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
                   showPage("Error during accessing server. Make sure the ip/port are corrects, and the server is running.");
                 }
             }
-          //}
+          }
         });
         
         
