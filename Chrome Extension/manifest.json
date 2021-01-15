@@ -3,7 +3,7 @@
   
     "name": "Notion AI My Mind",
     "description": "This extension allows to click to add any image or website to your MIND in notion, and forget about everything else.",
-    "version": "1.0.1",
+    "version": "1.0.3",
   
     "browser_action": {
      "default_icon": "icon/icon.png",
