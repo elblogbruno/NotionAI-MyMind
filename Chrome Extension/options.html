@@ -1,23 +1,34 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<meta charset="utf-8">
-		<title>Notion AI My Mind Options</title>
+		<meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Notion AI My Mind Options!</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 		<script src="js/options.js"></script>
 	</head>
 	<body>
-		<center>
+		<div class="jumbotron text-center">
 			<h1><img src="icon/icon.png" width="30px" style="margin-right: 10px;"/>Notion AI My Mind</h1>
 			<form name="settings">
 				<h2>Options :</h2>
-				<p>Ip Adress (ex: https://192.168.1.10) : (Please set the http:// or https:// and the correct server port)</p> <input type="text" id="serverip" placeholder="Enter the IP"/>
-                <button id="save">Save</button>
-                <h1>Current ip: </h1>
-				<h1 id="ip_status"></h1>
-				<h1>Notion Token V2: </h1>
-                <h2 id="token_info"></h2>
+				<div class="form-group">
+                    <label for="server_ip">Ip Adress (ex: https://192.168.1.10)</label>
+                    <input type="text" name="serverip" id="serverip" class="form-control"  aria-describedby="url_help" placeholder="Enter the URL">
+                    <small id="url_help" class="form-text text-muted">Please set the http:// or https:// and the correct server port</small>
+                </div>
+                <button class="btn btn-primary btn-sm"  id="save"  role="button">Save</button>
+				
+				<h3>Current ip: </h3>
+				<p id="ip_status"></p>
+				<h3>Notion Token V2: </h3>
+                <p id="token_info"></p>
 
 			</form>
-		</center>
+		</div>
 	</body>
 </html>
