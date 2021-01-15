@@ -47,6 +47,17 @@ On to the chrome extension settings, you can get your needed token_v2! It is nec
 
 ### Love to try it?
 
+To install the python server, fire up your linux distributed machine and run this command.
+```
+wget https://raw.githubusercontent.com/elblogbruno/NotionAI-MyMind/master/setup.sh && sudo sh setup.sh
+```
+That's it.
+
+The installation script will:
+- Download the repo and install the server, then follow steps 4 to 7 down here:
+
+Instead, you can follow the steps down here:
+
 - Step 1. Simply clone this repo.
 ```
 git clone https://github.com/elblogbruno/NotionAI-MyMind
