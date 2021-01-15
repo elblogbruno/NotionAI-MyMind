@@ -3,46 +3,60 @@
 
 This repo uses AI and the wonderful Notion to enable you to add anything on the web to your "Mind" and forget about everything else.
 
+## Table of Contents
+- [Project Philosophy](#project-philosophy)
+    - [Examples](#examples)
+- [Installing](#installing)
+    - [Prerequisites](#prerequisites)
+    - [Love to try it?](#love-to-try-it)
+- [Common Issues](#common-issues)
+- [TODO](#todo)
 
-### Project Philosophy.
+## Project Philosophy.
 
 The idea is to have an extension on the browser, and app on android and Ios, allowing you to add whatever you find on the web in your "Mind".
 Also, adding image and article tagging capabilities thanks to AI, so you can simply search on your "Mind" for what you remember.
 
 Right now, there's a working but work in progress Python Local Server, that receives all the data from the extension and the app, and publishes it to Notion. So it is 100% open source and fully private!
 
+### Chromium users
 https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 the chromium browsers such as google chrome or microsoft edge can install the extension from the store!
+### Firefox users
+https://addons.mozilla.org/es/firefox/addon/notion-ai-my-mind/ firefox users can install the extension from the store!
 
-## Adding text to your mind
-![Adding text from context](doc/example_adding_from_context.png)
+## Examples.
 
-## Adding images to your mind
-![Adding text from context](doc/example_adding_from_context_image.png)
+Adding text to your mind         |  Adding images to your mind
+:-------------------------:|:-------------------------:
+![](doc/example_adding_from_context.png)  |  ![](doc/example_adding_from_context_image.png)
 
-# Obtaining Credentials
+
+## Installing
+
+### Prerequisites
 
 Right now there is no official way of accessing the Notion API but there is a little work-around to get your credentials.
+You need to have an account on [Notion.so](https://notion.so/) and need to be logged in your browser.
 
-## Prerequisites
+### Getting your credentials
 
-You need to have an account on [Notion.so](https://notion.so/) and need to be logged in.
-
-## Getting your credentials
-
-Most of the modern web browsers support inspecting cookies visually using the browser's devtools.
-You can read how to do it in your browser here:
-
-- [Chrome](https://developers.google.com/web/tools/chrome-devtools/manage-data/cookies)
-- [Firefox](https://developer.mozilla.org/en-US/docs/Tools/Storage_Inspector)
-
-After you found the Notion.so cookie, look for an entry called `token_v2`. It is the necessary credential for the Python server. 
-
-For AI Tagging you need to create a free account at [Clarifai](https://www.clarifai.com/) and create an Application named whatever you want and get the API key.
-
-![Clarifai Screen](/doc/clarifai.png)
+On to the chrome extension settings, you can get your needed token_v2! It is necessary for the Python server. (Hidden in the photo for obvious reasons)         |  For AI Tagging you need to create a free account at [Clarifai](https://www.clarifai.com/) and create an Application named whatever you want and get the API key.
+:-------------------------:|:-------------------------:
+![](/doc/getting_cookie.png)  |  ![](/doc/clarifai.png)
 
 
 ### Love to try it?
+
+To install the python server, fire up your linux distributed machine and run this command.
+```
+wget https://raw.githubusercontent.com/elblogbruno/NotionAI-MyMind/master/setup.sh && sudo sh setup.sh
+```
+That's it.
+
+The installation script will:
+- Download the repo and install the server, then follow steps 4 to 7 down here:
+
+Instead, you can follow the steps down here:
 
 - Step 1. Simply clone this repo.
 ```
@@ -74,7 +88,7 @@ It must have this properties selected and add more properties if you want, but t
 - Step 8. ENJOY!
 
 
-# TODO
+## TODO
 - Finish flutter Android and Ios app
 - Fix extension issues
 - Develop extension for Firefox
