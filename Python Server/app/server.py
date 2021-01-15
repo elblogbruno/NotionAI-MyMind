@@ -8,7 +8,7 @@ from werkzeug.utils import secure_filename
 
 import json
 import secrets
-
+from utils import ask_server_port
 from NotionAI import *
 
 
@@ -102,7 +102,7 @@ def get_notion_token_v2():
 
 @app.route('/')
 def show_settings_home_menu():
-    return render_template("index.html")
+    return render_template("options.html")
 
 @app.route('/handle_data', methods=['POST'])
 def handle_data():
@@ -117,19 +117,13 @@ def handle_data():
     }
     with open('data.json', 'w') as outfile:
         json.dump(options, outfile)
-    runned = notion.run()
-    if runned:
-        return """
-        <h1>Notion AI My Mind</h1>
-        <h2>Settings were succesfully saved.</h2>
-        <p>This is a lovely program created by @elblogbruno.</p>
-        <code>Flask is <em>awesome</em></code>
-        """
+
+    has_run = notion.run()
+    if has_run:
+        return render_template("thank_you.html")
     else:
-        return """
-        <h1>Notion AI My Mind</h1>
-        <h2>Settings are incorrect, please check the Notion Token is correct.</h2>
-        """
+        return render_template("error.html")
+
 
 @app.route("/about")
 def about():
@@ -139,7 +133,9 @@ def about():
     <code>Flask is <em>awesome</em></code>
     """
 
+
 if __name__ == "__main__":
     secret = secrets.token_urlsafe(32)
     app.secret_key = secret
-    app.run(host="0.0.0.0", port="5002")
+    port = ask_server_port(logging)
+    app.run(host="0.0.0.0", port=port)

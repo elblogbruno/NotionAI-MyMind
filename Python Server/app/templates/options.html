@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>Notion AI My Mind Options!</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+        <!-- <script src="{{url_for('static', filename='options.js')}}"></script> -->
+	</head>
+	<body>
+		<div class="jumbotron text-center">
+			<h1><img src="{{url_for('static', filename='icon.png')}}" width="30px" style="margin-right: 10px;"/>Notion AI My Mind</h1>
+			<form name="settings" action="{{ url_for('handle_data') }}" method="post">
+				<h2>Options :</h2>
+                <div class="form-group">
+                    <label for="notion_url">Notion My Mind Database URL</label>
+                    <input type="text" name="notion_url" id="notion_url" class="form-control"  aria-describedby="url_help" placeholder="Enter the URL">
+                    <small id="url_help" class="form-text text-muted">Please set the https:// at start</small>
+                </div>
+				<div class="form-group">
+                    <label for="notion_token">Notion TokenV2</label>
+                    <input type="text" name="notion_token" id="notion_token" class="form-control"  aria-describedby="token_help" placeholder="Enter the Token v2">
+                    <small id="token_help" class="form-text text-muted">This can be obtained looking at the cookies or the extension</small>
+                </div>
+                <div class="form-group">
+                    <label for="notion_token">Clarifai API key</label>
+                    <input type="text" name="clarifai_key" id="clarifai_key" class="form-control"  aria-describedby="clarifai_help" placeholder="Enter the Clarifai API key">
+                    <small id="clarifai_help" class="form-text text-muted"> This can be obtained for free at Clarifai website</small>
+                </div>
+				<input class="btn btn-primary btn-sm" role="button" type="submit">
+      		</form>
+		</div>
+	</body>
+</html>
