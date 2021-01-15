@@ -20,9 +20,16 @@ Also, adding image and article tagging capabilities thanks to AI, so you can sim
 Right now, there's a working but work in progress Python Local Server, that receives all the data from the extension and the app, and publishes it to Notion. So it is 100% open source and fully private!
 
 ### Chromium users
-https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 the chromium browsers such as google chrome or microsoft edge can install the extension from the store!
+
+https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 
+
+The chromium browsers such as google chrome or microsoft edge can install the extension from the store!
+
 ### Firefox users
-https://addons.mozilla.org/es/firefox/addon/notion-ai-my-mind/ firefox users can install the extension from the store!
+
+https://addons.mozilla.org/es/firefox/addon/notion-ai-my-mind/   
+
+Firefox users can install the extension from the store!
 
 ## Examples.
 
