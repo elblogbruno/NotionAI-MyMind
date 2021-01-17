@@ -10,7 +10,7 @@ This repo uses AI and the wonderful Notion to enable you to add anything on the 
     - [Prerequisites](#prerequisites)
     - [Love to try it?](#love-to-try-it)
 - [Common Issues](#common-issues)
-- [TODO](#todo)
+- [Roadmap](#roadmap)
 
 ## Project Philosophy.
 
@@ -87,9 +87,5 @@ It must have this properties selected and add more properties if you want, but t
 
 - Step 8. ENJOY!
 
-
-## TODO
-- Finish flutter Android and Ios app
-- Fix extension issues
-- Develop extension for Firefox
-- Add offline capabilities so things are saved and pushed to your mind where there is internet available
+## Roadmap
+- You can check the roadmap here: https://github.com/elblogbruno/NotionAI-MyMind/projects/1
