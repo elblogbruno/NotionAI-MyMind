@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="ac90c820-cc31-4826-8116-39de2767400d" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/../../Chrome Extension.crx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Chrome Extension.pem" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Chrome Extension/css/bootstrap.min.css" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Chrome Extension/js/vendor/bootstrap.min.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Chrome Extension/js/vendor/jquery-3.3.1.slim.min.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Chrome Extension/js/vendor/popper.min.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Chrome Extension/popup_popable.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Firefox Extension/js/vendor/bootstrap.min.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Firefox Extension/js/vendor/jquery-3.3.1.slim.min.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Firefox Extension/js/vendor/popper.min.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/app.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/port.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../flutter-android-ios-app/notion_ai_my_mind/android/app/src/main/res/xml/network_security_config.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../flutter-android-ios-app/notion_ai_my_mind/lib/api/api.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Chrome Extension/js/background.js" beforeDir="false" afterPath="$PROJECT_DIR$/../../Chrome Extension/js/background.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Chrome Extension/js/options.js" beforeDir="false" afterPath="$PROJECT_DIR$/../../Chrome Extension/js/options.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Chrome Extension/js/popup.js" beforeDir="false" afterPath="$PROJECT_DIR$/../../Chrome Extension/js/popup.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Chrome Extension/options.html" beforeDir="false" afterPath="$PROJECT_DIR$/../../Chrome Extension/options.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Firefox Extension/js/background.js" beforeDir="false" afterPath="$PROJECT_DIR$/../../Firefox Extension/js/background.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Firefox Extension/options.html" beforeDir="false" afterPath="$PROJECT_DIR$/../../Firefox Extension/options.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server.py" beforeDir="false" afterPath="$PROJECT_DIR$/server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter-android-ios-app/notion_ai_my_mind/android/app/src/main/AndroidManifest.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter-android-ios-app/notion_ai_my_mind/android/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter-android-ios-app/notion_ai_my_mind/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter-android-ios-app/notion_ai_my_mind/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter-android-ios-app/notion_ai_my_mind/lib/settings.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter-android-ios-app/notion_ai_my_mind/lib/settings.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter-android-ios-app/notion_ai_my_mind/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter-android-ios-app/notion_ai_my_mind/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../flutter-android-ios-app/notion_ai_my_mind/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/../../flutter-android-ios-app/notion_ai_my_mind/pubspec.yaml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectId" id="1n6VOyynxggpxKVOLdPpLWXIrNG" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/server.py" />
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <module name="app" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\elblo\AppData\Local\Microsoft\WindowsApps\python3.8.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/server.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="server" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="app" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="C:\Users\elblo\AppData\Local\Microsoft\WindowsApps\python3.8.exe" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/server.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="ac90c820-cc31-4826-8116-39de2767400d" name="Default Changelist" comment="" />
+      <created>1610710500621</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1610710500621</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+</project>

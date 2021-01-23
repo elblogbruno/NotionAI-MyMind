@@ -58,6 +58,7 @@ def add_video_to_mind():
     # print(str(notion.statusCode))
     return str(notion.statusCode)
 
+
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -100,6 +101,31 @@ def get_current_mind_url():
 def get_notion_token_v2():
     return str(notion.options['token'])
 
+
+@app.route('/update_notion_tokenv2')
+def update_notion_tokenv2():
+    token_from_extension = request.args.get('tokenv2')
+    changed = False
+    with open('data.json') as json_file:
+        options = json.load(json_file)
+
+        if token_from_extension != options['token']:
+            try:
+                options['token'] = token_from_extension
+
+                client = NotionClient(token_v2=options['token']) # if can't make a client out of the token, it is not
+                # a correct one.
+
+                a_file = open("data.json", "w")
+                json.dump(options, a_file)
+                a_file.close()
+
+                logging.info("Token v2 changed to {}".format(token_from_extension))
+                changed = notion.run()
+            except requests.exceptions.HTTPError:
+                logging.info("Incorrect token V2 from notion")
+    return str(changed)
+
 @app.route('/')
 def show_settings_home_menu():
     return render_template("options.html")
@@ -138,4 +164,4 @@ if __name__ == "__main__":
     secret = secrets.token_urlsafe(32)
     app.secret_key = secret
     port = ask_server_port(logging)
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port,debug = True)

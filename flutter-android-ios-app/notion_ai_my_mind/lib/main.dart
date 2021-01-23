@@ -1,13 +1,16 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/io_client.dart';
 import 'package:notion_ai_my_mind/settings.dart';
 import 'dart:async';
 
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:http/http.dart' as http;
+import 'package:notion_ai_my_mind/api/api.dart';
+
 
 void main() => runApp(MyApp());
 
@@ -47,29 +50,24 @@ class _MyAppState extends State<MyHomePage> {
   StreamSubscription _intentDataStreamSubscription;
   List<SharedMediaFile> _sharedFiles;
   String _sharedText;
- String imageUrl;
+  String imageUrl;
 
-  void fetchPost() async {
-    var url = "http://192.168.1.12/get_current_mind_url";
-
-    var response = await http.get(url);
-    if (response.statusCode == 200) {
-      imageUrl = response.body;
-      print('Number of books about http: $imageUrl.');
-    } else {
-      print('Request failed with status: ${response.statusCode}.');
-    }
-  }
   @override
   void initState() {
     super.initState();
 
-    fetchPost();
-   // For sharing images coming from outside the app while the app is in the memory
+    Fluttertoast.showToast(msg: "app loaded",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM);
+    // For sharing images coming from outside the app while the app is in the memory
     _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
         .listen((List<SharedMediaFile> value) {
       setState(() {
         _sharedFiles = value;
+        Fluttertoast.showToast(msg: "Shared:" + (_sharedFiles?.map((f) => f.path)?.join(",") ?? ""),
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM);
+
         print("Shared:" + (_sharedFiles?.map((f) => f.path)?.join(",") ?? ""));
       });
     }, onError: (err) {
@@ -80,6 +78,10 @@ class _MyAppState extends State<MyHomePage> {
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
       setState(() {
         _sharedFiles = value;
+        Fluttertoast.showToast(msg: "Shared:" + (_sharedFiles?.map((f) => f.path)?.join(",") ?? ""),
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM);
+
         print("Shared:" + (_sharedFiles?.map((f) => f.path)?.join(",") ?? ""));
       });
     });
@@ -89,20 +91,37 @@ class _MyAppState extends State<MyHomePage> {
         ReceiveSharingIntent.getTextStream().listen((String value) {
           setState(() {
             _sharedText = value;
-            print("Shared: $_sharedText");
+            if(_sharedText != " ") {
+              Api().addUrlToMind(_sharedText, "Url from: $_sharedText");
+              print("Shared: $_sharedText");
+
+              Fluttertoast.showToast(msg: "Shared: $_sharedText",
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.BOTTOM);
+            }
           });
         }, onError: (err) {
+          Fluttertoast.showToast(msg: "getLinkStream error: $err",
+                          toastLength: Toast.LENGTH_SHORT,
+                          gravity: ToastGravity.BOTTOM);
           print("getLinkStream error: $err");
         });
     // For sharing or opening urls/text coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialText().then((String value) {
       setState(() {
         _sharedText = value;
-        print("Shared: $_sharedText");
+
+        if(_sharedText != " ") {
+          Api().addUrlToMind(_sharedText, "Url from: $_sharedText");
+          print("Shared: $_sharedText");
+
+          Fluttertoast.showToast(msg: "Shared: $_sharedText",
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM);
+        }
+
       });
     });
-
-    fetchPost();
   }
 
   @override
@@ -117,10 +136,23 @@ class _MyAppState extends State<MyHomePage> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Notion AI My Mind'),
         ),
-        body: (
-            _BuildWebView(context)
+        body: FutureBuilder(
+          // render content via the builder
+          builder: (context, snapshot) {
+            // render content if data is available
+
+            if (snapshot.hasData) {
+              var data = snapshot.data;
+              print(data);
+              return _BuildWebView(context,data);
+            }
+            // show a spinner until the data is available
+            return new CircularProgressIndicator();
+          },
+          // source of data for the builder
+          future: Api().getMindUrl(Api().getServerUrl().toString() + "get_current_mind_url"),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: _buildFab(
@@ -128,6 +160,7 @@ class _MyAppState extends State<MyHomePage> {
       ),
     );
   }
+
     Widget _buildFab(BuildContext context) {
       return new Container(
         padding: EdgeInsets.only(bottom: 5.0),
@@ -149,9 +182,10 @@ class _MyAppState extends State<MyHomePage> {
         ),
       );
     }
-    Widget _BuildWebView(BuildContext context){
+
+    Widget _BuildWebView(BuildContext context,String url){
       return new WebView(
-        initialUrl: imageUrl,
+        initialUrl: url,
         javascriptMode: JavascriptMode.unrestricted,
         onWebViewCreated: (WebViewController webViewController) {
           _controller.complete(webViewController);
@@ -174,6 +208,17 @@ class _MyAppState extends State<MyHomePage> {
         },
         onPageFinished: (String url) {
           print('Page finished loading: $url');
+          return showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                // Retrieve the text the that user has entered by using the
+                // TextEditingController.
+                content: Text("Your Mind Loaded!"),
+              );
+
+            },
+          );
         },
         gestureNavigationEnabled: true,
       );

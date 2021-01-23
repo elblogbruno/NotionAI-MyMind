@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'api/api.dart';
+
 class settings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -32,22 +34,7 @@ class settingsPage extends StatefulWidget {
 }
 class settingsState extends State<settingsPage> {
   final myController = TextEditingController();
-  String url = " ";
-  Future<bool> setUrl(String value) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      url = value;
-    });
-    return prefs.setString("url", value);
-  }
 
-  Future<String> getUrl() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      url = prefs.getString("url") ?? 'name';
-    });
-    return prefs.getString("url") ?? 'name';
-  }
 
   @override
   void dispose() {
@@ -61,16 +48,16 @@ class settingsState extends State<settingsPage> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Notion AI My Mind Settings'),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-              children: <Widget>[ TextField(
+              children: <Widget>[TextField(
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Set url',
-                    hintText: url,
+                    labelText: 'Set server url',
+                    hintText: Api().getServerUrl().toString(),
                   ),
                   onChanged: (text) {
                     print("First text field: $text");
@@ -78,11 +65,12 @@ class settingsState extends State<settingsPage> {
                   controller: myController,
                 ),
                 Text(
-                    "Current url: " + url,
+                    "Current url: " + Api().getServerUrl().toString(),
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontWeight: FontWeight.bold),
                 ),
+
               ]
           )
         ),
@@ -93,7 +81,7 @@ class settingsState extends State<settingsPage> {
             return showDialog(
               context: context,
               builder: (context) {
-                setUrl(myController.text);
+                Api().setServerUrl(myController.text);
                 return AlertDialog(
                   // Retrieve the text the that user has entered by using the
                   // TextEditingController.
@@ -104,7 +92,7 @@ class settingsState extends State<settingsPage> {
             );
           },
           tooltip: 'Save!',
-          child: Icon(Icons.text_fields),
+          child: Icon(Icons.save),
         ),
       ),
     );

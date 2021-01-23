@@ -1,14 +1,14 @@
 const CONTEXT_MENU_ID = "MY_CONTEXT_MENU";
 const CONTEXT_MENU_ID_COOKIE = "MY_CONTEXT_MENU";
+
 function getword(info,tab) {
   if (info.menuItemId !== CONTEXT_MENU_ID) {
     return;
   }
   const req = new XMLHttpRequest();
-  chrome.storage.sync.get("serverIP", function(items) {
+  browser.storage.local.get("serverIP", function(items) {
     if (!chrome.runtime.error) {
       ip = items["serverIP"];
-      console.log(ip);
       const baseUrl = ip;
       var urlParams = "";
 
@@ -35,34 +35,20 @@ function getword(info,tab) {
           urlParams = `add_text_to_mind?url=${url}&text=${text}`;
           break;
       }
-      //alert(baseUrl+urlParams);
-      //console.log(baseUrl+urlParams);
+      
       req.open("GET", baseUrl+urlParams, true);
       req.send();
   
       req.onreadystatechange = function() { // Call a function when the state changes.
-          if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-              console.log("Got response 200!");
-              console.log(this.responseText)
-              switch (this.responseText) {
-                case '200':
-                  alert("Added to your mind")
-                  break;
-                case '409':
-                  alert("Could not be added to your mind. (This content is invalid)")
-                  break;
-                case '500':
-                  alert("This url is invalid")
-                  break;
-                default:
-                  break;
-              }
-          } else {
-            console.log("Error during accessing server. Make sure the ip/port are corrects, and the server is running.");
-          }
-      }
+        if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+            console.log("Got response 200!");
+            switchResponse(this.responseText);
+        } else {
+            switchResponse("-1");
+        }
     }
-  
+  }
+
   });
 }
 
@@ -72,38 +58,51 @@ chrome.contextMenus.create({
   id: CONTEXT_MENU_ID
 });
 chrome.contextMenus.onClicked.addListener(getword)
-// chrome.contextMenus.create({
-//   title: "Get cookie: %s", 
-//   contexts:["all"], 
-//   id: CONTEXT_MENU_ID_COOKIE
-// });
-// chrome.contextMenus.onClicked.addListener(get)
-// chrome.menus.create({
-//   id: "open-popup",
-//   title: "open popup",
-//   contexts: ["all"]
-// });
-
-// chrome.menus.onClicked.addListener(() => {
-//   browser.browserAction.openPopup();
-// });
-// function showPage(content) {
 
 
-//   document.getElementById("message-status").innerHTML  = content;
-//   document.getElementById("loader").style.display = "none";
-//   document.getElementById("awmt-notification").style.display = "block";
-// }
+function switchResponse(response){
+  switch (response) {
+    case '200':
+      alert("Added to your mind")
+      break;
+    case '409':
+      alert("Could be added to your mind, but with no thumbnail!")
+      break;
+    case '500':
+      alert("This url is invalid")
+      break;
+    case '-1':
+      alert("Error during accessing server. Make sure the ip/port are corrects, and the server is running.");
+      break;
+    default:
+      break;
+  }
+}
 
-// function showLoader() {
-//   // const i = document.createElement('iframe')
-  
-//   // chrome.runtime.sendMessage({ open: true }, (response) => {
-//   //   i.src = response
-//   //   p.appendChild(i)
-//   // })
 
-//   // document.getElementById("loader").style.display = "block";
-//   // document.getElementById("awmt-notification").style.display = "none";
-//   chrome.browserAction.openPopup();
-// }
+browser.cookies.onChanged.addListener(function(info) 
+{
+  if(info['cookie']['domain'] == ".notion.so" && info['cookie']['name']  == "token_v2")
+  {
+      chrome.storage.sync.get("serverIP", function(items) {
+        if (!chrome.runtime.error) {
+          ip = items["serverIP"];
+          console.log(ip);
+          const baseUrl = ip;
+      
+          var value = info['cookie']['value'];
+          const urlParams = `update_notion_tokenv2?tokenv2=${value}`;
+      
+          req.open("GET", baseUrl+urlParams, true);
+
+          req.onreadystatechange = function() { // Call a function when the state changes.
+              if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+                  console.log("Got response 200!");
+              }
+          }
+
+          req.send();
+        }
+      });
+  }
+});
