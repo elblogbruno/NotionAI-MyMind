@@ -44,7 +44,7 @@ On to the chrome extension settings, you can get your needed token_v2! It is nec
 :-------------------------:|:-------------------------:
 ![](/doc/getting_cookie.png)  |  ![](/doc/clarifai.png)
 
-
+TokenV2 is updated automatically when it changes (it occurs when you log out of notion or it expires), so Notion AI My Mind should always work. ☻ You can also change it manually of course.
 ### Love to try it?
 
 To install the python server, fire up your linux distributed machine and run this command.
