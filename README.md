@@ -22,7 +22,7 @@ Right now, there's a working but work in progress Python Local Server, that rece
 ### Chromium users
 https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 the chromium browsers such as google chrome or microsoft edge can install the extension from the store!
 ### Firefox users
-https://addons.mozilla.org/es/firefox/addon/notion-ai-my-mind/ firefox users can install the extension from the store!
+https://addons.mozilla.org/en-US/firefox/addon/notion-ai-my-mind/ firefox users can install the extension from the store!
 
 ## Examples.
 
