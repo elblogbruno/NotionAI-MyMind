@@ -27,7 +27,7 @@ https://addons.mozilla.org/en-US/firefox/addon/notion-ai-my-mind/ firefox users 
 ## Examples.
 
 Adding text to your mind         |  Adding images to your mind |  Adding websites to your mind
-:-------------------------:|:-------------------------:|:-------------------------:
+:--- | :---: | ---:
 ![](doc/example_adding_from_context.png)  |  ![](doc/example_adding_from_context_image.png) |  ![](doc/example_adding_url.png)
 
 
