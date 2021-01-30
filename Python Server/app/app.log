@@ -1,0 +1,27 @@
+root - INFO - You should go to the homepage and set the config.
+root - INFO - Initiating with a found port.json file.
+root - INFO - Using 8080 port
+werkzeug - WARNING -  * Debugger is active!
+werkzeug - INFO -  * Debugger PIN: 207-644-306
+werkzeug - INFO -  * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
+root - INFO - Adding url to mind: b'https://github.com/elblogbruno/NotionAI-MyMind' b'elblogbruno/NotionAI-MyMind: This repo uses AI and the wonderful Notion to enable you to add anything on the web to your "Mind" and forget about everything else.'
+werkzeug - INFO - 192.168.1.42 - - [30/Jan/2021 11:09:39] "[35m[1mGET /add_url_to_mind?url=https://github.com/elblogbruno/NotionAI-MyMind&title=elblogbruno/NotionAI-MyMind:%20This%20repo%20uses%20AI%20and%20the%20wonderful%20Notion%20to%20enable%20you%20to%20add%20anything%20on%20the%20web%20to%20your%20%22Mind%22%20and%20forget%20about%20everything%20else. HTTP/1.1[0m" 500 -
+werkzeug - ERROR - 192.168.1.42 - - [30/Jan/2021 11:10:13] code 400, message Bad request version ('ÚÚ\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x01\x00\x01\x93úú\x00\x00\x00\x17\x00\x00ÿ\x01\x00\x01\x00\x00')
+werkzeug - ERROR - 192.168.1.42 - - [30/Jan/2021 11:10:13] code 400, message Bad HTTP/0.9 request type ('\x16\x03\x01\x02\x00\x01\x00\x01ü\x03\x032Òë\x9eî¼P¯\x92º\x88\x94\x10þ×\x7fÅ\x80\x80´û,B\x82\x02_úã')
+werkzeug - ERROR - 192.168.1.42 - - [30/Jan/2021 11:10:13] code 400, message Bad request version ('È¦\x0eù¾VÇõê\x9cî\x98Ìx\x83')
+werkzeug - ERROR - 192.168.1.42 - - [30/Jan/2021 11:10:13] code 400, message Bad request version ('2-\x07Â³³\x0fÜw\x13¦Û¬$Â\\\x00"JJ\x13\x01\x13\x02\x13\x03À+À/À,À0Ì©Ì¨À\x13À\x14\x00\x9c\x00\x9d\x00/\x005\x00')
+werkzeug - INFO - 192.168.1.42 - - [30/Jan/2021 11:10:18] "[37mGET / HTTP/1.1[0m" 200 -
+root - INFO - Running notionAI with {'url': 'https://www.notion.so/glassear/d4e43dbfe7244e0a83f18e14506e74ae?v=2b6755006a15418c978d5067180baae0', 'token': 'e6517083645826700a071fdf1644a844b6a9dba7252010c8a99efaae991f990575fd6160ce2c9a30c9ed78057261bb49f3245e227d80c3a8a630f3f4e839e66d90d75c24a26671a29fc072020f6d', 'clarifai_key': '7d13a00d87c5408b96fa94d16ad3c521'}
+werkzeug - INFO - 192.168.1.42 - - [30/Jan/2021 11:10:24] "[37mPOST /handle_data HTTP/1.1[0m" 200 -
+root - INFO - Adding url to mind: b'https://github.com/elblogbruno/NotionAI-MyMind' b'elblogbruno/NotionAI-MyMind: This repo uses AI and the wonderful Notion to enable you to add anything on the web to your "Mind" and forget about everything else.'
+root - INFO - {"type": "block", "blockId": "d4e43dbf-e724-4e0a-83f1-8e14506e74ae", "property": "P#~d", "items": [{"url": "https://github.com/elblogbruno/NotionAI-MyMind", "title": "elblogbruno/NotionAI-MyMind: This repo uses AI and the wonderful Notion to enable you to add anything on the web to your \"Mind\" and forget about everything else."}], "from": "chrome"}
+root - INFO - Thread 058a46df-5f41-401e-be3f-f197d2112859: starting
+werkzeug - INFO - 192.168.1.42 - - [30/Jan/2021 11:10:30] "[37mGET /add_url_to_mind?url=https://github.com/elblogbruno/NotionAI-MyMind&title=elblogbruno/NotionAI-MyMind:%20This%20repo%20uses%20AI%20and%20the%20wonderful%20Notion%20to%20enable%20you%20to%20add%20anything%20on%20the%20web%20to%20your%20%22Mind%22%20and%20forget%20about%20everything%20else. HTTP/1.1[0m" 200 -
+root - INFO - No content available yet 0
+root - INFO - No content available yet 1
+root - INFO - No content available yet 2
+root - INFO - None
+root - INFO - Request failed, status code: 10020
+root - INFO - Thread 058a46df-5f41-401e-be3f-f197d2112859: finishing
+root - INFO - Adding url to mind: b'chrome-extension://ocjdfdihgfjfflddjlkohpeifglmibig/options.html?serverip=http://192.168.1.42:8080/' b'Notion AI My Mind Options!'
+werkzeug - INFO - 192.168.1.42 - - [30/Jan/2021 11:11:59] "[35m[1mGET /add_url_to_mind?url=chrome-extension://ocjdfdihgfjfflddjlkohpeifglmibig/options.html?serverip=http%3A%2F%2F192.168.1.42%3A8080%2F&title=Notion%20AI%20My%20Mind%20Options! HTTP/1.1[0m" 500 -
