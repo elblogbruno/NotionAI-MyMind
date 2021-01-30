@@ -1,7 +1,8 @@
 # NotionAI MyMind
-![Alt Text](doc/header_gif.gif)
+This repo uses AI and the wonderful Notion to enable you   |  to add anything on the web to your "Mind" and forget about everything else.
+---: | :--- 
+![Alt Text](doc/header_gif.gif)  |  ![Alt Text](doc/header_gif_search.gif)
 
-This repo uses AI and the wonderful Notion to enable you to add anything on the web to your "Mind" and forget about everything else.
 
 ## Table of Contents
 - [Project Philosophy](#project-philosophy)
