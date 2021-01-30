@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
               if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
                   console.log("Got response 200!");
                   PopUp.switchResponse(this.responseText);
-              } else {
+              } else if (this.readyState === XMLHttpRequest.DONE && this.status === 0) {
                   PopUp.switchResponse(-1);
               }
           }

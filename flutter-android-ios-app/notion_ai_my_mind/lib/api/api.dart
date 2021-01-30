@@ -3,9 +3,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Api {
 
-  Future<String> getMindUrl(String serverUrl) async {
+  Future<String> getMindUrl() async {
     try {
-      print(serverUrl);
+      String _serverUrl = await getServerUrl();
+
+      String serverUrl = _serverUrl + "get_current_mind_url";
+      print("GetMindUrl: " + serverUrl);
       http.Response response = await http.get(serverUrl);
 
       if (response.statusCode == 200) {
@@ -20,8 +23,10 @@ class Api {
 
   Future<String> addUrlToMind(String urlToAdd,String title) async {
     try {
-      print(urlToAdd);
-      http.Response response = await http.get(getServerUrl().toString() + "add_url_to_mind?url="+urlToAdd+"&title="+title);
+      String _serverUrl = await getServerUrl();
+      String finalUrl = _serverUrl + "add_url_to_mind?url="+urlToAdd+"&title="+title;
+      print("Final sharing url: " + finalUrl);
+      http.Response response = await http.get(finalUrl);
 
       if (response.statusCode == 200) {
         return response.body.toString();
@@ -33,9 +38,9 @@ class Api {
     }
   }
 
-  Future<bool> setServerUrl(String value) async {
+  setServerUrl(String value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.setString("url", value);
+    await prefs.setString("url", value);
   }
 
 

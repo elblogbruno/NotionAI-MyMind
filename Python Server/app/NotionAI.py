@@ -14,6 +14,7 @@ from uuid import uuid1
 from random import choice
 from time import sleep
 
+import threading
 
 class NotionAI:
     def __init__(self, logging):
@@ -22,12 +23,12 @@ class NotionAI:
             print("Initiating with a found config file.")
             logging.info("Initiating with a found config file.")
             self.logging = logging
-            loaded = self.run()
+            loaded = self.run(logging)
         else:
             print("You should go to the homepage and set the config.")
             logging.info("You should go to the homepage and set the config.")
 
-    def run(self):
+    def run(self,logging):
         # Obtain the `token_v2` value by inspecting your browser cookies on a logged-in session on Notion.so
         loaded = False
         options = {}
@@ -45,6 +46,9 @@ class NotionAI:
 
             self.collection = cv.collection
             print("Running notionAI with " + str(self.options))
+
+            self.logging = logging
+
             self.logging.info("Running notionAI with " + str(self.options))
             loaded = True
         except requests.exceptions.HTTPError:
@@ -54,39 +58,44 @@ class NotionAI:
 
     def add_url_to_database(self, url, title):
         print("The url is " + url)
-
         self.statusCode = 200  # at start we asume everything will go ok
         try:
             rowId = self.web_clipper_request(url, title)
-            row = self.client.get_block(rowId)
-            try:
-                page_content = self.get_content_from_row(row, 0)
-                img_url = self.extract_image_from_content(page_content)
-                try:
-                    tags = self.clarifai.get_tags(img_url)
-                    print(tags)
-                    self.logging.info(tags)
-                    row.AITagsText = tags
-                    self.add_new_multi_select_value("AITags", tags)
-                except NoTagsFound as e:
-                    print(e)
-                    self.logging.info(e)
-                except ValueError as e:
-                    print(e)
-                    self.logging.info(e)
-                except Exception as e:
-                    print(e)
-                    self.logging.info(e)
-            except OnImageNotFound as e:
-                print(e)
-                self.logging.info(e)
-            except EmbedableContentNotFound as e:
-                print(e)
-                self.logging.info(e)
+            x = threading.Thread(target=self.add_url_thread, args=(rowId,))
+            x.start()
         except OnUrlNotValid as invalidUrl:
             print(invalidUrl)
             self.logging.info(invalidUrl)
             self.statusCode = 500
+
+    def add_url_thread(self,rowId):
+        self.logging.info("Thread %s: starting", rowId)
+        row = self.client.get_block(rowId)
+        try:
+            page_content = self.get_content_from_row(row, 0)
+            img_url = self.extract_image_from_content(page_content)
+            try:
+                tags = self.clarifai.get_tags(img_url)
+                print(tags)
+                self.logging.info(tags)
+                row.AITagsText = tags
+                self.add_new_multi_select_value("AITagsText", tags)
+            except NoTagsFound as e:
+                print(e)
+                self.logging.info(e)
+            except ValueError as e:
+                print(e)
+                self.logging.info(e)
+            except Exception as e:
+                print(e)
+                self.logging.info(e)
+        except OnImageNotFound as e:
+            print(e)
+            self.logging.info(e)
+        except EmbedableContentNotFound as e:
+            print(e)
+            self.logging.info(e)
+        self.logging.info("Thread %s: finishing", rowId)
 
     def add_new_multi_select_value(self, prop, value, color=None):
         colors = [
@@ -150,7 +159,7 @@ class NotionAI:
         row.refresh()
         content = row.get('content')
         if content is None and n < 15:
-            sleep(0.25)
+            sleep(0.15)
             print("No content available yet " + str(n))
             self.logging.info("No content available yet " + str(n))
             return self.get_content_from_row(row, n + 1)
@@ -265,7 +274,7 @@ class NotionAI:
                 tags = self.clarifai.get_tags(img_block.source)
                 print(tags)
                 row.AITagsText = tags
-                self.add_new_multi_select_value("AITags", tags)
+                self.add_new_multi_select_value("AITagsText", tags)
             except NoTagsFound as e:
                 print(e)
                 self.logging.info(e)

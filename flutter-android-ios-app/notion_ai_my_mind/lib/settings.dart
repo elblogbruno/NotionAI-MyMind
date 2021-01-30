@@ -34,13 +34,19 @@ class settingsPage extends StatefulWidget {
 }
 class settingsState extends State<settingsPage> {
   final myController = TextEditingController();
-
+  String _textFromFile = "";
 
   @override
   void dispose() {
     // Clean up the controller when the widget is disposed.
     myController.dispose();
     super.dispose();
+  }
+
+  settingsState() {
+    Api().getServerUrl().then((val) => setState(() {
+      _textFromFile = val;
+    }));
   }
 
   @override
@@ -65,7 +71,7 @@ class settingsState extends State<settingsPage> {
                   controller: myController,
                 ),
                 Text(
-                    "Current url: " + Api().getServerUrl().toString(),
+                    "Current url: " + _textFromFile,
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontWeight: FontWeight.bold),
@@ -82,6 +88,9 @@ class settingsState extends State<settingsPage> {
               context: context,
               builder: (context) {
                 Api().setServerUrl(myController.text);
+                Api().getServerUrl().then((val) => setState(() {
+                  _textFromFile = val;
+                }));
                 return AlertDialog(
                   // Retrieve the text the that user has entered by using the
                   // TextEditingController.

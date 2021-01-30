@@ -43,9 +43,9 @@ function getword(info,tab) {
         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
             console.log("Got response 200!");
             switchResponse(this.responseText);
-        } else {
-            switchResponse("-1");
-        }
+        } else if (this.readyState === XMLHttpRequest.DONE && this.status === 0) {
+          switchResponse("-1");
+      }
     }
   }
 

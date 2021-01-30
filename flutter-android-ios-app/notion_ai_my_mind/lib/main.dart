@@ -8,6 +8,7 @@ import 'package:notion_ai_my_mind/settings.dart';
 import 'dart:async';
 
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:notion_ai_my_mind/api/api.dart';
 
@@ -44,21 +45,18 @@ class MyHomePage extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyHomePage> {
+class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
+  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   final Completer<WebViewController> _controller =
   Completer<WebViewController>();
   StreamSubscription _intentDataStreamSubscription;
   List<SharedMediaFile> _sharedFiles;
   String _sharedText;
-  String imageUrl;
 
   @override
   void initState() {
     super.initState();
-
-    Fluttertoast.showToast(msg: "app loaded",
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.BOTTOM);
+    WidgetsBinding.instance.addObserver(this);
     // For sharing images coming from outside the app while the app is in the memory
     _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
         .listen((List<SharedMediaFile> value) {
@@ -91,13 +89,15 @@ class _MyAppState extends State<MyHomePage> {
         ReceiveSharingIntent.getTextStream().listen((String value) {
           setState(() {
             _sharedText = value;
-            if(_sharedText != " ") {
-              Api().addUrlToMind(_sharedText, "Url from: $_sharedText");
-              print("Shared: $_sharedText");
+            if(_sharedText != null) {
+                Api().addUrlToMind(_sharedText, "Url from: $_sharedText");
+                print("Shared: $_sharedText");
 
-              Fluttertoast.showToast(msg: "Shared: $_sharedText",
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.BOTTOM);
+                Fluttertoast.showToast(msg: "Shared: $_sharedText",
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.BOTTOM);
+            }else{
+                print("Shared text is null");
             }
           });
         }, onError: (err) {
@@ -111,13 +111,15 @@ class _MyAppState extends State<MyHomePage> {
       setState(() {
         _sharedText = value;
 
-        if(_sharedText != " ") {
-          Api().addUrlToMind(_sharedText, "Url from: $_sharedText");
-          print("Shared: $_sharedText");
+        if(_sharedText != null) {
+            Api().addUrlToMind(_sharedText, "Url from: $_sharedText");
+            print("Shared: $_sharedText");
 
-          Fluttertoast.showToast(msg: "Shared: $_sharedText",
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM);
+            Fluttertoast.showToast(msg: "Shared when app closed: $_sharedText",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM);
+        }else{
+          print("Shared text is null");
         }
 
       });
@@ -125,10 +127,38 @@ class _MyAppState extends State<MyHomePage> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if(state == AppLifecycleState.resumed){
+      print("App resumed");
+      Fluttertoast.showToast(msg: "App resumed",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM);
+    }else if(state == AppLifecycleState.inactive){
+      print("App Inactive");
+      Fluttertoast.showToast(msg: "App Inactive",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM);
+    }else if(state == AppLifecycleState.paused){
+      print("App paused");
+      Fluttertoast.showToast(msg: "App paused",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM);
+    }else if(state == AppLifecycleState.detached){
+      print("App detached");
+      Fluttertoast.showToast(msg: "App detached",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM);
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _intentDataStreamSubscription.cancel();
     super.dispose();
   }
+
+  Future<String> _calculation = Api().getMindUrl();
 
   @override
   Widget build(BuildContext context) {
@@ -136,23 +166,47 @@ class _MyAppState extends State<MyHomePage> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Notion AI My Mind'),
+          title:  const Text("Notion AI My Mind"),
         ),
-        body: FutureBuilder(
-          // render content via the builder
-          builder: (context, snapshot) {
-            // render content if data is available
-
+        body: FutureBuilder<String>(
+          future: _calculation, // a previously-obtained Future<String> or null
+          builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+            List<Widget> children;
             if (snapshot.hasData) {
-              var data = snapshot.data;
-              print(data);
-              return _BuildWebView(context,data);
+              return _BuildWebView(context,snapshot.data);
+            } else if (snapshot.hasError) {
+              children = <Widget>[
+                Icon(
+                  Icons.error_outline,
+                  color: Colors.red,
+                  size: 60,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Text('Error: ${snapshot.error}'),
+                )
+              ];
+            } else {
+              children = <Widget>[
+                SizedBox(
+                  child: CircularProgressIndicator(),
+                  width: 60,
+                  height: 60,
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: Text('Awaiting result...'),
+                )
+              ];
             }
-            // show a spinner until the data is available
-            return new CircularProgressIndicator();
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: children,
+              ),
+            );
           },
-          // source of data for the builder
-          future: Api().getMindUrl(Api().getServerUrl().toString() + "get_current_mind_url"),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: _buildFab(
@@ -179,6 +233,7 @@ class _MyAppState extends State<MyHomePage> {
             elevation: 3.0,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
           ),
+
         ),
       );
     }
@@ -208,17 +263,6 @@ class _MyAppState extends State<MyHomePage> {
         },
         onPageFinished: (String url) {
           print('Page finished loading: $url');
-          return showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                // Retrieve the text the that user has entered by using the
-                // TextEditingController.
-                content: Text("Your Mind Loaded!"),
-              );
-
-            },
-          );
         },
         gestureNavigationEnabled: true,
       );

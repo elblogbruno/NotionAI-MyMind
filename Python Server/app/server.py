@@ -18,13 +18,14 @@ ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',level=logging.INFO)
+
 notion = NotionAI(logging)
 
 @app.route('/add_url_to_mind')
 def add_url_to_mind():
     url = request.args.get('url')
     title = request.args.get('title')
-    logging.info("Adding url to mind: {0} {1}".format(url,title))
+    logging.info("Adding url to mind: {0} {1}".format(url.encode('utf8'),title.encode('utf8')))
     notion.add_url_to_database(url,title)
     print(str(notion.statusCode))
     return str(notion.statusCode)
@@ -33,7 +34,7 @@ def add_url_to_mind():
 def add_text_to_mind():
     url = request.args.get('url')
     text = request.args.get('text')
-    logging.info("Adding text to mind: {0} {1}".format(url,text))
+    logging.info("Adding text to mind: {0} {1}".format(url.encode('utf8'),text.encode('utf8')))
     notion.add_text_to_database(str(text),str(url))
     print(str(notion.statusCode))
     return str(notion.statusCode)
@@ -43,7 +44,7 @@ def add_image_to_mind():
     url = request.args.get('url')
     image_src = request.args.get('image_src')
     image_src_url = request.args.get('image_src_url')
-    logging.info("Adding image to mind: {0} {1} {2}".format(url,image_src,image_src_url))
+    logging.info("Adding image to mind: {0} {1} {2}".format(url.encode('utf8'),image_src.encode('utf8'),image_src_url.encode('utf8')))
     notion.add_image_to_database(str(url),str(image_src),str(image_src_url))
     # print(str(notion.statusCode))
     return str(notion.statusCode)
@@ -144,7 +145,7 @@ def handle_data():
     with open('data.json', 'w') as outfile:
         json.dump(options, outfile)
 
-    has_run = notion.run()
+    has_run = notion.run(logging)
     if has_run:
         return render_template("thank_you.html")
     else:

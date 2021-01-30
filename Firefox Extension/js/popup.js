@@ -38,8 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
                       default:
                         break;
                     }
-                } else {
-                  showPage("Error during accessing server. Make sure the ip/port are corrects, and the server is running.");
+                } else if (this.readyState === XMLHttpRequest.DONE && this.status === 0) {
+                    showPage("Error during accessing server. Make sure the ip/port are corrects, and the server is running.");
                 }
             }
           }
