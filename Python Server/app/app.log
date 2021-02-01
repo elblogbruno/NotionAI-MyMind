@@ -1,9 +1,0 @@
-root - INFO - Initiating NotionAI Class.
-root - INFO - Initiating with a found config file.
-root - INFO - Running notionAI with {'url': 'https://www.notion.so/glassear/d4e43dbfe7244e0a83f18e14506e74ae?v=2b6755006a15418c978d5067180baae0', 'token': 'e6517083645826700a071fdf1644a844b6a9dba7252010c8a99efaae991f990575fd6160ce2c9a30c9ed78057261bb49f3245e227d80c3a8a630f3f4e839e66d90d75c24a26671a29fc072020f6d'}
-root - INFO - Using tensorflow predictor, with delete_after_tagging = True
-root - INFO - Initiating with a found port.json file.
-root - INFO - Using 8080 port
-werkzeug - WARNING -  * Debugger is active!
-werkzeug - INFO -  * Debugger PIN: 207-644-306
-werkzeug - INFO -  * Running on http://0.0.0.0:8080/ (Press CTRL+C to quit)
