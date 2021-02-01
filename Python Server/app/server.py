@@ -8,46 +8,51 @@ from werkzeug.utils import secure_filename
 
 import json
 import secrets
-from utils import ask_server_port
+from utils import ask_server_port, save_options, save_data
 from NotionAI import *
-
 
 UPLOAD_FOLDER = '../app/uploads/'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',level=logging.INFO)
+logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',
+                    level=logging.INFO)
 
 notion = NotionAI(logging)
+
 
 @app.route('/add_url_to_mind')
 def add_url_to_mind():
     url = request.args.get('url')
     title = request.args.get('title')
-    logging.info("Adding url to mind: {0} {1}".format(url.encode('utf8'),title.encode('utf8')))
-    notion.add_url_to_database(url,title)
+    logging.info("Adding url to mind: {0} {1}".format(url.encode('utf8'), title.encode('utf8')))
+    notion.add_url_to_database(url, title)
     print(str(notion.statusCode))
     return str(notion.statusCode)
+
 
 @app.route('/add_text_to_mind')
 def add_text_to_mind():
     url = request.args.get('url')
     text = request.args.get('text')
-    logging.info("Adding text to mind: {0} {1}".format(url.encode('utf8'),text.encode('utf8')))
-    notion.add_text_to_database(str(text),str(url))
+    logging.info("Adding text to mind: {0} {1}".format(url.encode('utf8'), text.encode('utf8')))
+    notion.add_text_to_database(str(text), str(url))
     print(str(notion.statusCode))
     return str(notion.statusCode)
+
 
 @app.route('/add_image_to_mind')
 def add_image_to_mind():
     url = request.args.get('url')
     image_src = request.args.get('image_src')
     image_src_url = request.args.get('image_src_url')
-    logging.info("Adding image to mind: {0} {1} {2}".format(url.encode('utf8'),image_src.encode('utf8'),image_src_url.encode('utf8')))
-    notion.add_image_to_database(str(url),str(image_src),str(image_src_url))
+    logging.info("Adding image to mind: {0} {1} {2}".format(url.encode('utf8'), image_src.encode('utf8'),
+                                                            image_src_url.encode('utf8')))
+    notion.add_image_to_database(str(url), str(image_src), str(image_src_url))
     # print(str(notion.statusCode))
     return str(notion.statusCode)
+
 
 @app.route('/add_video_to_mind')
 def add_video_to_mind():
@@ -63,6 +68,7 @@ def add_video_to_mind():
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 @app.route('/upload_file', methods=['GET', 'POST'])
 def upload_file():
@@ -83,6 +89,7 @@ def upload_file():
             notion.add_image_to_database_by_post(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     return "File Uploaded Succesfully"
 
+
 @app.route('/add_audio_to_mind')
 def add_audio_to_mind():
     url = request.args.get('url')
@@ -92,6 +99,7 @@ def add_audio_to_mind():
     # notion.add_text_to_database(str(url),str(text))
     # print(str(notion.statusCode))
     return str(notion.statusCode)
+
 
 @app.route('/get_current_mind_url')
 def get_current_mind_url():
@@ -114,7 +122,7 @@ def update_notion_tokenv2():
             try:
                 options['token'] = token_from_extension
 
-                client = NotionClient(token_v2=options['token']) # if can't make a client out of the token, it is not
+                client = NotionClient(token_v2=options['token'])  # if can't make a client out of the token, it is not
                 # a correct one.
 
                 a_file = open("data.json", "w")
@@ -127,42 +135,39 @@ def update_notion_tokenv2():
                 logging.info("Incorrect token V2 from notion")
     return str(changed)
 
+
 @app.route('/')
 def show_settings_home_menu():
     return render_template("options.html")
+
 
 @app.route('/handle_data', methods=['POST'])
 def handle_data():
     notion_url = request.form['notion_url']
     notion_token = request.form['notion_token']
-    clarifai_key = request.form['clarifai_key']
-    
-    options = {
-        'url': notion_url,
-        'token': notion_token,
-        'clarifai_key': clarifai_key
-    }
-    with open('data.json', 'w') as outfile:
-        json.dump(options, outfile)
+
+    if request.form['clarifai_key']:
+        clarifai_key = request.form['clarifai_key']
+        save_data(logging, url=notion_url, token=notion_token, clarifai_key=clarifai_key)
+        use_clarifai = True
+    else:
+        save_data(logging, url=notion_url, token=notion_token)
+        use_clarifai = False
+
+    delete_after_tagging = request.form.getlist('delete_after_tagging')
+
+    save_options(logging, use_clarifai=use_clarifai, delete_after_tagging=delete_after_tagging)
 
     has_run = notion.run(logging)
+
     if has_run:
         return render_template("thank_you.html")
     else:
         return render_template("error.html")
 
 
-@app.route("/about")
-def about():
-    return """
-    <h1>Notion AI My Mind</h1>
-    <p>This is a lovely program created by @elblogbruno.</p>
-    <code>Flask is <em>awesome</em></code>
-    """
-
-
 if __name__ == "__main__":
     secret = secrets.token_urlsafe(32)
     app.secret_key = secret
     port = ask_server_port(logging)
-    app.run(host="0.0.0.0", port=port,debug = True)
+    app.run(host="0.0.0.0", port=port, debug=True)

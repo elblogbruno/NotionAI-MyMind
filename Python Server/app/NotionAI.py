@@ -4,21 +4,24 @@ from notion.block import ImageBlock, TextBlock
 import validators
 import os
 
-from custom_errors import OnImageNotFound, OnUrlNotValid, EmbedableContentNotFound, NoTagsFound, OnTokenV2NotValid
+from custom_errors import OnImageNotFound, OnUrlNotValid, EmbedableContentNotFound, NoTagsFound
 
 import requests
 import json
 
-from ClarifaiAI import *
 from uuid import uuid1
 from random import choice
 from time import sleep
 
 import threading
 
+from image_tagging.image_tagging import ImageTagging
+
+
 class NotionAI:
     def __init__(self, logging):
-        print("Init NotionAI")
+        logging.info("Initiating NotionAI Class.")
+
         if os.path.isfile('data.json'):
             print("Initiating with a found config file.")
             logging.info("Initiating with a found config file.")
@@ -28,36 +31,37 @@ class NotionAI:
             print("You should go to the homepage and set the config.")
             logging.info("You should go to the homepage and set the config.")
 
-    def run(self,logging):
-        # Obtain the `token_v2` value by inspecting your browser cookies on a logged-in session on Notion.so
+    def run(self, logging):
         loaded = False
-        options = {}
+        data = {}
         with open('data.json') as json_file:
-            options = json.load(json_file)
+            data = json.load(json_file)
         try:
-            self.client = NotionClient(token_v2=options['token'])
-            mind_page = self.client.get_block(options['url'])
-            self.mind_id = mind_page.id
-
-            self.options = options
-            self.clarifai = ClarifaiAI(options['clarifai_key'])
-
-            cv = self.client.get_collection_view(self.options['url'])
-
-            self.collection = cv.collection
-            print("Running notionAI with " + str(self.options))
-
             self.logging = logging
 
-            self.logging.info("Running notionAI with " + str(self.options))
+            self.logging.info("Running notionAI with " + str(data))
+
+            self.data = data
+
+            self.client = NotionClient(token_v2=data['token'])
+
+            mind_page = self.client.get_block(data['url'])
+
+            self.mind_id = mind_page.id
+
+            self.image_tagger = ImageTagging(data, logging)
+
+            cv = self.client.get_collection_view(self.data['url'])
+
+            self.collection = cv.collection
+
             loaded = True
         except requests.exceptions.HTTPError:
-            print("Incorrect token V2 from notion")
             self.logging.info("Incorrect token V2 from notion")
         return loaded
 
     def add_url_to_database(self, url, title):
-        print("The url is " + url)
+        self.logging("Adding url {} to mind with title {}".format(url,title))
         self.statusCode = 200  # at start we asume everything will go ok
         try:
             rowId = self.web_clipper_request(url, title)
@@ -68,18 +72,17 @@ class NotionAI:
             self.logging.info(invalidUrl)
             self.statusCode = 500
 
-    def add_url_thread(self,rowId):
+    def add_url_thread(self, rowId):
         self.logging.info("Thread %s: starting", rowId)
         row = self.client.get_block(rowId)
         try:
             page_content = self.get_content_from_row(row, 0)
             img_url = self.extract_image_from_content(page_content)
             try:
-                tags = self.clarifai.get_tags(img_url)
+                tags = self.image_tagger.get_tags(img_url)
                 print(tags)
                 self.logging.info(tags)
                 row.AITagsText = tags
-                self.add_new_multi_select_value("AITagsText", tags)
             except NoTagsFound as e:
                 print(e)
                 self.logging.info(e)
@@ -96,49 +99,6 @@ class NotionAI:
             print(e)
             self.logging.info(e)
         self.logging.info("Thread %s: finishing", rowId)
-
-    def add_new_multi_select_value(self, prop, value, color=None):
-        colors = [
-            "default",
-            "gray",
-            "brown",
-            "orange",
-            "yellow",
-            "green",
-            "blue",
-            "purple",
-            "pink",
-            "red",
-        ]
-
-        """`prop` is the name of the multi select property."""
-        if color is None:
-            color = choice(colors)
-
-        collection_schema = self.collection.get("schema")
-        prop_schema = next(
-            (v for k, v in collection_schema.items() if v["name"] == prop), None
-        )
-        if not prop_schema:
-            raise ValueError(
-                '{} property does not exist on the collection!'.format(prop)
-            )
-        if prop_schema["type"] != "multi_select":
-            raise ValueError('{} is not a multi select property!'.format(prop))
-
-        if "options" not in prop_schema:
-            prop_schema["options"] = []
-
-        dupe = next(
-            (o for o in prop_schema["options"] if o["value"] == value), None
-        )
-        if dupe:
-            raise ValueError(f'"{value}" already exists in the schema!')
-
-        prop_schema["options"].append(
-            {"id": str(uuid1()), "value": value, "color": color}
-        )
-        self.collection.set("schema", collection_schema)
 
     def extract_image_from_content(self, page_content):
         url = " "
@@ -171,7 +131,7 @@ class NotionAI:
 
     def web_clipper_request(self, url, title):
         cookies = {
-            'token_v2': self.options['token'],
+            'token_v2': self.data['token'],
         }
 
         headers = {
@@ -200,7 +160,7 @@ class NotionAI:
                                      data=data)
             response_text = response.text
             json_response = json.loads(response_text)
-            #self.logging.info(str(json_response))
+            # self.logging.info(str(json_response))
             rowId = json_response['createdBlockIds'][0]
             return rowId
         else:
@@ -229,6 +189,7 @@ class NotionAI:
         print("The Image is " + image_src + " context: " + image_src_url)
         self.statusCode = 200  # at start we asume everything will go ok
         row = self.collection.add_row()
+
         self.row = row
 
         try:
@@ -238,20 +199,9 @@ class NotionAI:
             img_block.source = image_src
             row.icon = img_block.source
             row.person = self.client.current_user
-            try:
-                tags = self.clarifai.get_tags(image_src)
-                self.logging.info("tags from image {0} : {1}".format(image_src_url,tags))
-                row.AITagsText = tags
-                self.add_new_multi_select_value("AITags", tags)
-            except NoTagsFound as e:
-                print(e)
-                self.logging.info(e)
-            except ValueError as e:
-                print(e)
-                self.logging.info(e)
-            except Exception as e:
-                print(e)
-                self.logging.info(e)
+            x = threading.Thread(target=self.analyze_image_thread, args=(image_src, row, image_src_url))
+            x.start()
+
         except requests.exceptions.HTTPError as invalidUrl:
             print(invalidUrl)
             self.logging.info(invalidUrl)
@@ -270,21 +220,28 @@ class NotionAI:
             img_block.upload_file(image_src)
             row.icon = img_block.source
             row.person = self.client.current_user
-            try:
-                tags = self.clarifai.get_tags(img_block.source)
-                print(tags)
-                row.AITagsText = tags
-                self.add_new_multi_select_value("AITagsText", tags)
-            except NoTagsFound as e:
-                print(e)
-                self.logging.info(e)
-            except ValueError as e:
-                print(e)
-                self.logging.info(e)
-            except Exception as e:
-                print(e)
-                self.logging.info(e)
+
+            x = threading.Thread(target=self.analyze_image_thread, args=(image_src, row))
+            x.start()
         except requests.exceptions.HTTPError as invalidUrl:
             print(invalidUrl)
             self.logging.info(invalidUrl)
             self.statusCode = 500
+
+    def analyze_image_thread(self, image_src,row, image_src_url="no context"):
+        try:
+            self.logging.info("Image tag Thread %s: starting", row.id)
+            tags = self.image_tagger.get_tags(image_src)
+            self.logging.info("Tags from image {0} : {1}".format(image_src_url, tags))
+            row.AITagsText = tags
+            self.logging.info("Image tag Thread %s: finished", row.id)
+        except NoTagsFound as e:
+            print(e)
+            self.logging.info(e)
+        except ValueError as e:
+            print(e)
+            self.logging.info(e)
+        except Exception as e:
+            print(e)
+            self.logging.info(e)
+
