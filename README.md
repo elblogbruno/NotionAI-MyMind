@@ -40,11 +40,13 @@ You need to have an account on [Notion.so](https://notion.so/) and need to be lo
 
 ### Getting your credentials
 
-On to the chrome extension settings, you can get your needed token_v2! It is necessary for the Python server. (Hidden in the photo for obvious reasons)         |  For AI Tagging you need to create a free account at [Clarifai](https://www.clarifai.com/) and create an Application named whatever you want and get the API key.
+On to the chrome extension settings, you can get your needed token_v2! It is necessary for the Python server. (Hidden in the photo for obvious reasons)         |  For AI Tagging you need to create a free account at [Clarifai](https://www.clarifai.com/) and create an Application named whatever you want and get the API key.(*)
 :-------------------------:|:-------------------------:
 ![](/doc/getting_cookie.png)  |  ![](/doc/clarifai.png)
 
 TokenV2 is updated automatically when it changes (it occurs when you log out of notion or it expires), so Notion AI My Mind should always work. ☻ You can also change it manually of course.
+
+*If you enter a clarifai api key, clarifai will be used. (Clarifai is cloud base, non gpu dependant, image is tagged on clarifai's servers) if you leave it blank it will use local tensorflow (will use cores of your server but image will be processed locally)
 ### Love to try it?
 
 To install the python server, fire up your linux distributed machine and run this command.
