@@ -1,5 +1,5 @@
 # NotionAI MyMind
-![Alt Text](doc/header_gif_joined.gif)
+![Alt Text](doc/header_gif_joined_updated.gif)
 
 This repo uses AI and the wonderful Notion to enable you to add anything on the web to your "Mind" and forget about everything else.
 
