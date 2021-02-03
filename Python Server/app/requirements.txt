@@ -11,3 +11,4 @@ Werkzeug==1.0.1
 tensorflow
 keras
 Pillow
+pillow
