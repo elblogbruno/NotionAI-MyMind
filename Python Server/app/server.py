@@ -176,5 +176,5 @@ def handle_data():
 if __name__ == "__main__":
     secret = secrets.token_urlsafe(32)
     app.secret_key = secret
-    #port = ask_server_port(logging)
-    app.run(host="0.0.0.0", port=int("5000"), debug=True)
+    port = ask_server_port(logging)
+    app.run(host="0.0.0.0", port=port, debug=True)
