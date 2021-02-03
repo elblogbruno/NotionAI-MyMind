@@ -1,5 +1,5 @@
 # NotionAI MyMind
-![Alt Text](doc/header_gif.gif)
+![Alt Text](doc/header_gif_joined_updated.gif)
 
 This repo uses AI and the wonderful Notion to enable you to add anything on the web to your "Mind" and forget about everything else.
 
@@ -9,33 +9,27 @@ This repo uses AI and the wonderful Notion to enable you to add anything on the 
 - [Installing](#installing)
     - [Prerequisites](#prerequisites)
     - [Love to try it?](#love-to-try-it)
+        - [Docker-Compose](#docker-compose)
 - [Common Issues](#common-issues)
-- [TODO](#todo)
+- [Roadmap](#roadmap)
 
 ## Project Philosophy.
 
 The idea is to have an extension on the browser, and app on android and Ios, allowing you to add whatever you find on the web in your "Mind".
 Also, adding image and article tagging capabilities thanks to AI, so you can simply search on your "Mind" for what you remember.
 
-Right now, there's a working but work in progress Python Local Server, that receives all the data from the extension and the app, and publishes it to Notion. So it is 100% open source and fully private!
+Right now, there's a working Python Local Server, that receives all the data from the extension and the app, and publishes it to Notion. So it is 100% open source and fully private!
 
 ### Chromium users
-
-https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 
-
-The chromium browsers such as google chrome or microsoft edge can install the extension from the store!
-
+https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 the chromium browsers such as google chrome or microsoft edge can install the extension from the store!
 ### Firefox users
-
-https://addons.mozilla.org/es/firefox/addon/notion-ai-my-mind/   
-
-Firefox users can install the extension from the store!
+https://addons.mozilla.org/en-US/firefox/addon/notion-ai-my-mind/ firefox users can install the extension from the store!
 
 ## Examples.
 
-Adding text to your mind         |  Adding images to your mind
-:-------------------------:|:-------------------------:
-![](doc/example_adding_from_context.png)  |  ![](doc/example_adding_from_context_image.png)
+Adding text to your mind         |  Adding images to your mind |  Adding websites to your mind
+:--- | :---: | ---:
+![](doc/example_adding_from_context.png)  |  ![](doc/example_adding_from_context_image.png) |  ![](doc/example_adding_url.png)
 
 
 ## Installing
@@ -47,10 +41,13 @@ You need to have an account on [Notion.so](https://notion.so/) and need to be lo
 
 ### Getting your credentials
 
-On to the chrome extension settings, you can get your needed token_v2! It is necessary for the Python server. (Hidden in the photo for obvious reasons)         |  For AI Tagging you need to create a free account at [Clarifai](https://www.clarifai.com/) and create an Application named whatever you want and get the API key.
+On to the chrome extension settings, you can get your needed token_v2! It is necessary for the Python server. (Hidden in the photo for obvious reasons)         |  For AI Tagging you need to create a free account at [Clarifai](https://www.clarifai.com/) and create an Application named whatever you want and get the API key.(*)
 :-------------------------:|:-------------------------:
 ![](/doc/getting_cookie.png)  |  ![](/doc/clarifai.png)
 
+TokenV2 is updated automatically when it changes (it occurs when you log out of notion or it expires), so Notion AI My Mind should always work. ☻ You can also change it manually of course.
+
+*If you enter a clarifai api key, clarifai will be used. (Clarifai is cloud base, non gpu dependant, image is tagged on clarifai's servers) if you leave it blank it will use local tensorflow (will use cores of your server but image will be processed locally)
 
 ### Love to try it?
 
@@ -78,7 +75,7 @@ cd NotionAI-MyMind && pip -r install requirements.txt
 python server.py \\Python 3.5 or up needed.
 ```
 - Step 4. Create Notion Database.
-It must have this properties selected and add more properties if you want, but the selected ones must exist. 
+It must have this properties selected and add more properties if you want, but the selected ones must exist. (AITagsText (text) and URL (url property)) 
 ![Notion Screen](/doc/notion-database-howto.jpg)
 
 - Step 5. Go to your servers IP and fill the data needed (Token, Notion Database URL and clarifai api key).
@@ -94,9 +91,25 @@ It must have this properties selected and add more properties if you want, but t
 
 - Step 8. ENJOY!
 
+## Docker-Compose
+You can run the server on docker container. Change the [SERVER_PORT] variable with the desired port to run the server with. Then simply call `docker-compose up -d`.
 
-## TODO
-- Finish flutter Android and Ios app
-- Fix extension issues
-- Develop extension for Firefox
-- Add offline capabilities so things are saved and pushed to your mind where there is internet available
+```yaml
+version: '3.4'
+
+services:
+  app:
+    image: elblogbruno/notion-ai-mymind:latest
+    ports:
+      - [SERVER_PORT]:5000
+```
+      
+When a new update is available, you can call :
+
+```
+docker-compose stop notionai-mymind
+docker-compose up -d notionai-mymind
+```
+
+## Roadmap
+- You can check the roadmap here: https://github.com/elblogbruno/NotionAI-MyMind/projects/1
