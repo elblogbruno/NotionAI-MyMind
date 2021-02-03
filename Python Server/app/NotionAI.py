@@ -61,12 +61,11 @@ class NotionAI:
         return loaded
 
     def add_url_to_database(self, url, title):
-        self.logging("Adding url {} to mind with title {}".format(url,title))
+        self.logging.info("Adding url to mind: {0} {1}".format(url.encode('utf8'), title.encode('utf8')))
         self.statusCode = 200  # at start we asume everything will go ok
         try:
             rowId = self.web_clipper_request(url, title)
-            x = threading.Thread(target=self.add_url_thread, args=(rowId,))
-            x.start()
+            self.add_url_thread(rowId)
         except OnUrlNotValid as invalidUrl:
             print(invalidUrl)
             self.logging.info(invalidUrl)
@@ -120,7 +119,7 @@ class NotionAI:
         content = row.get('content')
         if content is None and n < 15:
             sleep(0.15)
-            print("No content available yet " + str(n))
+            print("No image available yet " + str(n))
             self.logging.info("No content available yet " + str(n))
             return self.get_content_from_row(row, n + 1)
         else:
@@ -164,10 +163,10 @@ class NotionAI:
             rowId = json_response['createdBlockIds'][0]
             return rowId
         else:
-            raise OnUrlNotValid
+            raise OnUrlNotValid("Invalid url was sent",self)
 
     def add_text_to_database(self, text, url):
-        print("The text is " + text + " context: " + url)
+        self.logging.info("Adding text to mind: {0} {1}".format(url.encode('utf8'), text.encode('utf8')))
         self.statusCode = 200  # at start we asume everything will go ok
         row = self.collection.add_row()
         self.row = row
@@ -186,12 +185,10 @@ class NotionAI:
             self.statusCode = 500
 
     def add_image_to_database(self, url, image_src, image_src_url):
-        print("The Image is " + image_src + " context: " + image_src_url)
+        self.logging.info("Adding image to mind: {0} {1} {2}".format(url.encode('utf8'), image_src.encode('utf8'),image_src_url.encode('utf8')))
         self.statusCode = 200  # at start we asume everything will go ok
         row = self.collection.add_row()
-
         self.row = row
-
         try:
             row.name = "Image from " + image_src_url
             row.url = image_src_url
@@ -199,8 +196,9 @@ class NotionAI:
             img_block.source = image_src
             row.icon = img_block.source
             row.person = self.client.current_user
-            x = threading.Thread(target=self.analyze_image_thread, args=(image_src, row, image_src_url))
-            x.start()
+            self.analyze_image_thread(image_src, row, image_src_url)
+            # x = threading.Thread(target=self.analyze_image_thread, args=(image_src, row, image_src_url))
+            # x.start()
 
         except requests.exceptions.HTTPError as invalidUrl:
             print(invalidUrl)

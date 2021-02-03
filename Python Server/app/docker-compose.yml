@@ -1,0 +1,7 @@
+version: '3.4'
+
+services:
+  notionai-mymind:
+    image: elblogbruno/notion-ai-mymind:latest
+    ports:
+      - 8000:5000

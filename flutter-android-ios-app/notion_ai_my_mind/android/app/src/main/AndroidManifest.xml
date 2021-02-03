@@ -11,7 +11,7 @@
     <application
         android:name="io.flutter.app.FlutterApplication"
         android:networkSecurityConfig="@xml/network_security_config"
-        android:label="notion_ai_my_mind"
+        android:label="Notion AI My Mind"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

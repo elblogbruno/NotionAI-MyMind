@@ -21,10 +21,29 @@ class Api {
     }
   }
 
-  Future<String> addUrlToMind(String urlToAdd,String title) async {
+  Future<String> addUrlToMind(String urlToAdd) async {
     try {
+      String title = urlToAdd + " added to your mind from Phone";
       String _serverUrl = await getServerUrl();
       String finalUrl = _serverUrl + "add_url_to_mind?url="+urlToAdd+"&title="+title;
+      print("Final sharing url: " + finalUrl);
+      http.Response response = await http.get(finalUrl);
+
+      if (response.statusCode == 200) {
+        return response.body.toString();
+      } else {
+        return '-1';
+      }
+    } catch (_) {
+      return '-1';
+    }
+  }
+
+  Future<String> addImageToMind(String urlToAdd) async {
+    try {
+      String title = urlToAdd + " added to your mind from Phone";
+      String _serverUrl = await getServerUrl();
+      String finalUrl = _serverUrl + "add_image_to_mind?url="+urlToAdd+"&image_src="+title+"&image_src_url="+title;
       print("Final sharing url: " + finalUrl);
       http.Response response = await http.get(finalUrl);
 

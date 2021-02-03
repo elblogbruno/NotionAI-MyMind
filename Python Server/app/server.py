@@ -8,8 +8,13 @@ from werkzeug.utils import secure_filename
 
 import json
 import secrets
+
 from utils import ask_server_port, save_options, save_data
 from NotionAI import *
+
+import time
+from threading import Thread
+
 
 UPLOAD_FOLDER = '../app/uploads/'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -26,20 +31,20 @@ notion = NotionAI(logging)
 def add_url_to_mind():
     url = request.args.get('url')
     title = request.args.get('title')
-    logging.info("Adding url to mind: {0} {1}".format(url.encode('utf8'), title.encode('utf8')))
-    notion.add_url_to_database(url, title)
-    print(str(notion.statusCode))
-    return str(notion.statusCode)
+    thread = Thread(target=notion.add_url_to_database, args=(url, title))
+    thread.daemon = True
+    thread.start()
+    return "200"
 
 
 @app.route('/add_text_to_mind')
 def add_text_to_mind():
     url = request.args.get('url')
     text = request.args.get('text')
-    logging.info("Adding text to mind: {0} {1}".format(url.encode('utf8'), text.encode('utf8')))
-    notion.add_text_to_database(str(text), str(url))
-    print(str(notion.statusCode))
-    return str(notion.statusCode)
+    thread = Thread(target=notion.add_text_to_database, args=(str(text), str(url)))
+    thread.daemon = True
+    thread.start()
+    return "200"
 
 
 @app.route('/add_image_to_mind')
@@ -47,11 +52,10 @@ def add_image_to_mind():
     url = request.args.get('url')
     image_src = request.args.get('image_src')
     image_src_url = request.args.get('image_src_url')
-    logging.info("Adding image to mind: {0} {1} {2}".format(url.encode('utf8'), image_src.encode('utf8'),
-                                                            image_src_url.encode('utf8')))
-    notion.add_image_to_database(str(url), str(image_src), str(image_src_url))
-    # print(str(notion.statusCode))
-    return str(notion.statusCode)
+    thread = Thread(target=notion.add_image_to_database, args=(str(url), str(image_src), str(image_src_url)))
+    thread.daemon = True
+    thread.start()
+    return "200"
 
 
 @app.route('/add_video_to_mind')
@@ -86,7 +90,10 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            notion.add_image_to_database_by_post(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            thread = Thread(target=notion.add_image_to_database_by_post, args=(os.path.join(app.config['UPLOAD_FOLDER'], filename)))
+            thread.daemon = True
+            thread.start()
+            #notion.add_image_to_database_by_post(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     return "File Uploaded Succesfully"
 
 

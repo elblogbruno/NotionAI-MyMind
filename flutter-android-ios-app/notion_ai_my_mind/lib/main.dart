@@ -90,7 +90,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
           setState(() {
             _sharedText = value;
             if(_sharedText != null) {
-                Api().addUrlToMind(_sharedText, "Url from: $_sharedText");
+                Api().addUrlToMind(_sharedText);
                 print("Shared: $_sharedText");
 
                 Fluttertoast.showToast(msg: "Shared: $_sharedText",
@@ -112,7 +112,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
         _sharedText = value;
 
         if(_sharedText != null) {
-            Api().addUrlToMind(_sharedText, "Url from: $_sharedText");
+            Api().addUrlToMind(_sharedText);
             print("Shared: $_sharedText");
 
             Fluttertoast.showToast(msg: "Shared when app closed: $_sharedText",
