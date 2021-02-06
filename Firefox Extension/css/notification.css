@@ -1,0 +1,103 @@
+/*
+ * Notification Component
+ */
+ #naimm-notification {
+	font-family: Avenir, sans-serif !important;
+	position: fixed;
+	right: 30px;
+	top: 30px;
+	box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1);
+	border-radius: 4px;
+	width: 350px;
+	box-sizing: border-box;
+	user-select: none;
+
+	animation: naimmNotificationSlideIn 300ms ease-out forwards;
+	animation-delay: 300ms;
+	opacity: 0;
+	will-change: opacity, transform;
+	z-index: 2147483647;
+}
+
+#naimm-notification[status="error"] .naimm-notification-inner {
+	border: 2px solid #FF0000 !important;
+}
+
+#naimm-notification[status="limited"] .naimm-notification-inner {
+	background: #FF5924 !important;
+	border: none !important;
+}
+#naimm-notification[status="success"] .naimm-notification-inner {
+	border: 2px solid coral!important;
+}
+
+#naimm-notification[closing="true"] {
+	pointer-events: none !important;
+	animation: naimmNotificationSlideOut 300ms ease-out forwards;
+}
+
+#naimm-notification .naimm-notification-wrap {
+	overflow: hidden;
+	border-radius: 4px;
+}
+
+#naimm-notification .naimm-notification-inner {
+	border-radius: 4px;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center;
+	background: #FFFFFF;
+	color: #000000 !important;
+	position: relative;
+	z-index: 3;
+	min-height: 90px;
+	padding: 20px;
+	box-sizing: border-box;
+	border: 1px solid #EFEFEF;
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+	cursor: pointer;
+}
+
+#naimm-notification .naimm-notification-inner img {
+	width: 30px;
+	margin: 0 20px;
+}
+
+#naimm-notification .naimm-notification-inner span {
+	color: inherit !important;
+	font-family: Avenir, sans-serif !important;
+	font-weight: normal !important;
+	font-size: 20px !important;
+	line-height: 26px !important;
+	letter-spacing: 0 !important;
+	text-transform: none !important;
+}
+
+/*
+ * Animations
+ */
+
+@keyframes naimmNotificationSlideIn {
+	0% {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+
+	100% {
+		opacity: 1;
+		transform: translateY(0px);
+	}
+}
+
+@keyframes naimmNotificationSlideOut {
+	0% {
+		opacity: 1;
+		transform: translateY(0px);
+	}
+
+	100% {
+		opacity: 0;
+		transform: translateY(-30px);
+	}
+}

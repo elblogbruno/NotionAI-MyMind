@@ -1,15 +1,118 @@
-const CONTEXT_MENU_ID = "MY_CONTEXT_MENU";
-const CONTEXT_MENU_ID_COOKIE = "MY_CONTEXT_MENU";
+const usePromise = typeof browser !== "undefined";
 
-function getword(info,tab) {
-  if (info.menuItemId !== CONTEXT_MENU_ID) {
-    return;
-  }
+const menuConfig = [
+	{
+		title: "Add to my mind: %s",
+		id: "naimm-add",
+		contexts: [ "selection", "image", "video", "audio" ]
+	},
+	{
+		title: "Open my mind",
+		id: "naimm-open-mind",
+		contexts: [ "browser_action" ]
+	},
+  {
+		title: "Open server",
+		id: "naimm-open",
+		contexts: [ "browser_action" ]
+	}
+];
+
+if (usePromise) {
+	browser.contextMenus.removeAll().then(() => {
+		menuConfig.forEach(config => browser.contextMenus.create(config));
+	});
+} else {
+	chrome.contextMenus.removeAll(() => {
+		menuConfig.forEach(config => chrome.contextMenus.create(config));
+	});
+}
+
+
+/**
+ * Observers
+ */
+
+// Browser Action
+chrome.browserAction.onClicked.addListener((tab) => {
+  AddUrlToMind(tab);
+});
+
+// Context Menu
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+	const { menuItemId, linkUrl, selectionText, pageUrl } = info;
+
+	if (menuItemId === "naimm-add") {
+		if (selectionText && !linkUrl) {
+			// Used to support multi-line selections
+			saveSelection({pageUrl},tab);
+		} else {
+			ProcessSelection(info,tab);
+		}
+	}
+	else if (menuItemId === "naimm-open") {
+		openServer();
+	}
+  else if (menuItemId === "naimm-open-mind") {
+		openMindUrl();
+	}
+});
+
+async function AddUrlToMind(tab) {
+  let mainUrl = await getFromStorage("serverIP");
   const req = new XMLHttpRequest();
-  browser.storage.local.get("serverIP", function(items) {
-    if (!chrome.runtime.error) {
-      ip = items["serverIP"];
-      const baseUrl = ip;
+  if(!isEmpty(mainUrl)){
+    const baseUrl = mainUrl;
+
+    var url = tab.url;
+    var title = tab.title;
+    const urlParams = `add_url_to_mind?url=${url}&title=${title}`;
+
+    req.open("GET", baseUrl+urlParams, true);
+
+    req.onreadystatechange = function() { // Call a function when the state changes.
+        if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+            switchResponse(this.responseText);
+        } else if (this.status === 0) {
+            switchResponse("-1");
+        }
+    }
+    req.send();
+  }else{
+    switchResponse("-1");
+  }
+}
+
+async function AddTextToMind(info,tab) {
+  let mainUrl = await getFromStorage("serverIP");
+  const req = new XMLHttpRequest();
+  if(!isEmpty(mainUrl)){
+    const baseUrl = mainUrl;
+
+    var text = info.selectionText;
+    var url = tab.url;
+    urlParams = `add_text_to_mind?url=${url}&text=${text}`;
+
+    req.open("GET", baseUrl+urlParams, true);
+
+    req.onreadystatechange = function() { // Call a function when the state changes.
+        if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+            switchResponse(this.responseText);
+        } else if (this.status === 0) {
+            switchResponse("-1");
+        }
+    }
+    req.send();
+  }else{
+    switchResponse("-1");
+  }
+}
+
+async function ProcessSelection(info,tab) {
+  let mainUrl = await getFromStorage("serverIP");
+  const req = new XMLHttpRequest();
+  if(!isEmpty(mainUrl)){
+      const baseUrl = mainUrl;
       var urlParams = "";
 
       var url = info["linkUrl"];
@@ -30,9 +133,6 @@ function getword(info,tab) {
           urlParams = `add_audio_to_mind?url=${url}&audio_src=${src}&audio_src_url=${audio_src_url}`;
           break;
         default:
-          var text = info.selectionText;
-          url = tab.url;
-          urlParams = `add_text_to_mind?url=${url}&text=${text}`;
           break;
       }
       
@@ -41,38 +141,38 @@ function getword(info,tab) {
   
       req.onreadystatechange = function() { // Call a function when the state changes.
         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-            console.log("Got response 200!");
             switchResponse(this.responseText);
-        } else if (this.readyState === XMLHttpRequest.DONE && this.status === 0) {
-          switchResponse("-1");
+        } else if (this.status === 0) {
+            switchResponse("-1");
+        }
       }
-    }
+  }else{
+    switchResponse("-1");
   }
-
-  });
 }
-
-chrome.contextMenus.create({
-  title: "Add to my Mind: %s", 
-  contexts:["all"], 
-  id: CONTEXT_MENU_ID
-});
-chrome.contextMenus.onClicked.addListener(getword)
 
 
 function switchResponse(response){
   switch (response) {
     case '200':
-      alert("Added to your mind")
-      break;
-    case '409':
-      alert("Could be added to your mind, but with no thumbnail!")
-      break;
-    case '500':
-      alert("This url is invalid")
+      createHandler(
+        () =>
+          showNotification({
+            message: "Added to your mind.",
+            status: "success",
+            redirect: "http://www.laguiaempresarial.com/item/10731/",
+          })
+      );
       break;
     case '-1':
-      alert("Error during accessing server. Make sure the ip/port are corrects, and the server is running.");
+      createHandler(
+        () =>
+          showNotification({
+            message: "Error during accessing server. Make sure the ip/port are corrects, and the server is running.",
+            status: "error",
+            redirect: "http://www.laguiaempresarial.com/item/10731/",
+          })
+      );
       break;
     default:
       break;
@@ -84,8 +184,8 @@ browser.cookies.onChanged.addListener(function(info)
 {
   if(info['cookie']['domain'] == ".notion.so" && info['cookie']['name']  == "token_v2")
   {
-      chrome.storage.sync.get("serverIP", function(items) {
-        if (!chrome.runtime.error) {
+      browser.storage.local.get("serverIP", function(items) {
+        if (!browser.runtime.error) {
           ip = items["serverIP"];
           console.log(ip);
           const baseUrl = ip;
@@ -106,3 +206,108 @@ browser.cookies.onChanged.addListener(function(info)
       });
   }
 });
+
+// undefined
+function createHandler(callback) {
+    browser.tabs.insertCSS({
+      file: "css/notification.css",
+    });
+
+    const config = { file: "js/notificationCreate.js" };
+
+    if (usePromise) {
+      browser.tabs.executeScript(config).then(callback);
+    } else {
+      chrome.tabs.executeScript(config, callback);
+    }
+}
+
+function showNotification({ status, message, redirect, icon = 'icon.png' }) {
+	const props = {
+		icon: browser.runtime.getURL(`icon/${icon}`),
+		message,
+		status,
+		redirect,
+	}
+
+	function callback() {
+		browser.tabs.executeScript({ file: "js/notificationBehaviour.js" });
+	};
+
+	const config = {
+		code: `
+			window.naimm = {};
+			${Object.entries(props).map(([key, value]) => `window.naimm.${key} = "${value}";`).join('')}
+		`
+	};
+
+	if (usePromise) {
+		browser.tabs.executeScript(config).then(callback);
+	} else {
+		chrome.tabs.executeScript(config, callback);
+	}
+}
+
+function openNewTab(url) {
+	if (url) {
+		browser.tabs.create({ url });
+	}
+}
+
+function saveSelection(extraData,tab) {
+	const config = { file: "utils/get-selection.js" };
+	browser.tabs.executeScript(config, function(data) {
+		let result = Object.assign(data[0], extraData);
+
+		if (!result.selectionText) {
+			return;
+		};
+		AddTextToMind(result,tab);
+	});
+}
+
+function isEmpty(str) {
+  return (!str || 0 === str.length);
+}
+
+async function openMindUrl(){
+  const req = new XMLHttpRequest();
+  // var mainUrl = getServerUrl();
+  let permission = await getFromStorage("serverIP");
+  if(!isEmpty(permission)){
+    const baseUrl = permission;
+    const urlParams = `get_current_mind_url`;
+
+    req.open("GET", baseUrl+urlParams, true);
+
+    req.onreadystatechange = function() { // Call a function when the state changes.
+        if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+            openNewTab(this.responseText);
+        } else if (this.readyState === XMLHttpRequest.DONE && this.status === 0) {
+            switchResponse("-1");
+        }
+    }
+    req.send();
+  }else{
+    switchResponse("-1");
+  }
+}
+
+async function openServer(){
+  let mainUrl = await getFromStorage("serverIP");
+  if(!isEmpty(mainUrl)){
+    openNewTab(mainUrl);
+  }else{
+    switchResponse("-1");
+  }
+}
+
+async function getFromStorage(key) {
+    return new Promise((resolve, reject) => {
+      browser.storage.local.get(key, resolve);
+    })
+      .then(result => {
+          if (key == null) return result;
+          else return result[key];
+      });
+}

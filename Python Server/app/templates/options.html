@@ -22,12 +22,22 @@
                     <input type="text" name="notion_url" id="notion_url" class="form-control"  aria-describedby="url_help" placeholder="Enter the URL">
                     <small id="url_help" class="form-text text-muted">Please set the https:// at start</small>
                 </div>
+                <h3>Login options: </h3>
+                <div class="form-group">
+                    <label for="exampleInputEmail1">Email address</label>
+                    <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
+                    <small id="emailHelp" class="form-text text-muted">Server will never share your email with anyone else.</small>
+                  </div>
+                  <div class="form-group">
+                    <label for="exampleInputPassword1">Password</label>
+                    <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+                  </div>
+                <h3>or </h3>
 				<div class="form-group">
                     <label for="notion_token">Notion TokenV2</label>
                     <input type="text" name="notion_token" id="notion_token" class="form-control"  aria-describedby="token_help" placeholder="Enter the Token v2">
                     <small id="token_help" class="form-text text-muted">This can be obtained looking at the cookies or the extension</small>
                 </div>
-
                 <h2>Image tagging options: </h2>
                 <div class="form-group">
                     <label for="notion_token">Clarifai API key</label>

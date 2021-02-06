@@ -15,24 +15,30 @@ function restore_options() {
       document.getElementById("ip_status").innerHTML  = items["serverIP"];
     }
   });
-  getTokenFromCookie();
+  cookies_utils.getTokenFromCookie();
 }
 
-function getTokenFromCookie(){
-  getCookies("https://www.notion.so/", "token_v2", function(id) {
-     document.getElementById("token_info").innerHTML  = id
-  });
-}
 
-function getCookies(domain, name, callback) {
-  browser.cookies.get({"url": domain, "name": name}, function(cookie) {
-      if(callback) {
-          callback(cookie.value);
-      }
-  });
-}
 
 document.addEventListener('DOMContentLoaded', function() {
   restore_options();
   document.getElementById('save').onclick = saveSettings;
 }, true);
+
+class cookies_utils {
+
+  static getTokenFromCookie(){
+    cookies_utils.getCookies("https://www.notion.so/", "token_v2", function(id) {
+       document.getElementById("token_info").innerHTML  = id
+    });
+  }
+  
+  static getCookies(domain, name, callback) {
+    browser.cookies.get({"url": domain, "name": name}, function(cookie) {
+        if(callback) {
+            callback(cookie.value);
+        }
+    });
+  }
+
+}

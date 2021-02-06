@@ -61,6 +61,19 @@ def save_data(logging, **kwargs):
     logging.info("Data saved succesfully!")
 
 
+def append_data(logging, **kwargs):
+    logging.info("Appending data.")
+    with open("data.json", "r+") as file:
+        current_data = json.load(file)
+        data = {}
+        for key, value in kwargs.items():
+            data[key] = value
+        current_data.update(data)
+        file.seek(0)
+        json.dump(current_data, file)
+    logging.info("Appending data succesfully!")
+
+
 def download_image_from_url(image_url):
     filename = "./image_tagging/temp_image_folder/" + str(uuid.uuid4())
 

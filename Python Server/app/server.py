@@ -9,12 +9,10 @@ from werkzeug.utils import secure_filename
 import json
 import secrets
 
-from utils import ask_server_port, save_options, save_data
+from utils import ask_server_port, save_options, save_data, append_data
 from NotionAI import *
 
-import time
 from threading import Thread
-
 
 UPLOAD_FOLDER = '../app/uploads/'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -90,10 +88,11 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            thread = Thread(target=notion.add_image_to_database_by_post, args=(os.path.join(app.config['UPLOAD_FOLDER'], filename)))
+            thread = Thread(target=notion.add_image_to_database_by_post,
+                            args=(os.path.join(app.config['UPLOAD_FOLDER'], filename)))
             thread.daemon = True
             thread.start()
-            #notion.add_image_to_database_by_post(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            # notion.add_image_to_database_by_post(os.path.join(app.config['UPLOAD_FOLDER'], filename))
     return "File Uploaded Succesfully"
 
 
@@ -110,12 +109,12 @@ def add_audio_to_mind():
 
 @app.route('/get_current_mind_url')
 def get_current_mind_url():
-    return str(notion.options['url'])
+    return str(notion.data['url'])
 
 
 @app.route('/get_notion_token_v2')
 def get_notion_token_v2():
-    return str(notion.options['token'])
+    return str(notion.data['token'])
 
 
 @app.route('/update_notion_tokenv2')
@@ -153,6 +152,8 @@ def handle_data():
     notion_url = request.form['notion_url']
     notion_token = request.form['notion_token']
 
+    use_email = request.form['email'] and request.form['password']
+
     if request.form['clarifai_key']:
         clarifai_key = request.form['clarifai_key']
         save_data(logging, url=notion_url, token=notion_token, clarifai_key=clarifai_key)
@@ -165,7 +166,10 @@ def handle_data():
 
     save_options(logging, use_clarifai=use_clarifai, delete_after_tagging=delete_after_tagging)
 
-    has_run = notion.run(logging)
+    if use_email:
+        has_run = notion.run(logging, email=request.form['email'], password=request.form['password'])
+    else:
+        has_run = notion.run(logging)
 
     if has_run:
         return render_template("thank_you.html")
