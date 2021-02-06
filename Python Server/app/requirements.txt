@@ -3,7 +3,7 @@ flask==1.1.2
 gunicorn==20.0.4
 clarifai-grpc==6.7.1
 Flask==1.1.2
-notion==0.0.25
+notion==0.0.28
 requests==2.24.0
 urllib3==1.25.10
 validators==0.17.1

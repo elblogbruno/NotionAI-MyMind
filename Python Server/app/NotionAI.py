@@ -26,7 +26,7 @@ class NotionAI:
             print("You should go to the homepage and set the config.")
             self.logging.info("You should go to the homepage and set the config.")
 
-    def run(self, logging, email=None, password=None):
+    def run(self, logging, email_s=None, password_s=None):
         loaded = False
         data = {}
         with open('data.json') as json_file:
@@ -36,10 +36,10 @@ class NotionAI:
             self.logging.info("Running notionAI with " + str(data))
             self.data = data
 
-            if email is not None and password is not None:
+            if email_s is not None and password_s is not None:
                 print("Login in with email")
                 self.logging.info("Login in with email")
-                self.client = NotionClient(email=email, password=password)
+                self.client = NotionClient(email=email_s, password=password_s)
                 token_v2 = self.client.session.cookies.get("token_v2")
             elif data['token']:
                 print("Login in with tokenV2")

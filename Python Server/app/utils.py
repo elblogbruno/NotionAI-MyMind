@@ -4,32 +4,47 @@ import requests  # to get image from the web
 import shutil  # to save it locally
 import uuid
 
+import os, re
+
+path = "/proc/self/cgroup"
+
+def is_docker():
+  if not os.path.isfile(path): return False
+  with open(path) as f:
+    for line in f:
+      if re.match("\d+:[\w=]+:/docker(-[ce]e)?/\w+", line):
+        return True
+    return False
 
 def ask_server_port(logging):
-    if os.path.isfile('port.json'):
-        logging.info("Initiating with a found port.json file.")
-
-        with open('port.json') as json_file:
-            options = json.load(json_file)
-            logging.info("Using {} port".format(options['port']))
-        return options['port']
-
+    if is_docker():
+        print("running on docker")
+        return int("5000")
     else:
-        print("Asking initially for a port.")
+        if os.path.isfile('port.json'):
+            logging.info("Initiating with a found port.json file.")
 
-        logging.info("Asking initially for a port.")
+            with open('port.json') as json_file:
+                options = json.load(json_file)
+                logging.info("Using {} port".format(options['port']))
+            return options['port']
 
-        port = input("Which port you'd like to run the server on: ")
+        else:
+            print("Asking initially for a port.")
 
-        logging.info("Using {} port".format(port))
+            logging.info("Asking initially for a port.")
 
-        options = {
-            'port': port
-        }
-        with open('port.json', 'w') as outfile:
-            json.dump(options, outfile)
+            port = input("Which port you'd like to run the server on: ")
 
-        logging.info("Port saved succesfully!")
+            logging.info("Using {} port".format(port))
+
+            options = {
+                'port': port
+            }
+            with open('port.json', 'w') as outfile:
+                json.dump(options, outfile)
+
+            logging.info("Port saved succesfully!")
 
 
 def save_options(logging, **kwargs):
