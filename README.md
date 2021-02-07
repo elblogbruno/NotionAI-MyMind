@@ -7,6 +7,7 @@ This repo uses AI and the wonderful Notion to enable you to add anything on the 
 - [Project Philosophy](#project-philosophy)
     - [Examples](#examples)
 - [Installing](#installing)
+    - [Browser Extension](#extensions)
     - [Prerequisites](#prerequisites)
     - [Love to try it?](#love-to-try-it)
         - [Docker-Compose](#docker-compose)
@@ -82,7 +83,7 @@ It must have this properties selected and add more properties if you want, but t
 
 ![Options Screen](/doc/options_python.png)
 
-- Step 6. Load the extension on your chromium Browser or download from chrome or firefox [store](#extension)
+- Step 6. Load the extension on your chromium Browser or download from chrome or firefox [store](#extensions)
 
 ![Extension Screen](/doc/extension_howto.png)
 
