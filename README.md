@@ -19,7 +19,7 @@ The idea is to have an extension on the browser, and app on android and Ios, all
 Also, adding image and article tagging capabilities thanks to AI, so you can simply search on your "Mind" for what you remember.
 
 Right now, there's a working Python Local Server, that receives all the data from the extension and the app, and publishes it to Notion. So it is 100% open source and fully private!
-
+### Extensions
 ### Chromium users
 https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 the chromium browsers such as google chrome or microsoft edge can install the extension from the store!
 ### Firefox users
@@ -29,7 +29,7 @@ https://addons.mozilla.org/en-US/firefox/addon/notion-ai-my-mind/ firefox users 
 
 Adding text to your mind         |  Adding images to your mind |  Adding websites to your mind
 :--- | :---: | ---:
-![](doc/example_adding_from_context.png)  |  ![](doc/example_adding_from_context_image.png) |  ![](doc/example_adding_url.png)
+![](doc/add_text.gif)  |  ![](doc/add_image.gif) |  ![](doc/add_website.gif)
 
 
 ## Installing
@@ -82,7 +82,7 @@ It must have this properties selected and add more properties if you want, but t
 
 ![Options Screen](/doc/options_python.png)
 
-- Step 6. Load the extension on your chromium Browser or install it from the https://chrome.google.com/webstore/detail/notion-ai-mymind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 Chrome web store.
+- Step 6. Load the extension on your chromium Browser or download from chrome or firefox [store](#extension)
 
 ![Extension Screen](/doc/extension_howto.png)
 
