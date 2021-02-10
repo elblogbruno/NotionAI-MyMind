@@ -31,19 +31,15 @@ class Api {
       RegExp exp = new RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+');
       Iterable<RegExpMatch> matches = exp.allMatches(urlToAdd);
 
-      matches.forEach((match) {
-        print(urlToAdd.substring(match.start, match.end));
-      });
-
       if (matches == null) {
         print("No match");
       } else {
         final matchedText = matches.elementAt(1).group(0);
-        print(matchedText); // my
+        print("Match: " + matchedText); // my
 
-        String title = urlToAdd + " added to your mind from Phone";
+        String title = matchedText + " added to your mind from Phone";
         String _serverUrl = await getServerUrl();
-        String finalUrl = _serverUrl + "add_url_to_mind?url="+urlToAdd+"&title="+title;
+        String finalUrl = _serverUrl + "add_url_to_mind?url="+matchedText+"&title="+title;
         print("Final sharing url: " + finalUrl);
         http.Response response = await http.get(finalUrl);
 

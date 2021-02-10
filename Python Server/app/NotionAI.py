@@ -120,7 +120,7 @@ class NotionAI:
             self.statusCode = 500
 
     def add_image_to_database_by_post(self, image_src):
-        self.logging.info("Adding image to mind by post: {0} {1} {2}".format(image_src.encode('utf8')))
+        self.logging.info("Adding image to mind by post: {0}".format(image_src.encode('utf8')))
         self.statusCode = 200  # at start we asume everything will go ok
         row = self.collection.add_row()
         self.row = row
