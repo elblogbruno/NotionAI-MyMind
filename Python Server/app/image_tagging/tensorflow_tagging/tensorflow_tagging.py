@@ -17,9 +17,14 @@ class TensorFlowTag:
 
         createFolder("./image_tagging/temp_image_folder")
 
-    def get_tags(self, image_url):
+    def get_tags(self, image_url, is_local_image):
         model = InceptionV3(weights='imagenet')
-        file = download_image_from_url(image_url)
+
+        if is_local_image:
+            file = "./uploads/"+image_url.split("/")[-1]
+        else:
+            file = download_image_from_url(image_url)
+
         img = image.load_img(file, target_size=(299, 299))
         x = image.img_to_array(img)
         x = np.expand_dims(x, axis=0)

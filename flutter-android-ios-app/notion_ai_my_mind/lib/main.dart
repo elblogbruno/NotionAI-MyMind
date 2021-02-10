@@ -1,86 +1,191 @@
 import 'dart:convert';
+import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/io_client.dart';
+import 'package:notion_ai_my_mind/overlay_view.dart';
 import 'package:notion_ai_my_mind/settings.dart';
 import 'dart:async';
 
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:notion_ai_my_mind/api/api.dart';
 
+import 'package:device_info/device_info.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:rxdart/subjects.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
-void main() => runApp(MyApp());
+final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+FlutterLocalNotificationsPlugin();
 
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return new MaterialApp(
-      title: 'Flutter Demo',
-      theme: new ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or press Run > Flutter Hot Reload in IntelliJ). Notice that the
-        // counter didn't reset back to zero; the application is not restarted.
-        primarySwatch: Colors.blue,
-        //primaryColor: Colors.red,
-        //backgroundColor: Colors.white,
-        //bottomAppBarColor: Colors.white,
-      ),
-      home: new MyHomePage(),
-    );
-  }
+/// Streams are created so that app can respond to notification-related events
+/// since the plugin is initialised in the `main` function
+final BehaviorSubject<ReceivedNotification> didReceiveLocalNotificationSubject =
+BehaviorSubject<ReceivedNotification>();
+
+final BehaviorSubject<String> selectNotificationSubject =
+BehaviorSubject<String>();
+
+const MethodChannel platform =
+MethodChannel('dexterx.dev/flutter_local_notifications_example');
+
+class ReceivedNotification {
+  ReceivedNotification({
+    @required this.id,
+    @required this.title,
+    @required this.body,
+    @required this.payload,
+  });
+
+  final int id;
+  final String title;
+  final String body;
+  final String payload;
+}
+
+String selectedNotificationPayload;
+
+Future<void> main() async {
+  // needed if you intend to initialize in the `main` function
+  WidgetsFlutterBinding.ensureInitialized();
+
+  //await _configureLocalTimeZone();
+
+  final NotificationAppLaunchDetails notificationAppLaunchDetails =
+  await flutterLocalNotificationsPlugin.getNotificationAppLaunchDetails();
+
+  const AndroidInitializationSettings initializationSettingsAndroid =
+  AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  /// Note: permissions aren't requested here just to demonstrate that can be
+  /// done later
+  final IOSInitializationSettings initializationSettingsIOS =
+  IOSInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+      onDidReceiveLocalNotification:
+          (int id, String title, String body, String payload) async {
+        didReceiveLocalNotificationSubject.add(ReceivedNotification(
+            id: id, title: title, body: body, payload: payload));
+      });
+  const MacOSInitializationSettings initializationSettingsMacOS =
+  MacOSInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false);
+  final InitializationSettings initializationSettings = InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+      macOS: initializationSettingsMacOS);
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+      onSelectNotification: (String payload) async {
+        if (payload != null) {
+          debugPrint('notification payload: $payload');
+        }
+        selectedNotificationPayload = payload;
+        selectNotificationSubject.add(payload);
+      });
+  runApp(
+      MaterialApp(
+        title: 'Flutter Demo',
+        theme: new ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: new MyHomePage(notificationAppLaunchDetails),
+      )
+  );
+}
+
+Future<void> _configureLocalTimeZone() async {
+  tz.initializeTimeZones();
+  final String timeZoneName = await platform.invokeMethod('getTimeZoneName');
+  tz.setLocalLocation(tz.getLocation(timeZoneName));
 }
 
 class MyHomePage extends StatefulWidget {
-  @override
-  _MyAppState createState() => _MyAppState();
+
+    const MyHomePage(
+    this.notificationAppLaunchDetails, {
+      Key key,
+    }) : super(key: key);
+
+    static const String routeName = '/';
+
+    final NotificationAppLaunchDetails notificationAppLaunchDetails;
+
+    bool get didNotificationLaunchApp =>
+        notificationAppLaunchDetails?.didNotificationLaunchApp ?? false;
+
+    @override
+    _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   final Completer<WebViewController> _controller =
   Completer<WebViewController>();
   StreamSubscription _intentDataStreamSubscription;
   List<SharedMediaFile> _sharedFiles;
   String _sharedText;
 
+
   @override
   void initState() {
     super.initState();
+    _requestPermissions();
+    _configureDidReceiveLocalNotificationSubject();
+    _configureSelectNotificationSubject();
+    _initShareIntent();
     WidgetsBinding.instance.addObserver(this);
+  }
+  void _initShareIntent(){
     // For sharing images coming from outside the app while the app is in the memory
     _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
         .listen((List<SharedMediaFile> value) {
       setState(() {
         _sharedFiles = value;
-        Fluttertoast.showToast(msg: "Shared:" + (_sharedFiles?.map((f) => f.path)?.join(",") ?? ""),
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.BOTTOM);
+        if(_sharedFiles != null){
+          String uri = (_sharedFiles?.map((f) => f.path)?.join(",") ?? "");
+          var myFile = new File(uri);
+          Api().uploadImage(myFile).then((String result){
+            if (result == "200"){
+              _onContentAdded();
+            }
+          });
+        }else{
+          _onContentError();
+        }
 
-        print("Shared:" + (_sharedFiles?.map((f) => f.path)?.join(",") ?? ""));
       });
     }, onError: (err) {
       print("getIntentDataStream error: $err");
     });
-  
+
     // For sharing images coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
       setState(() {
         _sharedFiles = value;
-        Fluttertoast.showToast(msg: "Shared:" + (_sharedFiles?.map((f) => f.path)?.join(",") ?? ""),
-                          toastLength: Toast.LENGTH_SHORT,
-                          gravity: ToastGravity.BOTTOM);
-
-        print("Shared:" + (_sharedFiles?.map((f) => f.path)?.join(",") ?? ""));
+        if(_sharedFiles != null){
+          String uri = (_sharedFiles?.map((f) => f.path)?.join(",") ?? "");
+          var myFile = new File(uri);
+          Api().uploadImage(myFile).then((String result){
+            if (result == "200"){
+              _onContentAdded();
+            }
+          });
+        }else{
+          _onContentError();
+        }
       });
     });
 
@@ -90,42 +195,79 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
           setState(() {
             _sharedText = value;
             if(_sharedText != null) {
-                Api().addUrlToMind(_sharedText);
-                print("Shared: $_sharedText");
-
-                Fluttertoast.showToast(msg: "Shared: $_sharedText",
-                    toastLength: Toast.LENGTH_SHORT,
-                    gravity: ToastGravity.BOTTOM);
+              Api().addUrlToMind(_sharedText).then((String result){
+                if (result == "200"){
+                  _onContentAdded();
+                }
+              });
             }else{
-                print("Shared text is null");
+              _onContentError();
             }
           });
         }, onError: (err) {
           Fluttertoast.showToast(msg: "getLinkStream error: $err",
-                          toastLength: Toast.LENGTH_SHORT,
-                          gravity: ToastGravity.BOTTOM);
+              toastLength: Toast.LENGTH_SHORT,
+              gravity: ToastGravity.BOTTOM);
           print("getLinkStream error: $err");
         });
     // For sharing or opening urls/text coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialText().then((String value) {
       setState(() {
         _sharedText = value;
-
         if(_sharedText != null) {
-            Api().addUrlToMind(_sharedText);
-            print("Shared: $_sharedText");
-
-            Fluttertoast.showToast(msg: "Shared when app closed: $_sharedText",
-                toastLength: Toast.LENGTH_SHORT,
-                gravity: ToastGravity.BOTTOM);
+          Api().addUrlToMind(_sharedText).then((String result){
+            if (result == "200"){
+              _onContentAdded();
+            }
+          });
         }else{
-          print("Shared text is null");
+          _onContentError();
         }
 
       });
     });
   }
+  void _requestPermissions() {
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+        MacOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+  }
 
+  void _configureDidReceiveLocalNotificationSubject() {
+    didReceiveLocalNotificationSubject.stream
+        .listen((ReceivedNotification receivedNotification) async {
+      await showDialog(
+        context: context,
+        builder: (BuildContext context) => CupertinoAlertDialog(
+          title: receivedNotification.title != null
+              ? Text(receivedNotification.title)
+              : null,
+          content: receivedNotification.body != null
+              ? Text(receivedNotification.body)
+              : null,
+        ),
+      );
+    });
+  }
+
+  void _configureSelectNotificationSubject() {
+    selectNotificationSubject.stream.listen((String payload) async {
+      await Navigator.pushNamed(context, '/secondPage');
+    });
+  }
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if(state == AppLifecycleState.resumed){
@@ -153,16 +295,63 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    didReceiveLocalNotificationSubject.close();
+    selectNotificationSubject.close();
     WidgetsBinding.instance.removeObserver(this);
-    _intentDataStreamSubscription.cancel();
     super.dispose();
+  }
+
+  Future<void> _onMindLoaded() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails(
+        'your channel id', 'your channel name', 'your channel description',
+        importance: Importance.max,
+        priority: Priority.high,
+        ticker: 'ticker');
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+    );
+    await flutterLocalNotificationsPlugin.show(
+        0, null, 'Your mind loaded succesfully!', platformChannelSpecifics,
+        payload: 'item x');
+  }
+  Future<void> _onContentAdded() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails(
+        'your channel id', 'your channel name', 'your channel description',
+        importance: Importance.max,
+        priority: Priority.high,
+        ticker: 'ticker');
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+    );
+    await flutterLocalNotificationsPlugin.show(
+        0, null, 'Added to your mind.', platformChannelSpecifics,
+        payload: 'item x');
+  }
+  Future<void> _onContentError() async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+    AndroidNotificationDetails(
+        'your channel id', 'your channel name', 'your channel description',
+        importance: Importance.max,
+        priority: Priority.high,
+        ticker: 'ticker');
+    const NotificationDetails platformChannelSpecifics = NotificationDetails(
+      android: androidPlatformChannelSpecifics,
+    );
+    await flutterLocalNotificationsPlugin.show(
+        0, null, 'Content could not be added to your mind.', platformChannelSpecifics,
+        payload: 'item x');
+
+    await flutterLocalNotificationsPlugin.show(
+        0, null, 'Make sure the ip/port are corrects, and the server is running. Or that you are not sharing invalid content.', platformChannelSpecifics,
+        payload: 'item x');
   }
 
   Future<String> _calculation = Api().getMindUrl();
 
   @override
   Widget build(BuildContext context) {
-    const textStyleBold = const TextStyle(fontWeight: FontWeight.bold);
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -215,28 +404,28 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
     );
   }
 
-    Widget _buildFab(BuildContext context) {
-      return new Container(
-        padding: EdgeInsets.only(bottom: 5.0),
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          child: FloatingActionButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => settings()),
-              );
-            },
-            tooltip: 'Increment',
-            child: Icon(Icons.settings),
-            focusColor: Colors.red,
-            elevation: 3.0,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
-          ),
-
+  Widget _buildFab(BuildContext context) {
+    return new Container(
+      padding: EdgeInsets.only(bottom: 5.0),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => settings()),
+            );
+          },
+          tooltip: 'Increment',
+          child: Icon(Icons.settings),
+          focusColor: Colors.red,
+          elevation: 3.0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16.0))),
         ),
-      );
-    }
+
+      ),
+    );
+  }
 
     Widget _BuildWebView(BuildContext context,String url){
       return new WebView(
@@ -263,6 +452,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
         },
         onPageFinished: (String url) {
           print('Page finished loading: $url');
+          _onMindLoaded();
         },
         gestureNavigationEnabled: true,
       );

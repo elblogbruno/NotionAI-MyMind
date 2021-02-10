@@ -21,9 +21,9 @@ class ImageTagging:
             logging.info("options.json not found")
             print("Wrong file or file path")
 
-    def get_tags(self, image_url):
+    def get_tags(self, image_url,is_image_local):
         self.print_current_detector()
-        return self.predictor.get_tags(image_url)
+        return self.predictor.get_tags(image_url,is_image_local)
 
     def print_current_detector(self):
         if self.options['use_clarifai']:

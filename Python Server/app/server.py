@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 import json
 import secrets
 
-from utils import ask_server_port, save_options, save_data, append_data
+from utils import ask_server_port, save_options, save_data, append_data, createFolder
 from NotionAI import *
 
 from threading import Thread
@@ -74,6 +74,7 @@ def allowed_file(filename):
 
 @app.route('/upload_file', methods=['GET', 'POST'])
 def upload_file():
+    createFolder("uploads")
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -88,8 +89,9 @@ def upload_file():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            thread = Thread(target=notion.add_image_to_database_by_post,
-                            args=(os.path.join(app.config['UPLOAD_FOLDER'], filename)))
+            uri = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+            thread = Thread(target=notion.add_image_to_database_by_post,args=(uri,))
             thread.daemon = True
             thread.start()
             # notion.add_image_to_database_by_post(os.path.join(app.config['UPLOAD_FOLDER'], filename))

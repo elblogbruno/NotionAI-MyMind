@@ -9,14 +9,30 @@ class ClarifaiAI:
         self.channel = ClarifaiChannel.get_json_channel()
         self.key = key
 
-    def get_tags(self,image_url):
+    def get_tags(self,image_url, is_local_image):
         stub = service_pb2_grpc.V2Stub(self.channel)
+        file_bytes = {}
+        file = ""
 
-        request = service_pb2.PostModelOutputsRequest(
-            model_id='aaa03c23b3724a16a56b629203edc62c',
-            inputs=[
-            resources_pb2.Input(data=resources_pb2.Data(image=resources_pb2.Image(url=image_url)))
-            ])
+        if is_local_image:
+            file = "./uploads/"+image_url.split("/")[-1]
+            with open(file, "rb") as f:
+                file_bytes = f.read()
+        else:
+            file = image_url
+
+        if is_local_image:
+            request = service_pb2.PostModelOutputsRequest(
+                model_id='aaa03c23b3724a16a56b629203edc62c',
+                inputs=[
+                    resources_pb2.Input(data=resources_pb2.Data(image=resources_pb2.Image(base64=file_bytes)))
+                ])
+        else:
+            request = service_pb2.PostModelOutputsRequest(
+                model_id='aaa03c23b3724a16a56b629203edc62c',
+                inputs=[
+                    resources_pb2.Input(data=resources_pb2.Data(image=resources_pb2.Image(url=file)))
+                ])
 
         metadata = (('authorization', 'Key {0}'.format(self.key)),)
 

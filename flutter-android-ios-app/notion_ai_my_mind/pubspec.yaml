@@ -29,6 +29,10 @@ dependencies:
   receive_sharing_intent: ^1.4.2
   fluttertoast: ^3.1.0
   shared_preferences: ^0.5.8
+  flutter_local_notifications: ^4.0.0
+  device_info: ^0.4.2+4
+  path_provider: ^1.6.7
+  rxdart: ^0.24.0
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.3

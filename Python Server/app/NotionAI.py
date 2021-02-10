@@ -120,7 +120,7 @@ class NotionAI:
             self.statusCode = 500
 
     def add_image_to_database_by_post(self, image_src):
-        print("The Image is " + image_src)
+        self.logging.info("Adding image to mind by post: {0} {1} {2}".format(image_src.encode('utf8')))
         self.statusCode = 200  # at start we asume everything will go ok
         row = self.collection.add_row()
         self.row = row
@@ -133,7 +133,7 @@ class NotionAI:
             row.icon = img_block.source
             row.person = self.client.current_user
 
-            x = threading.Thread(target=self.analyze_image_thread, args=(image_src, row))
+            x = threading.Thread(target=self.analyze_image_thread, args=(image_src, row, True))
             x.start()
         except requests.exceptions.HTTPError as invalidUrl:
             print(invalidUrl)
@@ -181,9 +181,9 @@ class NotionAI:
 
         self.logging.info("Thread %s: finishing", rowId)
 
-    def add_tags_to_row(self, img_url):
+    def add_tags_to_row(self, img_url,is_image_local):
         self.logging.info("Adding tags to image {0}".format(img_url))
-        tags = self.image_tagger.get_tags(img_url)
+        tags = self.image_tagger.get_tags(img_url,is_image_local)
         self.logging.info("Tags from image {0} : {1}".format(img_url, tags))
         self.row.AITagsText = tags
 
@@ -238,10 +238,10 @@ class NotionAI:
         else:
             raise OnUrlNotValid("Invalid url was sent", self)
 
-    def analyze_image_thread(self, image_src, row, image_src_url="no context"):
+    def analyze_image_thread(self, image_src, row, is_image_local=False, image_src_url="no context"):
         try:
             self.logging.info("Image tag Thread %s: starting", row.id)
-            self.add_tags_to_row(image_src)
+            self.add_tags_to_row(image_src, is_image_local)
             self.logging.info("Image tag Thread %s: finished", row.id)
         except NoTagsFound as e:
             print(e)
