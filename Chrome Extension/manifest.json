@@ -26,8 +26,7 @@
       "http://*/",
       "https://www.notion.so/*",
       "contextMenus",
-      "storage",
-      "webNavigation"
+      "storage"
      ],
       "web_accessible_resources": [ "icon/icon.png" ]
   }

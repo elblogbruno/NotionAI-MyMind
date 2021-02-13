@@ -52,6 +52,7 @@ class settingsState extends State<settingsPage> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(primarySwatch: Colors.teal, accentColor: Color(0xFFDD5237)),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Notion AI My Mind Settings'),
@@ -62,8 +63,8 @@ class settingsState extends State<settingsPage> {
               children: <Widget>[TextField(
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Set server url',
-                    hintText: Api().getServerUrl().toString(),
+                    labelText: 'Server url (do not forget the / at the end)' ,
+                    hintText: "http://xxx.xxx.x.xx:xxxx/",
                   ),
                   onChanged: (text) {
                     print("First text field: $text");

@@ -17,7 +17,7 @@ class Api {
       http.Response response = await http.get(serverUrl);
 
       if (response.statusCode == 200) {
-        return "200";
+        return response.body.toString();
       } else {
         return '-1';
       }
@@ -51,7 +51,7 @@ class Api {
       }
 
     } catch (_) {
-      return '-1';
+      return 'error';
     }
   }
 
@@ -88,7 +88,7 @@ class Api {
 
   Future<String> uploadImage(File imageFile) async {
     var stream = new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
-    var length = await imageFile.length();
+    /*var length = await imageFile.length();
 
     String _serverUrl = await getServerUrl();
     String uploadURL = _serverUrl + "upload_file";
@@ -108,6 +108,36 @@ class Api {
       return '200';
     } else {
       return '-1';
-    }
+    }*/
+  }
+
+  Future<String> addContentToMind(String url,bool isImage) async{
+
+    addUrlToMind(url).then((String result){
+      print(result);
+      return result;
+    });
+    /*if(url != null){
+      print("Widget url: " + url);
+
+      if(isImage){
+        print("Widget is image");
+        var myFile = new File(url);
+        uploadImage(myFile).then((String result){
+          print(result);
+          return result;
+        });
+      }else{
+        print("Widget is url");
+        addUrlToMind(url).then((String result){
+          print(result);
+          return result;
+        });
+      }
+    }else{
+      print("Widget url is null");
+    }*/
+
+    return "Content is invalid or no content was added";
   }
 }

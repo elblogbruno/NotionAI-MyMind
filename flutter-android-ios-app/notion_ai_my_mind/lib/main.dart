@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:notion_ai_my_mind/overlay_view.dart';
+import 'package:notion_ai_my_mind/resources/strings.dart';
 import 'package:notion_ai_my_mind/settings.dart';
 import 'dart:async';
 
@@ -53,7 +54,9 @@ class ReceivedNotification {
   final String payload;
 }
 
+
 String selectedNotificationPayload;
+bool isSharing = false;
 
 Future<void> main() async {
   // needed if you intend to initialize in the `main` function
@@ -96,14 +99,20 @@ Future<void> main() async {
         selectedNotificationPayload = payload;
         selectNotificationSubject.add(payload);
       });
+
+  String initialRoute = MyHomePage.routeName;
+  if(isSharing){
+    initialRoute = AddLinkPage.routeName;
+  }
   runApp(
-      MaterialApp(
-        title: 'Flutter Demo',
-        theme: new ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        home: new MyHomePage(notificationAppLaunchDetails),
-      )
+    MaterialApp(
+      theme: ThemeData(primarySwatch: Colors.teal, accentColor: Color(0xFFDD5237)),
+      initialRoute: initialRoute,
+      routes: <String, WidgetBuilder>{
+        MyHomePage.routeName: (_) => MyHomePage(notificationAppLaunchDetails),
+        AddLinkPage.routeName: (_) => AddLinkPage()
+      },
+    ),
   );
 }
 
@@ -148,25 +157,30 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
     _initShareIntent();
     WidgetsBinding.instance.addObserver(this);
   }
-  void _initShareIntent(){
+
+  void _initShareIntent()
+  {
     // For sharing images coming from outside the app while the app is in the memory
     _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
         .listen((List<SharedMediaFile> value) {
+
       setState(() {
         _sharedFiles = value;
-        if(_sharedFiles != null){
-          String uri = (_sharedFiles?.map((f) => f.path)?.join(",") ?? "");
-          var myFile = new File(uri);
-          Api().uploadImage(myFile).then((String result){
-            if (result == "200"){
-              _onContentAdded();
-            }
-          });
-        }else{
-          _onContentError();
-        }
-
+        isSharing = true;
       });
+
+      if(_sharedFiles != null) {
+        String uri = (_sharedFiles?.map((f) => f.path)?.join(",") ?? "");
+        if (uri != null) {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    AddLinkPage(url: uri, isImage: true,),
+              ));
+        }
+      }
+
     }, onError: (err) {
       print("getIntentDataStream error: $err");
     });
@@ -175,18 +189,22 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
       setState(() {
         _sharedFiles = value;
-        if(_sharedFiles != null){
-          String uri = (_sharedFiles?.map((f) => f.path)?.join(",") ?? "");
-          var myFile = new File(uri);
-          Api().uploadImage(myFile).then((String result){
-            if (result == "200"){
-              _onContentAdded();
-            }
-          });
-        }else{
-          _onContentError();
-        }
+        isSharing = true;
       });
+
+      if(_sharedFiles != null) {
+        String uri = (_sharedFiles?.map((f) => f.path)?.join(",") ?? "");
+
+        if (uri != null) {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) =>
+                    AddLinkPage(url: uri, isImage: true,),
+              ));
+        }
+      }
+
     });
 
     // For sharing or opening urls/text coming from outside the app while the app is in the memory
@@ -194,16 +212,22 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
         ReceiveSharingIntent.getTextStream().listen((String value) {
           setState(() {
             _sharedText = value;
-            if(_sharedText != null) {
-              Api().addUrlToMind(_sharedText).then((String result){
-                if (result == "200"){
-                  _onContentAdded();
-                }
-              });
-            }else{
-              _onContentError();
-            }
+            isSharing = true;
           });
+
+          if(_sharedText != null) {
+            Fluttertoast.showToast(msg: "shared: $_sharedText",
+                toastLength: Toast.LENGTH_SHORT,
+                gravity: ToastGravity.BOTTOM);
+
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      AddLinkPage(url: _sharedText, isImage: false,),
+                ));
+          }
+
         }, onError: (err) {
           Fluttertoast.showToast(msg: "getLinkStream error: $err",
               toastLength: Toast.LENGTH_SHORT,
@@ -214,17 +238,22 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
     ReceiveSharingIntent.getInitialText().then((String value) {
       setState(() {
         _sharedText = value;
-        if(_sharedText != null) {
-          Api().addUrlToMind(_sharedText).then((String result){
-            if (result == "200"){
-              _onContentAdded();
-            }
-          });
-        }else{
-          _onContentError();
-        }
-
+        isSharing = true;
       });
+
+      if(_sharedText != null) {
+        Fluttertoast.showToast(msg: "shared when closed: $_sharedText",
+            toastLength: Toast.LENGTH_SHORT,
+            gravity: ToastGravity.BOTTOM);
+
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  AddLinkPage(url: _sharedText, isImage: false,),
+            ));
+      }
+
     });
   }
   void _requestPermissions() {
@@ -268,6 +297,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
       await Navigator.pushNamed(context, '/secondPage');
     });
   }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if(state == AppLifecycleState.resumed){
@@ -298,6 +328,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
     didReceiveLocalNotificationSubject.close();
     selectNotificationSubject.close();
     WidgetsBinding.instance.removeObserver(this);
+    _intentDataStreamSubscription.cancel();
     super.dispose();
   }
 
@@ -353,9 +384,10 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(primarySwatch: Colors.teal, accentColor: Color(0xFFDD5237)),
       home: Scaffold(
         appBar: AppBar(
-          title:  const Text("Notion AI My Mind"),
+          title:  const Text(Strings.title),
         ),
         body: FutureBuilder<String>(
           future: _calculation, // a previously-obtained Future<String> or null
@@ -427,7 +459,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
     );
   }
 
-    Widget _BuildWebView(BuildContext context,String url){
+  Widget _BuildWebView(BuildContext context,String url){
       return new WebView(
         initialUrl: url,
         javascriptMode: JavascriptMode.unrestricted,
@@ -457,6 +489,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
         gestureNavigationEnabled: true,
       );
     }
+
   JavascriptChannel _toasterJavascriptChannel(BuildContext context) {
     return JavascriptChannel(
         name: 'Toaster',

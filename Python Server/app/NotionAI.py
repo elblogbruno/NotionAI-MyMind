@@ -149,7 +149,7 @@ class NotionAI:
                 img_url = self.extract_image_from_content(self.page_content)
                 try:
                     self.row.remove_callbacks(self.row_callback)
-                    self.add_tags_to_row(img_url)
+                    self.add_tags_to_row(img_url,False)
                 except NoTagsFound as e:
                     print(e)
                     self.logging.info(e)

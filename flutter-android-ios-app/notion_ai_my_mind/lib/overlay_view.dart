@@ -1,112 +1,100 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:http/io_client.dart';
-import 'package:notion_ai_my_mind/settings.dart';
-import 'dart:async';
+import 'package:notion_ai_my_mind/resources/strings.dart';
 
-import 'package:receive_sharing_intent/receive_sharing_intent.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:notion_ai_my_mind/api/api.dart';
+import 'api/api.dart';
 
+class AddLinkPage extends StatefulWidget {
+  static const String routeName = '/add';
+  final String url;
+  final bool isImage;
+  AddLinkPage({Key key, this.url,this.isImage}) : super(key: key);
 
-class OverlayView extends StatefulWidget {
   @override
-  _MyAppState createState() => _MyAppState();
+  State<StatefulWidget> createState() => _ShowUrlState();
 }
 
-class _MyAppState extends State<OverlayView> {
-  StreamSubscription _intentDataStreamSubscription;
-  List<SharedMediaFile> _sharedFiles;
-  String _sharedText;
+class _ShowUrlState extends State<AddLinkPage> {
 
-  @override
-  void initState() {
-    super.initState();
-    // For sharing images coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
-        .listen((List<SharedMediaFile> value) {
-      setState(() {
-        _sharedFiles = value;
-        Fluttertoast.showToast(msg: "Shared:" + (_sharedFiles?.map((f) => f.path)?.join(",") ?? ""),
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM);
+  Future<String> status;
 
-        print("Shared:" + (_sharedFiles?.map((f) => f.path)?.join(",") ?? ""));
-      });
-    }, onError: (err) {
-      print("getIntentDataStream error: $err");
-    });
-
-    // For sharing images coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
-      setState(() {
-        _sharedFiles = value;
-        Fluttertoast.showToast(msg: "Shared:" + (_sharedFiles?.map((f) => f.path)?.join(",") ?? ""),
-            toastLength: Toast.LENGTH_SHORT,
-            gravity: ToastGravity.BOTTOM);
-
-        print("Shared:" + (_sharedFiles?.map((f) => f.path)?.join(",") ?? ""));
-      });
-    });
-
-    // For sharing or opening urls/text coming from outside the app while the app is in the memory
-    _intentDataStreamSubscription =
-        ReceiveSharingIntent.getTextStream().listen((String value) {
-          setState(() {
-            _sharedText = value;
-            if(_sharedText != null) {
-              Api().addUrlToMind(_sharedText);
-              print("Shared: $_sharedText");
-
-              Fluttertoast.showToast(msg: "Shared: $_sharedText",
-                  toastLength: Toast.LENGTH_SHORT,
-                  gravity: ToastGravity.BOTTOM);
-            }else{
-              print("Shared text is null");
-            }
-          });
-        }, onError: (err) {
-          Fluttertoast.showToast(msg: "getLinkStream error: $err",
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM);
-          print("getLinkStream error: $err");
-        });
-    // For sharing or opening urls/text coming from outside the app while the app is closed
-    ReceiveSharingIntent.getInitialText().then((String value) {
-      setState(() {
-        _sharedText = value;
-
-        if(_sharedText != null) {
-          Api().addUrlToMind(_sharedText);
-          print("Shared: $_sharedText");
-
-          Fluttertoast.showToast(msg: "Shared when app closed: $_sharedText",
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.BOTTOM);
-        }else{
-          print("Shared text is null");
-        }
-
-      });
-    });
-  }
-
-
-  @override
-  void dispose() {
-    _intentDataStreamSubscription.cancel();
-    super.dispose();
-  }
+  //Future<String> _calculation = Api().addContentToMind(widget.url,widget.isImage);
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
-    throw UnimplementedError();
+    return Scaffold(
+        appBar: AppBar(
+          title: const Text(Strings.titleAddNewLinkPage),
+        ),
+        body: FutureBuilder<String>(
+          future:  Api().addContentToMind(widget.url,widget.isImage), // a previously-obtained Future<String> or null
+          builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+            List<Widget> children;
+            if (snapshot.hasData) {
+              return _buildText(context,snapshot.data,true);
+            } else if (snapshot.hasError) {
+              return _buildText(context,snapshot.error.toString(),false);
+            } else {
+              children = <Widget>[
+                SizedBox(
+                  child: CircularProgressIndicator(),
+                  width: 60,
+                  height: 60,
+                ),
+                const Padding(
+                  padding: EdgeInsets.only(top: 16),
+                  child: Text('Awaiting result...'),
+                )
+              ];
+            }
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: children,
+              ),
+            );
+          },
+        ),
+    );
   }
 
-
+  Widget _buildText(BuildContext context,String text,bool error) {
+    List<Widget> children;
+    if(error){
+      children = <Widget>[
+        Icon(
+          Icons.error_outline,
+          color: Colors.red,
+          size: 200,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Text(text,textScaleFactor: 3,),
+        )
+      ];
+    }else{
+      children = <Widget>[
+        Icon(
+          Icons.check_circle_outline,
+          color: Colors.green,
+          size: 200,
+        ),
+        Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Text(text,textScaleFactor: 3,),
+        )
+      ];
+    }
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: children,
+      ),
+    );
+  }
 }
+
+
