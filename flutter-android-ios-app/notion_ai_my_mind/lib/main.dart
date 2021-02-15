@@ -1,27 +1,23 @@
-import 'dart:convert';
 import 'dart:async';
-import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:notion_ai_my_mind/Arguments.dart';
+
 import 'package:notion_ai_my_mind/overlay_view.dart';
 import 'package:notion_ai_my_mind/resources/strings.dart';
 import 'package:notion_ai_my_mind/settings.dart';
-import 'dart:async';
-
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:notion_ai_my_mind/api/api.dart';
 
-import 'package:device_info/device_info.dart';
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
@@ -54,7 +50,7 @@ class ReceivedNotification {
   final String payload;
 }
 
-
+final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 String selectedNotificationPayload;
 bool isSharing = false;
 
@@ -101,16 +97,17 @@ Future<void> main() async {
       });
 
   String initialRoute = MyHomePage.routeName;
-  if(isSharing){
+  /*if(isSharing){
     initialRoute = AddLinkPage.routeName;
-  }
+  }*/
+
   runApp(
     MaterialApp(
+      navigatorKey: navigatorKey,
       theme: ThemeData(primarySwatch: Colors.teal, accentColor: Color(0xFFDD5237)),
-      initialRoute: initialRoute,
-      routes: <String, WidgetBuilder>{
-        MyHomePage.routeName: (_) => MyHomePage(notificationAppLaunchDetails),
-        AddLinkPage.routeName: (_) => AddLinkPage()
+      home: MyHomePage(notificationAppLaunchDetails),
+      routes: {
+        '/add': (BuildContext context) => AddLinkPage(),
       },
     ),
   );
@@ -158,8 +155,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
   }
 
-  void _initShareIntent()
-  {
+  void _initShareIntent() {
     // For sharing images coming from outside the app while the app is in the memory
     _intentDataStreamSubscription = ReceiveSharingIntent.getMediaStream()
         .listen((List<SharedMediaFile> value) {
@@ -172,14 +168,14 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
       if(_sharedFiles != null) {
         String uri = (_sharedFiles?.map((f) => f.path)?.join(",") ?? "");
         if (uri != null) {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    AddLinkPage(url: uri, isImage: true,),
-              ));
+          navigatorKey.currentState.pushNamed('/add', arguments: Arguments(uri,true));
         }
       }
+
+      setState(() {
+        _sharedFiles = null;
+        isSharing = true;
+      });
 
     }, onError: (err) {
       print("getIntentDataStream error: $err");
@@ -189,21 +185,21 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
     ReceiveSharingIntent.getInitialMedia().then((List<SharedMediaFile> value) {
       setState(() {
         _sharedFiles = value;
-        isSharing = true;
+        isSharing = false;
       });
 
       if(_sharedFiles != null) {
         String uri = (_sharedFiles?.map((f) => f.path)?.join(",") ?? "");
 
         if (uri != null) {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) =>
-                    AddLinkPage(url: uri, isImage: true,),
-              ));
+          navigatorKey.currentState.pushNamed('/add', arguments: Arguments(uri,true));
         }
       }
+
+      setState(() {
+        _sharedFiles = null;
+        isSharing = false;
+      });
 
     });
 
@@ -216,17 +212,21 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
           });
 
           if(_sharedText != null) {
+            print("Main activity: " + _sharedText);
+
             Fluttertoast.showToast(msg: "shared: $_sharedText",
                 toastLength: Toast.LENGTH_SHORT,
                 gravity: ToastGravity.BOTTOM);
 
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) =>
-                      AddLinkPage(url: _sharedText, isImage: false,),
-                ));
+            navigatorKey.currentState.pushNamed('/add', arguments: Arguments(_sharedText,false));
+
+          }else{
+            print("Main activity: is null");
           }
+
+          setState(() {
+            _sharedText = null;
+          });
 
         }, onError: (err) {
           Fluttertoast.showToast(msg: "getLinkStream error: $err",
@@ -234,6 +234,8 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
               gravity: ToastGravity.BOTTOM);
           print("getLinkStream error: $err");
         });
+
+
     // For sharing or opening urls/text coming from outside the app while the app is closed
     ReceiveSharingIntent.getInitialText().then((String value) {
       setState(() {
@@ -241,21 +243,24 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
         isSharing = true;
       });
 
-      if(_sharedText != null) {
-        Fluttertoast.showToast(msg: "shared when closed: $_sharedText",
+      if (_sharedText != null) {
+        print("Main activity app closed: " + _sharedText);
+
+        Fluttertoast.showToast(msg: "Shared when closed: $_sharedText",
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM);
 
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  AddLinkPage(url: _sharedText, isImage: false,),
-            ));
+        navigatorKey.currentState.pushNamed('/add', arguments: Arguments(_sharedText,false));
+      }else{
+        print("Main activity app closed: is null");
       }
 
+        setState(() {
+          _sharedText = null;
+        });
     });
   }
+
   void _requestPermissions() {
     flutterLocalNotificationsPlugin
         .resolvePlatformSpecificImplementation<
@@ -294,7 +299,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
 
   void _configureSelectNotificationSubject() {
     selectNotificationSubject.stream.listen((String payload) async {
-      await Navigator.pushNamed(context, '/secondPage');
+      //await Navigator.pushNamed(context, '/secondPage');
     });
   }
 
@@ -302,11 +307,15 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if(state == AppLifecycleState.resumed){
       print("App resumed");
+
       Fluttertoast.showToast(msg: "App resumed",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM);
     }else if(state == AppLifecycleState.inactive){
       print("App Inactive");
+      setState(() {
+        isSharing = false;
+      });
       Fluttertoast.showToast(msg: "App Inactive",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM);
@@ -346,6 +355,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
         0, null, 'Your mind loaded succesfully!', platformChannelSpecifics,
         payload: 'item x');
   }
+
   Future<void> _onContentAdded() async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
     AndroidNotificationDetails(
@@ -360,6 +370,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
         0, null, 'Added to your mind.', platformChannelSpecifics,
         payload: 'item x');
   }
+
   Future<void> _onContentError() async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
     AndroidNotificationDetails(
@@ -394,7 +405,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
           builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
             List<Widget> children;
             if (snapshot.hasData) {
-              return _BuildWebView(context,snapshot.data);
+              return _buildButtons(context,snapshot.data);
             } else if (snapshot.hasError) {
               children = <Widget>[
                 Icon(
@@ -416,7 +427,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
                 ),
                 const Padding(
                   padding: EdgeInsets.only(top: 16),
-                  child: Text('Awaiting result...'),
+                  child: Text(Strings.waitText),
                 )
               ];
             }
@@ -448,7 +459,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
               MaterialPageRoute(builder: (context) => settings()),
             );
           },
-          tooltip: 'Increment',
+          tooltip: 'Settings',
           child: Icon(Icons.settings),
           focusColor: Colors.red,
           elevation: 3.0,
@@ -459,7 +470,69 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
     );
   }
 
-  Widget _BuildWebView(BuildContext context,String url){
+  Widget _buildButtons(BuildContext context,String url) {
+    return new Scaffold(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(height: 25),
+            new Text('Welcome to your mind!',textAlign: TextAlign.center,
+              overflow: TextOverflow.visible,
+              style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30)),
+            SizedBox(height: 50),
+            ButtonTheme(
+              minWidth: 200.0,
+              height: 100.0,
+              child: RaisedButton(
+                onPressed:() => Api().launchURL(url),
+                splashColor: Color(0xFFDD5237),
+                color: Colors.teal,
+                child: new Text(
+                  "Open Your Mind",
+                  style: new TextStyle(fontSize: 20.0, color: Colors.white),
+                ),
+              ),
+            ),
+            SizedBox(height: 30),
+            ButtonTheme(
+              minWidth: 200.0,
+              height: 100.0,
+              child: RaisedButton(
+                onPressed:() => Api().launchSettings(),
+                splashColor: Color(0xFFDD5237),
+                color: Colors.teal,
+                child: new Text(
+                  "Open Server Settings",
+                  style: new TextStyle(fontSize: 20.0, color: Colors.white),
+                ),
+              ),
+            ),
+            SizedBox(height: 50),
+            new Text('Made with love by @elblogbruno! Have any problem or feedback? Post an issue!', textAlign: TextAlign.center,
+                overflow: TextOverflow.visible,
+                style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20)),
+            SizedBox(height: 10),
+            new RaisedButton(
+              onPressed:() => Api().launchRepo(),
+              splashColor: Color(0xFFDD5237),
+              color: Colors.teal,
+              child: new Text(
+                "Open Github Repo",
+                style: new TextStyle(fontSize: 20.0, color: Colors.white),
+              ),
+            ),
+
+          ],
+        )
+      ),
+    );
+  }
+
+
+  Widget _buildWebView(BuildContext context,String url){
       return new WebView(
         initialUrl: url,
         javascriptMode: JavascriptMode.unrestricted,

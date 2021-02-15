@@ -8,24 +8,7 @@ import 'api/api.dart';
 class settings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-      title: 'Flutter Demo',
-      theme: new ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or press Run > Flutter Hot Reload in IntelliJ). Notice that the
-        // counter didn't reset back to zero; the application is not restarted.
-        primarySwatch: Colors.blue,
-        //primaryColor: Colors.red,
-        //backgroundColor: Colors.white,
-        //bottomAppBarColor: Colors.white,
-      ),
-      home: new settingsPage(),
-    );
+    return new settingsPage();
   }
 }
 class settingsPage extends StatefulWidget {
@@ -71,11 +54,19 @@ class settingsState extends State<settingsPage> {
                   },
                   controller: myController,
                 ),
+                SizedBox(height: 50),
                 Text(
-                    "Current url: " + _textFromFile,
+                  "Current url: ",
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontWeight: FontWeight.bold,fontSize: 35),
+                ),
+                SizedBox(height: 20),
+                Text(
+                    _textFromFile,
                     textAlign: TextAlign.center,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),
                 ),
 
               ]
@@ -95,7 +86,8 @@ class settingsState extends State<settingsPage> {
                 return AlertDialog(
                   // Retrieve the text the that user has entered by using the
                   // TextEditingController.
-                  content: Text("Url saved: " + myController.text),
+                  title: Text("URL Saved: "),
+                  content: Text(_textFromFile),
                 );
 
               },

@@ -1,9 +1,14 @@
 # Created by https://www.toptal.com/developers/gitignore/api/images,video
 # Edit at https://www.toptal.com/developers/gitignore?templates=images,video
 
+
+*.jks
+key.properties
+
 /Python Server/app/.idea
 /Python Server/app/image_tagging/temp_image_folder
 /Python Server/app/__pycache__
+
 *.zip
 *.log
 *.json

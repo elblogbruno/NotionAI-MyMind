@@ -1,40 +1,31 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:notion_ai_my_mind/Arguments.dart';
+import 'package:notion_ai_my_mind/main.dart';
 import 'package:notion_ai_my_mind/resources/strings.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import 'api/api.dart';
 
-class AddLinkPage extends StatefulWidget {
+class AddLinkPage extends StatelessWidget  {
   static const String routeName = '/add';
-  final String url;
-  final bool isImage;
-  AddLinkPage({Key key, this.url,this.isImage}) : super(key: key);
-
-  @override
-  State<StatefulWidget> createState() => _ShowUrlState();
-}
-
-class _ShowUrlState extends State<AddLinkPage> {
-
-  Future<String> status;
-
-  //Future<String> _calculation = Api().addContentToMind(widget.url,widget.isImage);
 
   @override
   Widget build(BuildContext context) {
+    final Arguments args = ModalRoute.of(context).settings.arguments;
     return Scaffold(
         appBar: AppBar(
           title: const Text(Strings.titleAddNewLinkPage),
         ),
         body: FutureBuilder<String>(
-          future:  Api().addContentToMind(widget.url,widget.isImage), // a previously-obtained Future<String> or null
+          future:  Api().addContentToMind(args.url,args.isImage), // a previously-obtained Future<String> or null
           builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
             List<Widget> children;
             if (snapshot.hasData) {
-              return _buildText(context,snapshot.data,true);
+              return _buildText(context,snapshot.data.toString(), snapshot.data == '-1');
             } else if (snapshot.hasError) {
-              return _buildText(context,snapshot.error.toString(),false);
+              return _buildText(context,snapshot.error.toString(), true);
             } else {
               children = <Widget>[
                 SizedBox(
@@ -44,7 +35,7 @@ class _ShowUrlState extends State<AddLinkPage> {
                 ),
                 const Padding(
                   padding: EdgeInsets.only(top: 16),
-                  child: Text('Awaiting result...'),
+                  child: Text(Strings.waitText),
                 )
               ];
             }
@@ -62,6 +53,9 @@ class _ShowUrlState extends State<AddLinkPage> {
 
   Widget _buildText(BuildContext context,String text,bool error) {
     List<Widget> children;
+    if(text == '200'){
+        text = Strings.goodResultResponse;
+    }
     if(error){
       children = <Widget>[
         Icon(
@@ -71,7 +65,17 @@ class _ShowUrlState extends State<AddLinkPage> {
         ),
         Padding(
           padding: const EdgeInsets.only(top: 16),
-          child: Text(text,textScaleFactor: 3,),
+          child: Text(text,textAlign: TextAlign.center ,style: new TextStyle(fontSize: 20.0, color: Colors.black)),
+        ),
+        SizedBox(height: 50),
+        RaisedButton(
+          onPressed:()=> Navigator.of(context).pop(),
+          splashColor: Color(0xFFDD5237),
+          color: Colors.teal,
+          child: new Text(
+            Strings.exitButtonText,
+            style: new TextStyle(fontSize: 20.0, color: Colors.white),
+          ),
         )
       ];
     }else{
@@ -83,10 +87,21 @@ class _ShowUrlState extends State<AddLinkPage> {
         ),
         Padding(
           padding: const EdgeInsets.only(top: 16),
-          child: Text(text,textScaleFactor: 3,),
+          child: Text(text,textAlign: TextAlign.center ,style: new TextStyle(fontSize: 20.0, color: Colors.black)),
+        ),
+        SizedBox(height: 50),
+        RaisedButton(
+          onPressed:()=> Navigator.of(context).pop(),
+          splashColor: Color(0xFFDD5237),
+          color: Colors.teal,
+          child: new Text(
+            Strings.exitButtonText,
+            style: new TextStyle(fontSize: 20.0, color: Colors.white),
+          ),
         )
       ];
     }
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

@@ -1,10 +1,13 @@
 import 'dart:convert';
 
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart';
 import 'package:async/async.dart';
 import 'dart:io';
+
+import 'package:url_launcher/url_launcher.dart';
 
 class Api {
 
@@ -30,37 +33,82 @@ class Api {
     try {
       RegExp exp = new RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+');
       Iterable<RegExpMatch> matches = exp.allMatches(urlToAdd);
-
+      print(matches.length);
       if (matches == null) {
-        print("No match");
+
       } else {
-        final matchedText = matches.elementAt(1).group(0);
-        print("Match: " + matchedText); // my
+          if(matches.length == 0) //means no url extracted on the text. it is just text.
+          {
+            String title = "unknown url added to your mind from Phone";
+            String _serverUrl = await getServerUrl();
+            String finalUrl = _serverUrl + "add_text_to_mind?url=" + title + "&text=" + urlToAdd;
+            print("Final sharing url: " + finalUrl);
+            http.Response response = await http.get(finalUrl);
 
-        String title = matchedText + " added to your mind from Phone";
-        String _serverUrl = await getServerUrl();
-        String finalUrl = _serverUrl + "add_url_to_mind?url="+matchedText+"&title="+title;
-        print("Final sharing url: " + finalUrl);
-        http.Response response = await http.get(finalUrl);
+            if (response.statusCode == 200) {
+              return '200';
+            } else {
+              return '-1';
+            }
+          }
+          else if(urlToAdd == matches.first.group(0)) {
+            print(matches.first.group(0));
 
-        if (response.statusCode == 200) {
-          return "200";
-        } else {
-          return '-1';
-        }
+            final matchedText = matches.first.group(0);
+            print("Match: " + matchedText); // my
+
+            String title = matchedText + " added to your mind from Phone";
+            String _serverUrl = await getServerUrl();
+            String finalUrl = _serverUrl + "add_url_to_mind?url=" + matchedText + "&title=" + title;
+            print("Final sharing url: " + finalUrl);
+            http.Response response = await http.get(finalUrl);
+
+
+            if (response.statusCode == 200) {
+              return '200';
+            } else {
+              return '-1';
+            }
+          }else{
+            print(matches.first.group(0));
+
+            final matchedText = matches.first.group(0);
+            print("Match: " + matchedText); // my
+
+            String _serverUrl = await getServerUrl();
+            String finalUrl = _serverUrl + "add_text_to_mind?url=" + matchedText + "&text=" + urlToAdd;
+
+            print("Final sharing url: " + finalUrl);
+            http.Response response = await http.get(finalUrl);
+
+            if (response.statusCode == 200) {
+              return '200';
+            } else {
+              return '-1';
+            }
+          }
+
       }
 
-    } catch (_) {
-      return 'error';
+    } catch (e) {
+
+      Fluttertoast.showToast(msg: "Error: $e",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM);
+
+      return '-1';
     }
   }
 
   Future<String> addImageToMind(String urlToAdd) async {
     try {
+
       String title = urlToAdd + " added to your mind from Phone";
       String _serverUrl = await getServerUrl();
       String finalUrl = _serverUrl + "add_image_to_mind?url="+urlToAdd+"&image_src="+title+"&image_src_url="+title;
+
       print("Final sharing url: " + finalUrl);
+
       http.Response response = await http.get(finalUrl);
 
       if (response.statusCode == 200) {
@@ -73,22 +121,10 @@ class Api {
     }
   }
 
-  setServerUrl(String value) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString("url", value);
-  }
-
-
-  Future<String> getServerUrl() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getString("url") ?? 'name';
-  }
-
-
 
   Future<String> uploadImage(File imageFile) async {
     var stream = new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
-    /*var length = await imageFile.length();
+    var length = await imageFile.length();
 
     String _serverUrl = await getServerUrl();
     String uploadURL = _serverUrl + "upload_file";
@@ -108,36 +144,60 @@ class Api {
       return '200';
     } else {
       return '-1';
-    }*/
+    }
   }
 
   Future<String> addContentToMind(String url,bool isImage) async{
-
-    addUrlToMind(url).then((String result){
-      print(result);
-      return result;
-    });
-    /*if(url != null){
+    print("addContentToMind: " + url + " " + isImage.toString());
+    String response = "Content is invalid or no content was added";
+    if(url != null){
       print("Widget url: " + url);
-
       if(isImage){
         print("Widget is image");
         var myFile = new File(url);
-        uploadImage(myFile).then((String result){
-          print(result);
-          return result;
-        });
+        return uploadImage(myFile);
       }else{
         print("Widget is url");
-        addUrlToMind(url).then((String result){
-          print(result);
-          return result;
-        });
+        return addUrlToMind(url);
       }
     }else{
-      print("Widget url is null");
-    }*/
+      return response;
+    }
+  }
 
-    return "Content is invalid or no content was added";
+
+  setServerUrl(String value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (value[value.length-1] != "/"){
+      value = value + "/";
+    }
+
+    await prefs.setString("url", value);
+  }
+
+
+  Future<String> getServerUrl() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    return prefs.getString("url") ?? 'name';
+  }
+
+
+
+
+  launchSettings() async {
+    String _serverUrl = await getServerUrl();
+    launchURL(_serverUrl);
+  }
+  launchRepo() async {
+    launchURL("https://github.com/elblogbruno/NotionAI-MyMind");
+  }
+
+  launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }
