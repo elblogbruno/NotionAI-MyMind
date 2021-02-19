@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8]
+
+### Added 
+
+- Added initial Android and Ios App based on flutter. You can download from Play Store here: https://play.google.com/store/apps/details?id=com.elblogbruno.notion_ai_my_mind
+- Disclaimer : I won't be releasing the app on the Apple App Store, as I don't have an Apple Developer Account either Mac OS based computer.
+
+### Fixed
+
+- Fixed server issues to be able to add images by posting, so I could add local images from phone.
+
 ## [1.7]
 
 ### Added 
