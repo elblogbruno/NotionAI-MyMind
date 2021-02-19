@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:notion_ai_my_mind/Arguments.dart';
+import 'package:notion_ai_my_mind/api/apiresponse.dart';
 import 'package:notion_ai_my_mind/main.dart';
 import 'package:notion_ai_my_mind/resources/strings.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -18,14 +19,14 @@ class AddLinkPage extends StatelessWidget  {
         appBar: AppBar(
           title: const Text(Strings.titleAddNewLinkPage),
         ),
-        body: FutureBuilder<String>(
+        body: FutureBuilder<APIResponse>(
           future:  Api().addContentToMind(args.url,args.isImage), // a previously-obtained Future<String> or null
-          builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+          builder: (BuildContext context, AsyncSnapshot<APIResponse> snapshot) {
             List<Widget> children;
             if (snapshot.hasData) {
-              return _buildText(context,snapshot.data.toString(), snapshot.data == '-1');
+              return _buildText(context,snapshot.data, snapshot.data.status_text == 'error');
             } else if (snapshot.hasError) {
-              return _buildText(context,snapshot.error.toString(), true);
+              return _buildText(context,snapshot.error, true);
             } else {
               children = <Widget>[
                 SizedBox(
@@ -51,11 +52,8 @@ class AddLinkPage extends StatelessWidget  {
     );
   }
 
-  Widget _buildText(BuildContext context,String text,bool error) {
+  Widget _buildText(BuildContext context,APIResponse response,bool error) {
     List<Widget> children;
-    if(text == '200'){
-        text = Strings.goodResultResponse;
-    }
     if(error){
       children = <Widget>[
         Icon(
@@ -65,7 +63,7 @@ class AddLinkPage extends StatelessWidget  {
         ),
         Padding(
           padding: const EdgeInsets.only(top: 16),
-          child: Text(text,textAlign: TextAlign.center ,style: new TextStyle(fontSize: 20.0, color: Colors.black)),
+          child: Text(response.text_response,textAlign: TextAlign.center ,style: new TextStyle(fontSize: 20.0, color: Colors.black)),
         ),
         SizedBox(height: 50),
         RaisedButton(
@@ -74,6 +72,15 @@ class AddLinkPage extends StatelessWidget  {
           color: Colors.teal,
           child: new Text(
             Strings.exitButtonText,
+            style: new TextStyle(fontSize: 20.0, color: Colors.white),
+          ),
+        ),
+        RaisedButton(
+          onPressed:()=> Api().launchURL(response.block_url),
+          splashColor: Color(0xFFDD5237),
+          color: Colors.teal,
+          child: new Text(
+            Strings.openAddedContentText,
             style: new TextStyle(fontSize: 20.0, color: Colors.white),
           ),
         )
@@ -87,7 +94,7 @@ class AddLinkPage extends StatelessWidget  {
         ),
         Padding(
           padding: const EdgeInsets.only(top: 16),
-          child: Text(text,textAlign: TextAlign.center ,style: new TextStyle(fontSize: 20.0, color: Colors.black)),
+          child: Text(response.text_response,textAlign: TextAlign.center ,style: new TextStyle(fontSize: 20.0, color: Colors.black)),
         ),
         SizedBox(height: 50),
         RaisedButton(
@@ -96,6 +103,15 @@ class AddLinkPage extends StatelessWidget  {
           color: Colors.teal,
           child: new Text(
             Strings.exitButtonText,
+            style: new TextStyle(fontSize: 20.0, color: Colors.white),
+          ),
+        ),
+        RaisedButton(
+          onPressed:()=> Api().launchURL(response.block_url),
+          splashColor: Color(0xFFDD5237),
+          color: Colors.teal,
+          child: new Text(
+            Strings.openAddedContentText,
             style: new TextStyle(fontSize: 20.0, color: Colors.white),
           ),
         )

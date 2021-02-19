@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9]
+
+### Added 
+
+- Faster and more reliable thanks to switching to an async based server with Quart. 
+- Added json responses on server with built-in responses that would be translated to other languages. When requesting to the API, it returns the same text and status code on chrome, firefox and android/ios platforms.
+- Updated app to work with these changes.
+- When clicking on the message box, you can go to the url of the added content and see it.
+
+### Fixed
+
+- Refactored code, made it easier for example to implement in the near future a way to translate to different languages, and removed unused code.
+- No message was shown when trying to add something witouth having entered credentials.
+
 ## [1.8]
 
 ### Added 

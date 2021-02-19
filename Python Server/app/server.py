@@ -1,23 +1,18 @@
-import os
 import logging
 
-from flask import send_from_directory
-from flask import render_template
-from flask import Flask, flash, request, redirect, url_for
+from quart import Quart, render_template, flash, request, redirect
 from werkzeug.utils import secure_filename
 
-import json
 import secrets
 
-from utils import ask_server_port, save_options, save_data, append_data, createFolder
+from utils import ask_server_port, save_options, save_data, createFolder
 from NotionAI import *
 
-from threading import Thread
-
 UPLOAD_FOLDER = '../app/uploads/'
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif','webp'])
 
-app = Flask(__name__)
+app = Quart(__name__)
+
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -26,45 +21,25 @@ notion = NotionAI(logging)
 
 
 @app.route('/add_url_to_mind')
-def add_url_to_mind():
+async def add_url_to_mind():
     url = request.args.get('url')
     title = request.args.get('title')
-    thread = Thread(target=notion.add_url_to_database, args=(url, title))
-    thread.daemon = True
-    thread.start()
-    return "200"
+    return str(notion.add_url_to_database(url, title))
 
 
 @app.route('/add_text_to_mind')
-def add_text_to_mind():
+async def add_text_to_mind():
     url = request.args.get('url')
     text = request.args.get('text')
-    thread = Thread(target=notion.add_text_to_database, args=(str(text), str(url)))
-    thread.daemon = True
-    thread.start()
-    return "200"
+    return str(notion.add_text_to_database(text, url))
 
 
 @app.route('/add_image_to_mind')
-def add_image_to_mind():
+async def add_image_to_mind():
     url = request.args.get('url')
     image_src = request.args.get('image_src')
     image_src_url = request.args.get('image_src_url')
-    thread = Thread(target=notion.add_image_to_database, args=(str(url), str(image_src), str(image_src_url)))
-    thread.daemon = True
-    thread.start()
-    return "200"
-
-
-@app.route('/add_video_to_mind')
-def add_video_to_mind():
-    url = request.args.get('url')
-    video_src = request.args.get('video_src')
-    video_src_url = request.args.get('video_src_url')
-
-    # notion.add_text_to_database(str(url),str(text))
-    # print(str(notion.statusCode))
-    return str(notion.statusCode)
+    return str(notion.add_image_to_database(url, image_src, image_src_url))
 
 
 def allowed_file(filename):
@@ -72,55 +47,41 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@app.route('/upload_file', methods=['GET', 'POST'])
-def upload_file():
+@app.route('/upload_file', methods=['POST'])
+async def upload_file():
     createFolder("uploads")
-    if request.method == 'POST':
-        # check if the post request has the file part
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        # if user does not select file, browser also
-        # submit an empty part without filename
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            uri = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    status_code = 200
+    # check if the post request has the file part
+    request_files = await request.files
 
-            thread = Thread(target=notion.add_image_to_database_by_post,args=(uri,))
-            thread.daemon = True
-            thread.start()
-            # notion.add_image_to_database_by_post(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    return "File Uploaded Succesfully"
+    if 'file' not in request_files:
+        flash('No file part')
+        status_code = 500
 
-
-@app.route('/add_audio_to_mind')
-def add_audio_to_mind():
-    url = request.args.get('url')
-    audio_src = request.args.get('audio_src')
-    audio_src_url = request.args.get('audio_src_url')
-
-    # notion.add_text_to_database(str(url),str(text))
-    # print(str(notion.statusCode))
-    return str(notion.statusCode)
+    file = request_files['file']
+    # if user does not select file, browser also
+    # submit an empty part without filename
+    if file.filename == '':
+        flash('No selected file')
+        status_code = 500
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        uri = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        return str(notion.add_image_to_database(uri))
+    else:
+        print("This file is not allowed to be post")
+        status_code = 500
+    return str(notion.create_json_response(status_code=status_code))
 
 
 @app.route('/get_current_mind_url')
-def get_current_mind_url():
+async def get_current_mind_url():
     return str(notion.data['url'])
 
 
-@app.route('/get_notion_token_v2')
-def get_notion_token_v2():
-    return str(notion.data['token'])
-
-
 @app.route('/update_notion_tokenv2')
-def update_notion_tokenv2():
+async def update_notion_tokenv2():
     token_from_extension = request.args.get('tokenv2')
     changed = False
     with open('data.json') as json_file:
@@ -145,38 +106,44 @@ def update_notion_tokenv2():
 
 
 @app.route('/')
-def show_settings_home_menu():
-    return render_template("options.html")
+async def show_settings_home_menu():
+    return await render_template("options.html")
 
 
 @app.route('/handle_data', methods=['POST'])
-def handle_data():
-    notion_url = request.form['notion_url']
-    notion_token = request.form['notion_token']
+async def handle_data():
+    data = await request.get_json()
+    print(data)
+    notion_url = data['notion_url']
 
-    use_email = request.form['email'] and request.form['password']
+    notion_token = data['notion_token']
 
-    if request.form['clarifai_key']:
-        clarifai_key = request.form['clarifai_key']
+    use_email = data['email'] and data['password']
+
+    if data['clarifai_key']:
+        clarifai_key = data['clarifai_key']
         save_data(logging, url=notion_url, token=notion_token, clarifai_key=clarifai_key)
         use_clarifai = True
     else:
         save_data(logging, url=notion_url, token=notion_token)
         use_clarifai = False
 
-    delete_after_tagging = request.form.getlist('delete_after_tagging')
+    if "delete_after_tagging" in data:
+        delete_after_tagging = data['delete_after_tagging']
+    else:
+        delete_after_tagging = False
 
     save_options(logging, use_clarifai=use_clarifai, delete_after_tagging=delete_after_tagging)
 
     if use_email:
-        has_run = notion.run(logging, email=request.form['email'], password=request.form['password'])
+        has_run = notion.run(logging, email=data['email'], password=data['password'])
     else:
         has_run = notion.run(logging)
 
     if has_run:
-        return render_template("thank_you.html")
+        return "200"
     else:
-        return render_template("error.html")
+        return "500"
 
 
 if __name__ == "__main__":

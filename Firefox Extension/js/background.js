@@ -72,7 +72,7 @@ async function AddUrlToMind(tab) {
 
     req.onreadystatechange = function() { // Call a function when the state changes.
         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-            switchResponse(this.responseText);
+            parseAndSwitchResponse(this.responseText);
         } else if (this.status === 0) {
             switchResponse("-1");
         }
@@ -97,7 +97,7 @@ async function AddTextToMind(info,tab) {
 
     req.onreadystatechange = function() { // Call a function when the state changes.
         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-            switchResponse(this.responseText);
+            parseAndSwitchResponse(this.responseText);
         } else if (this.status === 0) {
             switchResponse("-1");
         }
@@ -141,7 +141,7 @@ async function ProcessSelection(info,tab) {
   
       req.onreadystatechange = function() { // Call a function when the state changes.
         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-            switchResponse(this.responseText);
+            parseAndSwitchResponse(this.responseText);
         } else if (this.status === 0) {
             switchResponse("-1");
         }
@@ -152,32 +152,34 @@ async function ProcessSelection(info,tab) {
 }
 
 
-function switchResponse(response){
-  switch (response) {
-    case '200':
-      createHandler(
-        () =>
-          showNotification({
-            message: "Added to your mind.",
-            status: "success",
-            redirect: "http://www.laguiaempresarial.com/item/10731/",
-          })
-      );
-      break;
-    case '-1':
-      createHandler(
-        () =>
-          showNotification({
-            message: "Error during accessing server. Make sure the ip/port are corrects, and the server is running.",
-            status: "error",
-            redirect: "http://www.laguiaempresarial.com/item/10731/",
-          })
-      );
-      break;
-    default:
-      break;
+function parseAndSwitchResponse(response_from_api){
+  var myObj = JSON.parse(response_from_api);  
+  switchResponse(String(myObj['status_code']), String(myObj['block_url']),String(myObj['status_text']),String(myObj['text_response']));
+}
+
+function switchResponse(status_code,block_url,status_text,text_response)
+{
+  if (status_code == '-1'){
+    createHandler(
+      () =>
+        showNotification({
+          message: "Error during accessing server. Make sure the ip/port are corrects, and the server is running.",
+          status: "error",
+          redirect: "https://github.com/elblogbruno/NotionAI-MyMind#love-to-try-it",
+        })
+    );
+  }else{
+    createHandler(
+      () =>
+        showNotification({
+          message: text_response,
+          status: status_text,
+          redirect: block_url,
+        })
+    );
   }
 }
+
 
 
 browser.cookies.onChanged.addListener(function(info) 
@@ -205,6 +207,10 @@ browser.cookies.onChanged.addListener(function(info)
         }
       });
   }
+});
+
+browser.runtime.onMessage.addListener(function(request, sender) {
+  openNewTab(request.redirect);
 });
 
 // undefined

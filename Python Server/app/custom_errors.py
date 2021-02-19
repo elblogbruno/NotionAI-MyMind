@@ -4,8 +4,8 @@ class OnImageNotFound(Exception):
             self.message = args[0]
         else:
             self.message = None
-        args[1].imageStatusCode = 409
-
+        #args[1].imageStatusCode = 409
+        args[1].statusCode = 200
     def __str__(self):
         if self.message:
             return 'OnImageNotFound, {0} '.format(self.message)
@@ -19,7 +19,7 @@ class OnUrlNotValid(Exception):
             self.message = args[0]
         else:
             self.message = None
-        args[1].imageStatusCode = 500
+        args[1].statusCode = 500
 
     def __str__(self):
         if self.message:

@@ -90,6 +90,7 @@ def append_data(logging, **kwargs):
 
 
 def download_image_from_url(image_url):
+    print("Downloading this {} image".format(image_url))
     filename = "./image_tagging/temp_image_folder/" + str(uuid.uuid4())
 
     # Open the url image, set stream to True, this will return the stream content.

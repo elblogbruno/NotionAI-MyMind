@@ -1,7 +1,10 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:notion_ai_my_mind/api/apiresponse.dart';
+import 'package:notion_ai_my_mind/resources/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:path/path.dart';
 import 'package:async/async.dart';
@@ -29,7 +32,7 @@ class Api {
     }
   }
 
-  Future<String> addUrlToMind(String urlToAdd) async {
+  Future<APIResponse> addUrlToMind(String urlToAdd) async {
     try {
       RegExp exp = new RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+');
       Iterable<RegExpMatch> matches = exp.allMatches(urlToAdd);
@@ -46,9 +49,9 @@ class Api {
             http.Response response = await http.get(finalUrl);
 
             if (response.statusCode == 200) {
-              return '200';
+              return parseResponse(response.body);
             } else {
-              return '-1';
+              return createBadResponse();
             }
           }
           else if(urlToAdd == matches.first.group(0)) {
@@ -65,9 +68,9 @@ class Api {
 
 
             if (response.statusCode == 200) {
-              return '200';
+              return  parseResponse(response.body);
             } else {
-              return '-1';
+              return createBadResponse();
             }
           }else{
             print(matches.first.group(0));
@@ -82,9 +85,9 @@ class Api {
             http.Response response = await http.get(finalUrl);
 
             if (response.statusCode == 200) {
-              return '200';
+              return  parseResponse(response.body);
             } else {
-              return '-1';
+              return createBadResponse();
             }
           }
 
@@ -96,7 +99,7 @@ class Api {
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.BOTTOM);
 
-      return '-1';
+      return createBadResponse();
     }
   }
 
@@ -122,7 +125,7 @@ class Api {
   }
 
 
-  Future<String> uploadImage(File imageFile) async {
+  Future<APIResponse> uploadImage(File imageFile) async {
     var stream = new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
     var length = await imageFile.length();
 
@@ -140,16 +143,17 @@ class Api {
     var response = await request.send();
     print(response.statusCode);
 
+    var response1 = await http.Response.fromStream(response);
+
     if (response.statusCode == 200) {
-      return '200';
+      return parseResponse(response1.body);
     } else {
-      return '-1';
+      return createBadResponse();
     }
   }
 
-  Future<String> addContentToMind(String url,bool isImage) async{
+  Future<APIResponse> addContentToMind(String url,bool isImage) async{
     print("addContentToMind: " + url + " " + isImage.toString());
-    String response = "Content is invalid or no content was added";
     if(url != null){
       print("Widget url: " + url);
       if(isImage){
@@ -161,10 +165,24 @@ class Api {
         return addUrlToMind(url);
       }
     }else{
-      return response;
+      return createBadResponse();
     }
   }
 
+  APIResponse parseResponse(String responseBody) {
+    Map userMap = jsonDecode(responseBody);
+    var response = APIResponse.fromJson(userMap);
+    return response;
+  }
+
+  APIResponse createBadResponse() {
+    return APIResponse(
+      status_code: -1,
+      text_response: Strings.badResultResponse,
+      status_text: Strings.badResultResponse,
+      block_url: Strings.badResultResponse,
+    );
+  }
 
   setServerUrl(String value) async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();

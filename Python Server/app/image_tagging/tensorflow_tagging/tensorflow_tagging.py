@@ -14,12 +14,10 @@ class TensorFlowTag:
 
     def __init__(self, delete_image_after_tagging=True):
         self.delete_after_tagging = delete_image_after_tagging
-
+        self.model = InceptionV3(weights='imagenet')
         createFolder("./image_tagging/temp_image_folder")
 
     def get_tags(self, image_url, is_local_image):
-        model = InceptionV3(weights='imagenet')
-
         if is_local_image:
             file = "./uploads/"+image_url.split("/")[-1]
         else:
@@ -30,14 +28,15 @@ class TensorFlowTag:
         x = np.expand_dims(x, axis=0)
         x = preprocess_input(x)
 
-        preds = model.predict(x)
-        prediction_decoded = decode_predictions(preds, top=5)[0]
+        preds = self.model.predict(x)
+        prediction_decoded = decode_predictions(preds, top=20)[0]
 
         print('Predicted:', prediction_decoded)
 
         tags = []
         for element in prediction_decoded:
-            tags.append(element[1])
+            if element[2] > 0.20:
+                tags.append(element[1])
 
         if self.delete_after_tagging:
             os.remove(file)

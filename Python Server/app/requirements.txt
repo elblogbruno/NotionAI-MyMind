@@ -2,13 +2,14 @@
 flask==1.1.2
 gunicorn==20.0.4
 clarifai-grpc==6.7.1
-Flask==1.1.2
 notion==0.0.28
 requests==2.24.0
 urllib3==1.25.10
 validators==0.17.1
 Werkzeug==1.0.1
-tensorflow
+tensorflow~=2.3.1
 keras
 Pillow
 pillow
+Quart~=0.14.1
+numpy~=1.18.5

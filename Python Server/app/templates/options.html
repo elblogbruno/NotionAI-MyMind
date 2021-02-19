@@ -48,7 +48,7 @@
                     <input type="checkbox" class="form-check-input"  name= "delete_after_tagging" id="delete_after_tagging" >
                     <label class="form-check-label" for="delete_after_tagging">Would you like images to be deleted after tagging (deleted from server not notion)?</label>
                 </div>
-                <input class="btn btn-primary btn-sm" role="button" type="button" onclick="postData()">
+                <input class="btn btn-primary btn-sm" role="button" type="button" onclick="postData()" value="Save">
       		</form>
 		</div>
 
@@ -92,13 +92,12 @@
 
                     // Should be 'OK' if everything was successful
                     console.log(text);
-                    console.log({{ url_for('static',filename='thank_you.html') }});
 
                     if (text == "200")
                     {
-                         window.location.href = url_for('thank_you.html');
+                         window.location.href = '{{ url_for('static',filename='thank_you.html') }}';
                     }else{
-                         window.location.href = url_for('error.html');
+                         window.location.href = '{{ url_for('static',filename='error.html') }}';
                     }
                 });
             }

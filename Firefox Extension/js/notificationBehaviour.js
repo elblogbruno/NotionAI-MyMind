@@ -1,13 +1,9 @@
 (() => {
 	const usePromise = typeof browser !== "undefined";
 
-	const { id, icon, item, message, status, redirect } = window.naimm;
+	const { id, icon, message, status, redirect } = window.naimm;
 
 	const events = {};
-	const tags = [];
-	const tagCache = {};
-
-	let previousValue = "";
 
 	const createListener = (id, target, name, callback) => {
 		events[id] = {
@@ -44,7 +40,7 @@
 
 	createListener("click", notificationInner, "click", event => {
 		if (redirect && redirect !== "undefined") {
-			chrome.runtime.sendMessage({ openTab: redirect });
+			chrome.runtime.sendMessage({redirect: redirect});
 		}
 
 		createRemovalTimeout(0, true);
