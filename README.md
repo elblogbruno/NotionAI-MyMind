@@ -25,6 +25,13 @@ Right now, there's a working Python Local Server, that receives all the data fro
 https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 the chromium browsers such as google chrome or microsoft edge can install the extension from the store!
 ### Firefox users
 https://addons.mozilla.org/en-US/firefox/addon/notion-ai-my-mind/ firefox users can install the extension from the store!
+### Android and Ios users
+
+Users can install the android app from android store
+https://play.google.com/store/apps/details?id=com.elblogbruno.notion_ai_my_mind
+
+I won't be releasing the app on the Apple App Store, as I don't have an Apple Developer Account either Mac OS based computer.
+Meanwhile, you can clone the flutter project and build the app yourself.
 
 ## Examples.
 
