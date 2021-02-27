@@ -4,19 +4,21 @@ from notion.block import ImageBlock, TextBlock
 import validators
 import os
 
-from custom_errors import OnImageNotFound, OnUrlNotValid, EmbedableContentNotFound, NoTagsFound
+from utils.custom_errors import OnImageNotFound, OnUrlNotValid, EmbedableContentNotFound, NoTagsFound
 
 import requests
 import json
 
+import webbrowser
+import socket
 from threading import Thread
 
 from image_tagging.image_tagging import ImageTagging
-from lang_utils import get_response_text
+from utils.lang_utils import get_response_text
 
 
 class NotionAI:
-    def __init__(self, logging):
+    def __init__(self, logging, port):
         self.logging = logging
         logging.info("Initiating NotionAI Class.")
         if os.path.isfile('data.json'):
@@ -24,8 +26,18 @@ class NotionAI:
             logging.info("Initiating with a found config file.")
             self.loaded = self.run(logging)
         else:
-            print("You should go to the homepage and set the config.")
-            self.logging.info("You should go to the homepage and set the config.")
+            self.open_browser_at_start(port)
+
+    def open_browser_at_start(self, port):
+        hostname = socket.gethostname()
+        local_ip = socket.gethostbyname(hostname)
+        final_url = "http://" + str(local_ip) + ":" + str(port)
+        print("You should go to the homepage and set the credentials. The url will open in your browser now. If can't "
+              "access a browser you can access {0}".format(final_url))
+        self.logging.info("You should go to the homepage and set the credentials. The url will open in your browser "
+                          "now. If can't "
+                          "access a browser you can access {0}".format(final_url))
+        webbrowser.open(final_url)
 
     def run(self, logging, email=None, password=None):
         loaded = False

@@ -10,6 +10,7 @@ This repo uses AI and the wonderful Notion to enable you to add anything on the 
     - [Browser Extension](#extensions)
     - [Prerequisites](#prerequisites)
     - [Love to try it?](#love-to-try-it)
+        - [Post installing steps](#post-installing-steps)
         - [Docker-Compose](#docker-compose)
 - [Common Issues](#common-issues)
 - [Roadmap](#roadmap)
@@ -57,16 +58,30 @@ TokenV2 is updated automatically when it changes (it occurs when you log out of 
 
 *If you enter a clarifai api key, clarifai will be used. (Clarifai is cloud base, non gpu dependant, image is tagged on clarifai's servers) if you leave it blank it will use local tensorflow (will use cores of your server but image will be processed locally)
 
-### Love to try it?
+#### Love to try it?
 
+### Linux
 To install the python server, fire up your linux distributed machine and run this command.
+
 ```
 wget https://raw.githubusercontent.com/elblogbruno/NotionAI-MyMind/master/setup.sh && sudo sh setup.sh
 ```
 That's it.
 
 The installation script will:
-- Download the repo and install the server, then follow steps 4 to 7 down here:
+- Download the repo and install the server, then follow [the post installation steps down here](https://github.com/elblogbruno/NotionAI-MyMind#post-installing-steps) :
+
+
+### Windows
+
+If you are on windows, you can go to the release tab and download [the exe installer](https://github.com/elblogbruno/NotionAI-MyMind/releases) 
+which will install it as easy as a normal windows program, so you don't have to bother, and install it like a normal program.
+
+The installation setup program will:
+- Extract and install the server on your computer, then follow [the post installation steps down here](https://github.com/elblogbruno/NotionAI-MyMind#post-installing-steps) :
+
+
+### Manual installation
 
 Instead, you can follow the steps down here:
 
@@ -80,24 +95,27 @@ cd NotionAI-MyMind && pip -r install requirements.txt
 ```
 - Step 3. Run the server.
 ```
-python server.py \\Python 3.5 or up needed.
+python server.py \\Python 3.5 to versions 3.8 supported.
 ```
-- Step 4. Create Notion Database.
+
+## Post-installing steps
+
+- Step 1. Create Notion Database.
 It must have this properties selected and add more properties if you want, but the selected ones must exist. (AITagsText (text) and URL (url property)) 
 ![Notion Screen](/doc/notion-database-howto.jpg)
 
-- Step 5. Go to your servers IP and fill the data needed (Token, Notion Database URL and clarifai api key).
+- Step 2. Go to your servers IP and fill the data needed (Token, Notion Database URL and clarifai api key) (The url will be opened automatically if you don't know what url it is).
 
 ![Options Screen](/doc/options_python.png)
 
-- Step 6. Load the extension on your chromium Browser or download from chrome or firefox [store](#extensions)
+- Step 3. Load the extension on your chromium Browser or download from chrome or firefox [store](#extensions)
 
 ![Extension Screen](/doc/extension_howto.png)
 
-- Step 7. Change the config of your extension to your local server IP.
+- Step 4. Change the config of your extension to your local server IP.
 ![Settings Screen](/doc/settings_howto.png)
 
-- Step 8. ENJOY!
+- Step 5. ENJOY!
 
 ## Docker-Compose
 You can run the server on docker container. Change the [SERVER_PORT] variable with the desired port to run the server with. Then simply call `docker-compose up -d`.

@@ -16,7 +16,14 @@
 		<div class="jumbotron text-center">
           <h1 class="display-3">Thank You!</h1>
           <p class="lead"><strong>You have now a fully </strong> 100% open source server with AI.</p>
+            <p class="lead"><strong>Server URL is: </strong> </p>
+            <p  id ="ip" ></p>
+            <p> Set this url on the <strong>browser extension</strong> and <strong>phone app.</strong></p>
+
           <hr>
+            <p>
+            Don't have any of these? <a href="https://github.com/elblogbruno/NotionAI-MyMind#extensions">Download the browser extension and app right now</a>
+          </p>
           <p>
             Having trouble? <a href="https://github.com/elblogbruno/NotionAI-MyMind/issues">Post an issue on github</a>
           </p>
@@ -29,4 +36,8 @@
             <h2 class="display-2">Made with love by @elblogbruno!</h2>
         </div>
 	</body>
+    <script>
+        ip = document.getElementById("ip");
+        ip.innerHTML = "http://"+document.location.host+"/"
+    </script>
 </html>

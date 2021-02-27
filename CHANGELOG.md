@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0]
+
+### Added 
+
+- Added server as a .exe program on windows so it is easier as ever to run Notion AI My Mind in simple clicks.
+- Server url is opened automatically on the browser, so you don't get lost if you don't know what the server url is.
+
+
+### Fixed
+
+- No port was returned at first run of the server.
+- Refactored python directory, organized with folders.
+
 ## [1.9]
 
 ### Added 
@@ -41,6 +54,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed server issues adding callback capabilities. Before some websites images were not added due to timeouts.
 
+[2.0]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0
 [1.9]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/1.9
 [1.8]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/1.8
 [1.7]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/1.7

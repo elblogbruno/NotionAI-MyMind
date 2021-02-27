@@ -8,13 +8,15 @@ import os, re
 
 path = "/proc/self/cgroup"
 
+
 def is_docker():
-  if not os.path.isfile(path): return False
-  with open(path) as f:
-    for line in f:
-      if re.match("\d+:[\w=]+:/docker(-[ce]e)?/\w+", line):
-        return True
-    return False
+    if not os.path.isfile(path): return False
+    with open(path) as f:
+        for line in f:
+            if re.match("\d+:[\w=]+:/docker(-[ce]e)?/\w+", line):
+                return True
+        return False
+
 
 def ask_server_port(logging):
     if is_docker():
@@ -41,10 +43,13 @@ def ask_server_port(logging):
             options = {
                 'port': port
             }
+
             with open('port.json', 'w') as outfile:
                 json.dump(options, outfile)
 
             logging.info("Port saved succesfully!")
+
+            return options['port']
 
 
 def save_options(logging, **kwargs):

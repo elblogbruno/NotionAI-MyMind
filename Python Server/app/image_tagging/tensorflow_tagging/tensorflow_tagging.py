@@ -7,7 +7,7 @@ import numpy as np
 from tensorflow.python.keras.applications.inception_v3 import InceptionV3, preprocess_input, decode_predictions
 from tensorflow.python.keras.preprocessing import image
 import os
-from utils import download_image_from_url, createFolder
+from utils.utils import download_image_from_url, createFolder
 
 
 class TensorFlowTag:

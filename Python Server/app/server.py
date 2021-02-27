@@ -5,11 +5,11 @@ from werkzeug.utils import secure_filename
 
 import secrets
 
-from utils import ask_server_port, save_options, save_data, createFolder
-from NotionAI import *
+from NotionAI.NotionAI import *
+from utils.utils import ask_server_port, save_options, save_data, createFolder
 
 UPLOAD_FOLDER = '../app/uploads/'
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif','webp'])
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp'])
 
 app = Quart(__name__)
 
@@ -17,7 +17,7 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
-notion = NotionAI(logging)
+notion = None
 
 
 @app.route('/add_url_to_mind')
@@ -150,4 +150,5 @@ if __name__ == "__main__":
     secret = secrets.token_urlsafe(32)
     app.secret_key = secret
     port = ask_server_port(logging)
+    notion = NotionAI(logging, port)
     app.run(host="0.0.0.0", port=port, debug=True)
