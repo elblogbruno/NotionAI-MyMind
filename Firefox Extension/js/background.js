@@ -32,6 +32,16 @@ if (usePromise) {
 /**
  * Observers
  */
+chrome.runtime.onInstalled.addListener(function(details){
+  if(details.reason == "install"){
+      console.log("This is a first install!");
+      openNewTab("https://github.com/elblogbruno/NotionAI-MyMind/wiki/Mind-Extension-Installation-Welcome-Page!");
+  }else if(details.reason == "update"){
+      var thisVersion = chrome.runtime.getManifest().version;
+      console.log("Updated from " + details.previousVersion + " to " + thisVersion + "!");
+      openNewTab("https://github.com/elblogbruno/NotionAI-MyMind/wiki/Extension-Changelog");
+  }
+});
 
 // Browser Action
 chrome.browserAction.onClicked.addListener((tab) => {
