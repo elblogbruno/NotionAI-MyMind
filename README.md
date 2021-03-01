@@ -1,19 +1,53 @@
-# NotionAI MyMind
+<!-- PROJECT LOGO -->
+<br />
+<p align="center">
+  <a href="https://github.com/elblogbruno/NotionAI-MyMind/">
+    <img src="Chrome%20Extension/icon/icon.png" alt="Logo" width="80" height="80">
+  </a>
+
+  <h3 align="center">NotionAI MyMind</h3>
+
+  <p align="center">
+    This repo uses AI and the wonderful Notion to enable you to add anything on the web to your "Mind" and forget about everything else.
+    <br />
+    <a href="https://github.com/elblogbruno/NotionAI-MyMind/wiki"><strong>Explore the docs »</strong></a>
+    <br />
+    <br />
+    <a href="https://www.notion.so/glassear/172f159e4203410ea4b22aa83fde416d?v=4328ac5f98894ee7900d39600c882cfa">View Demo</a>
+    ·
+    <a href="https://github.com/elblogbruno/NotionAI-MyMind/issues">Report Bug</a>
+    ·
+    <a href="https://github.com/elblogbruno/NotionAI-MyMind/issues">Request Feature</a>
+  </p>
+</p>
+
+
 ![Alt Text](doc/header_gif_joined_updated.gif)
 
-This repo uses AI and the wonderful Notion to enable you to add anything on the web to your "Mind" and forget about everything else.
 
-## Table of Contents
-- [Project Philosophy](#project-philosophy)
-    - [Examples](#examples)
-- [Installing](#installing)
-    - [Browser Extension](#extensions)
-    - [Prerequisites](#prerequisites)
-    - [Love to try it?](#love-to-try-it)
-        - [Post installing steps](#post-installing-steps)
-        - [Docker-Compose](#docker-compose)
-- [Common Issues](#common-issues)
-- [Roadmap](#roadmap)
+<!-- TABLE OF CONTENTS -->
+<details open="open">
+  <summary>Table of Contents</summary>
+  <ol>
+    <li>
+      <a href="#project-philosophy">Project Philosophy</a>
+      <ul>
+        <li><a href="#examples">Examples</a></li>
+        <li><a href="#extensions">Mind Extensions</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#installing">Installing</a>
+      <ul>
+        <li><a href="#i-have-installed-the-server-what-to-do-next">I have installed the server, what to do next?</a></li>
+        <li><a href="#docker-compose">Docker-Compose</a></li>
+       </ul>
+      </ul>
+    </li>
+    <li><a href="#common-issues">Common Issues</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+  </ol>
+</details>
 
 ## Project Philosophy.
 
@@ -40,15 +74,14 @@ Adding text to your mind         |  Adding images to your mind |  Adding website
 :--- | :---: | ---:
 ![](doc/add_text.gif)  |  ![](doc/add_image.gif) |  ![](doc/add_website.gif)
 
-
-## Love to try it?
+# Installing
 
 - You can check it out on the wiki: [Installing the Notion AI My Mind Server](https://github.com/elblogbruno/NotionAI-MyMind/wiki/Installing-the-Notion-AI-My-Mind-Server)
 
 - This covers:
     - Notion AI My Mind Server installation
 
-## I have installed the server, what to do next?
+### I have installed the server, what to do next?
 
 - You can check it out on the wiki: [I have installed the server, what to do next?](https://github.com/elblogbruno/NotionAI-MyMind/wiki/I-have-installed-the-server,-what-to-do-next%3F)
 
@@ -56,7 +89,7 @@ Adding text to your mind         |  Adding images to your mind |  Adding website
     - Notion database creation
     - Browser or app walktrough with explanations.
 
-## Docker-Compose
+### Docker-Compose
 
 - You can check it out on the wiki: [Installing the Notion AI My Mind Server on Docker](https://github.com/elblogbruno/NotionAI-MyMind/wiki/Installing-the-Notion-AI-My-Mind-Server-on-Docker)
 
