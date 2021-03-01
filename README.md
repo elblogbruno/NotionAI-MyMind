@@ -41,101 +41,31 @@ Adding text to your mind         |  Adding images to your mind |  Adding website
 ![](doc/add_text.gif)  |  ![](doc/add_image.gif) |  ![](doc/add_website.gif)
 
 
-## Installing
+## Love to try it?
 
-### Prerequisites
+- You can check it out on the wiki: [Installing the Notion AI My Mind Server](https://github.com/elblogbruno/NotionAI-MyMind/wiki/Installing-the-Notion-AI-My-Mind-Server)
 
-Right now there is no official way of accessing the Notion API but there is a little work-around to get your credentials.
-You need to have an account on [Notion.so](https://notion.so/) and need to be logged in your browser.
+- This covers:
+    - Notion AI My Mind Server installation
 
-### Getting your credentials
+## I have installed the server, what to do next?
 
-On to the chrome extension settings, you can get your needed token_v2! It is necessary for the Python server. (Hidden in the photo for obvious reasons)         |  For AI Tagging you need to create a free account at [Clarifai](https://www.clarifai.com/) and create an Application named whatever you want and get the API key.(*)
-:-------------------------:|:-------------------------:
-![](/doc/getting_cookie.png)  |  ![](/doc/clarifai.png)
+- You can check it out on the wiki: [I have installed the server, what to do next?](https://github.com/elblogbruno/NotionAI-MyMind/wiki/I-have-installed-the-server,-what-to-do-next%3F)
 
-TokenV2 is updated automatically when it changes (it occurs when you log out of notion or it expires), so Notion AI My Mind should always work. ☻ You can also change it manually of course.
-
-*If you enter a clarifai api key, clarifai will be used. (Clarifai is cloud base, non gpu dependant, image is tagged on clarifai's servers) if you leave it blank it will use local tensorflow (will use cores of your server but image will be processed locally)
-
-#### Love to try it?
-
-### Linux
-To install the python server, fire up your linux distributed machine and run this command.
-
-```
-wget https://raw.githubusercontent.com/elblogbruno/NotionAI-MyMind/master/setup.sh && sudo sh setup.sh
-```
-That's it.
-
-The installation script will:
-- Download the repo and install the server, then follow [the post installation steps down here](https://github.com/elblogbruno/NotionAI-MyMind#post-installing-steps) :
-
-
-### Windows
-
-If you are on windows, you can go to the release tab and download [the exe installer](https://github.com/elblogbruno/NotionAI-MyMind/releases) 
-which will install it as easy as a normal windows program, so you don't have to bother, and install it like a normal program.
-
-The installation setup program will:
-- Extract and install the server on your computer, then follow [the post installation steps down here](https://github.com/elblogbruno/NotionAI-MyMind#post-installing-steps) :
-
-
-### Manual installation
-
-Instead, you can follow the steps down here:
-
-- Step 1. Simply clone this repo.
-```
-git clone https://github.com/elblogbruno/NotionAI-MyMind
-```
-- Step 2. Install requirements for python server.
-```
-cd NotionAI-MyMind && pip -r install requirements.txt
-```
-- Step 3. Run the server.
-```
-python server.py \\Python 3.5 to versions 3.8 supported.
-```
-
-## Post-installing steps
-
-- Step 1. Create Notion Database.
-It must have this properties selected and add more properties if you want, but the selected ones must exist. (AITagsText (text) and URL (url property)) 
-![Notion Screen](/doc/notion-database-howto.jpg)
-
-- Step 2. Go to your servers IP and fill the data needed (Token, Notion Database URL and clarifai api key) (The url will be opened automatically if you don't know what url it is).
-
-![Options Screen](/doc/options_python.png)
-
-- Step 3. Load the extension on your chromium Browser or download from chrome or firefox [store](#extensions)
-
-![Extension Screen](/doc/extension_howto.png)
-
-- Step 4. Change the config of your extension to your local server IP.
-![Settings Screen](/doc/settings_howto.png)
-
-- Step 5. ENJOY!
+- This covers:
+    - Notion database creation
+    - Browser or app walktrough with explanations.
 
 ## Docker-Compose
-You can run the server on docker container. Change the [SERVER_PORT] variable with the desired port to run the server with. Then simply call `docker-compose up -d`.
 
-```yaml
-version: '3.4'
+- You can check it out on the wiki: [Installing the Notion AI My Mind Server on Docker](https://github.com/elblogbruno/NotionAI-MyMind/wiki/Installing-the-Notion-AI-My-Mind-Server-on-Docker)
 
-services:
-  app:
-    image: elblogbruno/notion-ai-mymind:latest
-    ports:
-      - [SERVER_PORT]:5000
-```
-      
-When a new update is available, you can call :
+- This covers:
+    - Server installation as a Docker Image
 
-```
-docker-compose stop notionai-mymind
-docker-compose up -d notionai-mymind
-```
+## Common Issues
+
+- You can check it out on the wiki: [Common Issues](https://github.com/elblogbruno/NotionAI-MyMind/wiki/Common-Issues)
 
 ## Roadmap
 - You can check the roadmap here: https://github.com/elblogbruno/NotionAI-MyMind/projects/1
