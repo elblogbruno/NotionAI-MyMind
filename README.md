@@ -32,7 +32,7 @@
     <li>
       <a href="#project-philosophy">Project Philosophy</a>
       <ul>
-        <li><a href="#examples">Examples</a></li>
+        <li><a href="#examples-of-what-you-can-do">Examples</a></li>
         <li><a href="#extensions">Mind Extensions</a></li>
       </ul>
     </li>
@@ -70,9 +70,15 @@ Meanwhile, you can clone the flutter project and build the app yourself.
 
 ## Examples of what you can do.
 
-Add text to your mind         |  Add images to your mind |  Add websites to your mind |  Search on your mind
-:--- | :---: | :---: | ---:
-![](doc/add_text.gif)  |  ![](doc/add_image.gif) |  ![](doc/add_website.gif) |  ![](doc/header_gif_search.gif)
+Add text to your mind  |  Add images to your mind
+:---: | :---:
+![](doc/add_text.gif)  |  ![](doc/add_image.gif)
+
+
+Add websites to your mind |  Search on your mind
+:---: | :---:
+![](doc/add_website.gif)  |  ![](doc/header_gif_search.gif)
+
 
 # Installing
 
