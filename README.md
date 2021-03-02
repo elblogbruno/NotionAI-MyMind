@@ -68,11 +68,11 @@ https://play.google.com/store/apps/details?id=com.elblogbruno.notion_ai_my_mind
 I won't be releasing the app on the Apple App Store, as I don't have an Apple Developer Account either Mac OS based computer.
 Meanwhile, you can clone the flutter project and build the app yourself.
 
-## Examples.
+## Examples of what you can do.
 
-Adding text to your mind         |  Adding images to your mind |  Adding websites to your mind
-:--- | :---: | ---:
-![](doc/add_text.gif)  |  ![](doc/add_image.gif) |  ![](doc/add_website.gif)
+Add text to your mind         |  Add images to your mind |  Add websites to your mind |  Search on your mind
+:--- | :---: | :---: | ---:
+![](doc/add_text.gif)  |  ![](doc/add_image.gif) |  ![](doc/add_website.gif) |  ![](doc/header_gif_search.gif)
 
 # Installing
 
