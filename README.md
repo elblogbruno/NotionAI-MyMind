@@ -51,10 +51,10 @@
 
 ## Project Philosophy.
 
-The idea is to have an extension on the browser, and app on android and Ios, allowing you to add whatever you find on the web in your "Mind".
-Also, adding image and article tagging capabilities thanks to AI, so you can simply search on your "Mind" for what you remember.
+The idea is to have extensions for your mind on the browser, and app on android and Ios, allowing you to add whatever you find on the web in your "Mind". Also, adding image and article tagging capabilities thanks to AI, so you can simply search on your "Mind" for what you remember.
 
-Right now, there's a working Python Local Server, that receives all the data from the extension and the app, and publishes it to Notion. So it is 100% open source and fully private!
+Right now, there's a working Python Local Server, that receives all the data from the extension and the app, and publishes it to your fully customizable and searchable database in Notion. So it is 100% open source and fully private!
+
 ### Extensions
 ### Chromium users
 https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 the chromium browsers such as google chrome or microsoft edge can install the extension from the store!
