@@ -1,42 +1,42 @@
 from notion.client import NotionClient
 from notion.block import ImageBlock, TextBlock
 
-import validators
+from utils.custom_errors import OnImageNotFound, OnUrlNotValid, NoTagsFound
+
 import os
-
-from utils.custom_errors import OnImageNotFound, OnUrlNotValid, EmbedableContentNotFound, NoTagsFound
-
 import requests
 import json
-
 import webbrowser
 import socket
-from threading import Thread
 
+from threading import Thread
 from image_tagging.image_tagging import ImageTagging
-from utils.lang_utils import get_response_text
+from NotionAI.utils import create_json_response, web_clipper_request, extract_image_from_content, \
+    get_current_extension_name
 
 
 class NotionAI:
     def __init__(self, logging, port):
         self.logging = logging
         logging.info("Initiating NotionAI Class.")
-        if os.path.isfile('data.json'):
+        if os.path.isfile('data.json'):  # If we have a data.json with credentials, we start with these credentials
             print("Initiating with a found config file.")
             logging.info("Initiating with a found config file.")
             self.loaded = self.run(logging)
-        else:
+        else:  # Instead it is  the first time running the server, so we open the server url.
             self.open_browser_at_start(port)
 
     def open_browser_at_start(self, port):
         hostname = socket.gethostname()
         local_ip = socket.gethostbyname(hostname)
-        final_url = "http://" + str(local_ip) + ":" + str(port)
+        final_url = "http://{0}:{1}/".format(str(local_ip), str(port))
+
         print("You should go to the homepage and set the credentials. The url will open in your browser now. If can't "
               "access a browser you can access {0}".format(final_url))
+
         self.logging.info("You should go to the homepage and set the credentials. The url will open in your browser "
-                          "now. If can't "
-                          "access a browser you can access {0}".format(final_url))
+                          "now. If can't access a browser you can access {0}".format(final_url))
+
         webbrowser.open(final_url)
 
     def run(self, logging, email=None, password=None):
@@ -71,11 +71,15 @@ class NotionAI:
 
             self.mind_id = mind_page.id
 
-            self.image_tagger = ImageTagging(data, logging)
+            self.image_tagger = ImageTagging(data, logging)  # we initialize the image tagger with our data.
 
             cv = self.client.get_collection_view(self.data['url'])
 
-            self.collection = cv.collection
+            self.collection = cv.collection  # collection is our database or "mind" in notion
+
+            self.counter = 0
+
+            self.times_to_retry = 5  # if no image is found initially, it will retry this many times
 
             loaded = True
         except requests.exceptions.HTTPError:
@@ -83,26 +87,30 @@ class NotionAI:
         return loaded
 
     def add_url_to_database(self, url, title):
-        self.logging.info("Adding url to mind: {0} {1}".format(url.encode('utf8'), title.encode('utf8')))
-        self.statusCode = 200  # at start we asume everything will go ok
-        try:
-            rowId = self.web_clipper_request(url, title)
-
-            thread = Thread(target=self.add_url_thread, args=(rowId,))
-            thread.daemon = True  # Daemonize thread
-            thread.start()  # Start the execution
-
-            return self.create_json_response(rowId=rowId)
-
-        except OnUrlNotValid as invalidUrl:
-            self.logging.info(invalidUrl)
+        if url is None or title is None:
             self.statusCode = 500
-            return self.create_json_response()
-        except AttributeError as e:
-            self.logging.info(e)
-            print(e)
-            self.statusCode = 404
-            return self.create_json_response()
+            return create_json_response(self)
+        else:
+            self.logging.info("Adding url to mind: {0} {1}".format(url.encode('utf8'), title.encode('utf8')))
+            self.statusCode = 200  # at start we asume everything will go ok
+            try:
+                rowId = web_clipper_request(self, url, title)
+
+                thread = Thread(target=self.add_url_thread, args=(rowId,))
+                thread.daemon = True  # Daemonize thread
+                thread.start()  # Start the execution
+
+                return create_json_response(self, rowId=rowId)
+
+            except OnUrlNotValid as invalidUrl:
+                self.logging.info(invalidUrl)
+                self.statusCode = 500
+                return create_json_response(self)
+            except AttributeError as e:
+                self.logging.info(e)
+                print(e)
+                self.statusCode = 404
+                return create_json_response(self)
 
     def add_text_to_database(self, text, url):
         self.logging.info("Adding text to mind: {0} {1}".format(url.encode('utf8'), text.encode('utf8')))
@@ -110,14 +118,16 @@ class NotionAI:
         try:
             if url == "" or text == "":
                 self.statusCode = 500
-                return self.create_json_response()
+                return create_json_response(self)
             else:
+                row = self.collection.add_row()
+                self.row = row
 
                 thread = Thread(target=self.add_text_thread, args=(url, text,))
                 thread.daemon = True  # Daemonize thread
                 thread.start()  # Start the execution
 
-                return self.create_json_response()
+                return create_json_response(self, rowId=row.id)
         except requests.exceptions.HTTPError as invalidUrl:
             print(invalidUrl)
             self.logging.info(invalidUrl)
@@ -128,7 +138,7 @@ class NotionAI:
             self.logging.info(e)
             print(e)
             self.statusCode = 404
-            return self.create_json_response()
+            return create_json_response(self)
 
     def add_image_to_database(self, image_src, url=None, image_src_url=None):
         is_local = image_src_url is None and url is None
@@ -136,54 +146,76 @@ class NotionAI:
         if is_local:
             self.logging.info("Adding image to mind: {0}".format(image_src.encode('utf8')))
         else:
-            self.logging.info("Adding image to mind: {0} {1} {2}".format(url.encode('utf8'), image_src.encode('utf8'),
+            self.logging.info("Adding image to mind: {0} {1} {2}".format(image_src.encode('utf8'), url.encode('utf8'),
                                                                          image_src_url.encode('utf8')))
-
         self.statusCode = 200  # at start we asume everything will go ok
 
         try:
+            row = self.collection.add_row()
+            self.row = row
 
             thread = Thread(target=self.add_image_thread, args=(image_src, url, image_src_url, is_local,))
             thread.daemon = True  # Daemonize thread
             thread.start()  # Start the execution
 
-            return self.create_json_response()
+            return create_json_response(self, rowId=row.id)
 
         except requests.exceptions.HTTPError as invalidUrl:
             self.logging.info(invalidUrl)
             self.statusCode = 500
-            return self.create_json_response()
+            return create_json_response(self)
         except AttributeError as e:
             self.logging.info(e)
             print(e)
             self.statusCode = 404
-            return self.create_json_response()
+            return create_json_response(self)
+
+    def modify_row_by_id(self, id, title, url):
+        self.statusCode = 204  # at start we asume everything will go ok
+        try:
+            block = self.client.get_block(id)
+
+            if url == "" or title == "":
+                self.statusCode = 500
+                return create_json_response(self)
+            else:
+                block.title = title
+                block.url = url
+                return create_json_response(self)
+
+        except OnUrlNotValid as invalidUrl:
+            self.logging.info(invalidUrl)
+            self.statusCode = 500
+            return create_json_response(self)
+        except AttributeError as e:
+            self.logging.info(e)
+            print(e)
+            self.statusCode = 404
+            return create_json_response(self)
 
     def row_callback(self, record, difference):
-        if len(self.row.AITagsText) == 0:
+        if len(self.row.AITagsText) == 0 and len(self.row.mind_extension) == 0 and len(difference[0][-1][0][1]) != 0:
             print("Callback from row. Here's what was changed:")
-            print(difference)
             self.page_content = difference[0][-1][0][1]
             try:
-                img_url = self.extract_image_from_content(self.page_content)
+                img_url_list = extract_image_from_content(self, self.page_content, record.id)
                 try:
                     self.row.remove_callbacks(self.row_callback)
-                    self.add_tags_to_row(img_url, False)
+                    self.add_tags_to_row(img_url_list, False)
                 except NoTagsFound as e:
                     print(e)
+                    self.add_tags_to_row(None, False)
                     self.logging.info(e)
                 except ValueError as e:
                     print(e)
+                    self.add_tags_to_row(None, False)
                     self.logging.info(e)
                 except Exception as e:
-                    print(e)
+                    self.add_tags_to_row(None, False)
                     self.logging.info(e)
             except OnImageNotFound as e:
                 print(e)
-                self.row.AITagsText = "no-tags-available"
-                self.logging.info(e)
-            except EmbedableContentNotFound as e:
-                print(e)
+                self.add_tags_to_row(None, False)
                 self.logging.info(e)
         else:
             print("This row is added already")
@@ -201,9 +233,7 @@ class NotionAI:
         self.logging.info("Thread %s: finishing", rowId)
 
     def add_text_thread(self, url, text):
-        row = self.collection.add_row()
-        self.row = row
-
+        row = self.row
         self.logging.info("Add text Thread %s: starting", row.id)
 
         row.name = "Extract from " + url
@@ -216,10 +246,7 @@ class NotionAI:
         self.logging.info("Add text Thread %s: finished", row.id)
 
     def add_image_thread(self, image_src, url=None, image_src_url=None, is_local=False):
-        row = self.collection.add_row()
-
-        self.row = row
-
+        row = self.row
         self.logging.info("Image add Thread %s: starting", row.id)
 
         img_block = row.children.add_new(ImageBlock)
@@ -227,7 +254,6 @@ class NotionAI:
         if is_local:
             img_block.upload_file(image_src)
             row.name = "Image from phone"
-
         else:
             img_block.source = image_src
             row.name = "Image from " + str(image_src_url)
@@ -235,65 +261,26 @@ class NotionAI:
 
         row.icon = img_block.source
         row.person = self.client.current_user
+        self.analyze_image_thread([image_src], row, is_image_local=is_local)
 
-        self.analyze_image_thread(image_src, row, is_image_local=is_local)
-
-    def add_tags_to_row(self, img_url, is_image_local):
-        self.logging.info("Adding tags to image {0}".format(img_url))
-        tags = self.image_tagger.get_tags(img_url, is_image_local)
-        self.logging.info("Tags from image {0} : {1}".format(img_url, tags))
-        self.row.AITagsText = tags
-
-    def extract_image_from_content(self, page_content):
-        url = " "
-        for element in page_content:
-            im = self.client.get_block(element)
-            block_type = im.get('type')
-            if block_type == 'image':
-                url = im.source
-                break
-        if url == " ":
-            raise OnImageNotFound("Thumbnail Image URL not found. Value is None", self)
+    def add_tags_to_row(self, img_url_list, is_image_local):
+        if img_url_list is None or len(img_url_list) == 0:
+            self.logging.info("No image was found or no tags are available.")
+            self.row.AITagsText = "no-tags-available"
         else:
-            print(url)
-            self.logging.info(url)
-        return url
+            self.logging.info("Found {0} images.".format(len(img_url_list)))
+            result = ""
+            for img_url in img_url_list:
+                self.logging.info("Adding tags to image {0}".format(img_url))
+                tags = self.image_tagger.get_tags(img_url, is_image_local)
+                self.logging.info("Tags from image {0} : {1}".format(img_url, tags))
+                result = tags + "," + result
+            self.row.AITagsText = result
+            self.row.mind_extension = get_current_extension_name(self.request_platform)
 
-    def web_clipper_request(self, url, title):
-        cookies = {
-            'token_v2': self.token_v2,
-        }
-
-        headers = {
-            'Content-Type': 'application/json',
-        }
-        if title == None:
-            title = url
-
-        is_well_formed = validators.url(url)
-        if is_well_formed:
-            url_object = {
-                "url": url,
-                "title": title
-            }
-            data_dict = {
-                "type": "block",
-                "blockId": "{}".format(self.mind_id),
-                "property": "P#~d",
-                "items": [url_object],
-                "from": "chrome"
-            }
-            data = json.dumps(data_dict)
-
-            self.logging.info(data)
-            response = requests.post('https://www.notion.so/api/v3/addWebClipperURLs', headers=headers, cookies=cookies,
-                                     data=data)
-            response_text = response.text
-            json_response = json.loads(response_text)
-            rowId = json_response['createdBlockIds'][0]
-            return rowId
-        else:
-            raise OnUrlNotValid("Invalid url was sent", self)
+    # sets the current platform making the request, so we know if content is added from phone or desktop
+    def set_mind_extension(self, platform):
+        self.request_platform = platform
 
     def analyze_image_thread(self, image_src, row, is_image_local=False):
         try:
@@ -311,31 +298,3 @@ class NotionAI:
         except OnImageNotFound as e:
             print(e)
             self.logging.info(e)
-        except EmbedableContentNotFound as e:
-            print(e)
-            self.logging.info(e)
-
-    def create_json_response(self, status_code=None, rowId=None):
-        url = "https://github.com/elblogbruno/NotionAI-MyMind#love-to-try-it"
-
-        if status_code is None:
-            status_code = self.statusCode
-
-        if rowId is not None:
-            rowIdExtracted = rowId.split("-")
-            str1 = ''.join(str(e) for e in rowIdExtracted)
-            url = "https://www.notion.so/" + str1
-
-        text_response, status_text = get_response_text(status_code)
-
-        x = {
-            "status_code": status_code,
-            "text_response": text_response,
-            "status_text": status_text,
-            "block_url": url
-        }
-
-        # convert into JSON:
-        json_response = json.dumps(x)
-
-        return json_response

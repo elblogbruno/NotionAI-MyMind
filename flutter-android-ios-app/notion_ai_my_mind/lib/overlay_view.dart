@@ -1,11 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:notion_ai_my_mind/Arguments.dart';
 import 'package:notion_ai_my_mind/api/apiresponse.dart';
-import 'package:notion_ai_my_mind/main.dart';
 import 'package:notion_ai_my_mind/resources/strings.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 import 'api/api.dart';
 

@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1]
+
+### Added 
+
+- Added function to modify a row title and url by its id, this is a base for developing ideas on #8.
+- Now it looks at all images available on the content added so we can get more information and AI tag every image.
+- Click to open added content works for url's, texts and images now.
+- When you add content, it tracks if it was added from your phone or desktop. You need to add a new text atribute called "mind_extension". You can use this to filter by elements added from phone or desktop.
+### Fixed
+
+- Fixed error #9
+- Fixed error no output provided when url or title was none adding a url.
+- Fixed error when on some websites where tagged as image not found when images were found.
+- Moved utils function to a util file.
+
 ## [2.0]
 
 ### Added 
@@ -54,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed server issues adding callback capabilities. Before some websites images were not added due to timeouts.
 
+[2.0.1]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.1
 [2.0]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0
 [1.9]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/1.9
 [1.8]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/1.8

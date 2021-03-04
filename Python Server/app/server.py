@@ -1,12 +1,13 @@
 import logging
 
-from quart import Quart, render_template, flash, request, redirect
+from quart import Quart, render_template, flash, request
 from werkzeug.utils import secure_filename
 
 import secrets
 
 from NotionAI.NotionAI import *
 from utils.utils import ask_server_port, save_options, save_data, createFolder
+
 
 UPLOAD_FOLDER = '../app/uploads/'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp'])
@@ -24,6 +25,7 @@ notion = None
 async def add_url_to_mind():
     url = request.args.get('url')
     title = request.args.get('title')
+    notion.set_mind_extension(request.user_agent.platform)
     return str(notion.add_url_to_database(url, title))
 
 
@@ -31,9 +33,11 @@ async def add_url_to_mind():
 async def add_text_to_mind():
     url = request.args.get('url')
     text = request.args.get('text')
+    notion.set_mind_extension(request.user_agent.platform)
     if len(request.args) > 2:
         l = request.args.to_dict()
         text = text + " & " + str(list(l)[-1])
+
     return str(notion.add_text_to_database(text, url))
 
 
@@ -42,7 +46,17 @@ async def add_image_to_mind():
     url = request.args.get('url')
     image_src = request.args.get('image_src')
     image_src_url = request.args.get('image_src_url')
-    return str(notion.add_image_to_database(url, image_src, image_src_url))
+    notion.set_mind_extension(request.user_agent.platform)
+    return str(notion.add_image_to_database(image_src, url, image_src_url))
+
+
+@app.route('/modify_element_by_id')
+async def modify_element_by_id():
+    id = request.args.get('id')
+    title = request.args.get('new_title')
+    url = request.args.get('new_url')
+    notion.set_mind_extension(request.user_agent.platform)
+    return str(notion.modify_row_by_id(id, title, url))
 
 
 def allowed_file(filename):
