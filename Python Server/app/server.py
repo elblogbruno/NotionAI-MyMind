@@ -31,6 +31,9 @@ async def add_url_to_mind():
 async def add_text_to_mind():
     url = request.args.get('url')
     text = request.args.get('text')
+    if len(request.args) > 2:
+        l = request.args.to_dict()
+        text = text + " & " + str(list(l)[-1])
     return str(notion.add_text_to_database(text, url))
 
 

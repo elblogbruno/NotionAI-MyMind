@@ -103,9 +103,8 @@ async function AddTextToMind(info,tab) {
     var text = info.selectionText;
     var url = tab.url;
     urlParams = `add_text_to_mind?url=${url}&text=${text}`;
-
+  
     req.open("GET", baseUrl+urlParams, true);
-
     req.onreadystatechange = function() { // Call a function when the state changes.
         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
             parseAndSwitchResponse(this.responseText);
@@ -146,7 +145,6 @@ async function ProcessSelection(info,tab) {
         default:
           break;
       }
-
       req.open("GET", baseUrl+urlParams, true);
       req.send();
   
