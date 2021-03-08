@@ -21,9 +21,15 @@
   </p>
 </p>
 
+### Add content
 
-![Alt Text](doc/header_gif_joined_updated.gif)
+![Alt Text](doc/header_collections_example.gif)
 
+### Search
+
+![Alt Text](doc/header_gif_search.gif)
+
+### Free your mind!
 
 <!-- TABLE OF CONTENTS -->
 <details open="open">
