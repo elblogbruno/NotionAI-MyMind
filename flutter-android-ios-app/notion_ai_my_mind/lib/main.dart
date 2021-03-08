@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:notion_ai_my_mind/Arguments.dart';
+import 'package:notion_ai_my_mind/list_view.dart';
 
 import 'package:notion_ai_my_mind/overlay_view.dart';
 import 'package:notion_ai_my_mind/resources/strings.dart';
@@ -108,6 +109,7 @@ Future<void> main() async {
       home: MyHomePage(notificationAppLaunchDetails),
       routes: {
         '/add': (BuildContext context) => AddLinkPage(),
+        '/collection':  (BuildContext context) => CollectionListPage(),
       },
     ),
   );
@@ -168,7 +170,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
       if(_sharedFiles != null) {
         String uri = (_sharedFiles?.map((f) => f.path)?.join(",") ?? "");
         if (uri != null) {
-          navigatorKey.currentState.pushNamed('/add', arguments: Arguments(uri,true));
+          navigatorKey.currentState.pushNamed(CollectionListPage.routeName, arguments: Arguments(uri,true,0,navigatorKey));
         }
       }
 
@@ -192,7 +194,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
         String uri = (_sharedFiles?.map((f) => f.path)?.join(",") ?? "");
 
         if (uri != null) {
-          navigatorKey.currentState.pushNamed('/add', arguments: Arguments(uri,true));
+          navigatorKey.currentState.pushNamed(CollectionListPage.routeName, arguments: Arguments(uri,true,0,navigatorKey));
         }
       }
 
@@ -218,7 +220,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
                 toastLength: Toast.LENGTH_SHORT,
                 gravity: ToastGravity.BOTTOM);
 
-            navigatorKey.currentState.pushNamed('/add', arguments: Arguments(_sharedText,false));
+            navigatorKey.currentState.pushNamed(CollectionListPage.routeName, arguments: Arguments(_sharedText,false,0,navigatorKey));
 
           }else{
             print("Main activity: is null");
@@ -250,7 +252,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
             toastLength: Toast.LENGTH_SHORT,
             gravity: ToastGravity.BOTTOM);
 
-        navigatorKey.currentState.pushNamed('/add', arguments: Arguments(_sharedText,false));
+        navigatorKey.currentState.pushNamed(CollectionListPage.routeName, arguments: Arguments(_sharedText,false,0,navigatorKey));
       }else{
         print("Main activity app closed: is null");
       }
@@ -510,7 +512,21 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
                 ),
               ),
             ),
-            SizedBox(height: 50),
+            SizedBox(height: 30),
+            ButtonTheme(
+              minWidth: 200.0,
+              height: 50.0,
+              child: RaisedButton(
+                onPressed:() => Api().refreshCollections(),
+                splashColor: Color(0xFFDD5237),
+                color: Colors.teal,
+                child: new Text(
+                  "Refresh collections",
+                  style: new TextStyle(fontSize: 20.0, color: Colors.white),
+                ),
+              ),
+            ),
+            SizedBox(height: 30),
             new Text('Made with love by @elblogbruno! Have any problem or feedback? Post an issue!', textAlign: TextAlign.center,
                 overflow: TextOverflow.visible,
                 style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20)),

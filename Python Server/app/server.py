@@ -26,7 +26,7 @@ async def add_url_to_mind():
     title = request.args.get('title')
     collection_index = request.args.get('collection_index')
     notion.set_mind_extension(request.user_agent.platform)
-    return str(notion.add_url_to_database(url, title,int(collection_index)))
+    return str(notion.add_url_to_database(url, title, int(collection_index)))
 
 
 @app.route('/add_text_to_mind')
@@ -42,7 +42,7 @@ async def add_text_to_mind():
         addition = '&'.join(str(text) for text in addition_list)
         text = text + "&" + addition
 
-    return str(notion.add_text_to_database(text, url,int(collection_index)))
+    return str(notion.add_text_to_database(text, url, int(collection_index)))
 
 
 @app.route('/add_image_to_mind')
@@ -53,7 +53,7 @@ async def add_image_to_mind():
     collection_index = request.args.get('collection_index')
 
     notion.set_mind_extension(request.user_agent.platform)
-    return str(notion.add_image_to_database(image_src, url, image_src_url,int(collection_index)))
+    return str(notion.add_image_to_database(image_src, url, image_src_url, int(collection_index)))
 
 
 @app.route('/get_mind_structure')
@@ -75,9 +75,15 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+@app.route('/set_collection_index', methods=['POST'])
+async def set_collection_index():
+    notion.collection_index = request.args.get('set_collection_index')
+
+
 @app.route('/upload_file', methods=['POST'])
 async def upload_file():
     createFolder("uploads")
+
     status_code = 200
     # check if the post request has the file part
     request_files = await request.files
@@ -96,7 +102,7 @@ async def upload_file():
         filename = secure_filename(file.filename)
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         uri = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        return str(notion.add_image_to_database(uri))
+        return str(notion.add_image_to_database(uri, collection_index=notion.collection_index))
     else:
         print("This file is not allowed to be post")
         status_code = 500

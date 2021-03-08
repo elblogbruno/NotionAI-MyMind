@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added collections! Now you can have different collections or databases, so you can add the content to the collection you choose. More info here as you need to change your current notion setup:  https://github.com/elblogbruno/NotionAI-MyMind/wiki/Notion-AI-My-Mind-Collections
 
+-Android app has updated to allow the new collections!
+
 ### Fixed
 
 - Added more exceptions for error handling.

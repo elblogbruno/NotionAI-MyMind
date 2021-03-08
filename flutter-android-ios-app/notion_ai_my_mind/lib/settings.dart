@@ -1,8 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/diagnostics.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import 'api/api.dart';
 
 class settings extends StatelessWidget {

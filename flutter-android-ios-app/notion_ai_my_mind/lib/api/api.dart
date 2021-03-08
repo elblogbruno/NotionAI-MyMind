@@ -1,8 +1,11 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
+
+import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
+import 'package:notion_ai_my_mind/api/APICollectionResponse.dart';
+import 'package:notion_ai_my_mind/api/apicollection.dart';
 import 'package:notion_ai_my_mind/api/apiresponse.dart';
 import 'package:notion_ai_my_mind/resources/strings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -13,7 +16,24 @@ import 'dart:io';
 import 'package:url_launcher/url_launcher.dart';
 
 class Api {
+  Future<String> refreshCollections() async {
+    try {
+      String _serverUrl = await getServerUrl();
 
+      String serverUrl = _serverUrl + "get_mind_structure";
+      print("get_mind_structure: " + serverUrl);
+      http.Response response = await http.get(serverUrl);
+
+      if (response.statusCode == 200) {
+        setCollections(response.body.toString());
+        return '200';
+      } else {
+        return '-1';
+      }
+    } catch (_) {
+      return '-1';
+    }
+  }
   Future<String> getMindUrl() async {
     try {
       String _serverUrl = await getServerUrl();
@@ -32,7 +52,7 @@ class Api {
     }
   }
 
-  Future<APIResponse> addUrlToMind(String urlToAdd) async {
+  Future<APIResponse> addUrlToMind(String urlToAdd,int collection_index) async {
     try {
       RegExp exp = new RegExp(r'(?:(?:https?|ftp):\/\/)?[\w/\-?=%.]+\.[\w/\-?=%.]+');
       Iterable<RegExpMatch> matches = exp.allMatches(urlToAdd);
@@ -44,7 +64,7 @@ class Api {
           {
             String title = "unknown url added to your mind from Phone";
             String _serverUrl = await getServerUrl();
-            String finalUrl = _serverUrl + "add_text_to_mind?url=" + title + "&text=" + urlToAdd;
+            String finalUrl = _serverUrl + "add_text_to_mind?collection_index="+collection_index.toString() + "&url=" + title + "&text=" + urlToAdd;
             print("Final sharing url: " + finalUrl);
             http.Response response = await http.get(finalUrl);
 
@@ -62,7 +82,7 @@ class Api {
 
             String title = matchedText + " added to your mind from Phone";
             String _serverUrl = await getServerUrl();
-            String finalUrl = _serverUrl + "add_url_to_mind?url=" + matchedText + "&title=" + title;
+            String finalUrl = _serverUrl + "add_url_to_mind?collection_index="+collection_index.toString() + "&url=" + matchedText + "&title=" + title;
             print("Final sharing url: " + finalUrl);
             http.Response response = await http.get(finalUrl);
 
@@ -79,7 +99,7 @@ class Api {
             print("Match: " + matchedText); // my
 
             String _serverUrl = await getServerUrl();
-            String finalUrl = _serverUrl + "add_text_to_mind?url=" + matchedText + "&text=" + urlToAdd;
+            String finalUrl = _serverUrl + "add_text_to_mind?collection_index="+collection_index.toString() + "&url=" + matchedText + "&text=" + urlToAdd;
 
             print("Final sharing url: " + finalUrl);
             http.Response response = await http.get(finalUrl);
@@ -124,8 +144,30 @@ class Api {
     }
   }
 
+  Future<String> setCollectionIndex(int index) async {
+    try {
 
-  Future<APIResponse> uploadImage(File imageFile) async {
+      String _serverUrl = await getServerUrl();
+      String finalUrl = _serverUrl + "set_collection_index?collection_index="+index.toString();
+
+      print("Final setCollectionIndex url: " + finalUrl);
+
+      http.Response response = await http.get(finalUrl);
+
+      if (response.statusCode == 200) {
+        return "200";
+      } else {
+        return '-1';
+      }
+    } catch (_) {
+      return '-1';
+    }
+  }
+
+
+  Future<APIResponse> uploadImage(File imageFile,int index) async {
+    setCollectionIndex(index);
+
     var stream = new http.ByteStream(DelegatingStream.typed(imageFile.openRead()));
     var length = await imageFile.length();
 
@@ -152,17 +194,17 @@ class Api {
     }
   }
 
-  Future<APIResponse> addContentToMind(String url,bool isImage) async{
+  Future<APIResponse> addContentToMind(String url,bool isImage,int index) async{
     print("addContentToMind: " + url + " " + isImage.toString());
     if(url != null){
       print("Widget url: " + url);
       if(isImage){
         print("Widget is image");
         var myFile = new File(url);
-        return uploadImage(myFile);
+        return uploadImage(myFile,index);
       }else{
         print("Widget is url");
-        return addUrlToMind(url);
+        return addUrlToMind(url,index);
       }
     }else{
       return createBadResponse();
@@ -182,6 +224,37 @@ class Api {
       status_text: Strings.badResultResponse,
       block_url: Strings.badResultResponse,
     );
+  }
+
+  setCollections(String value) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    await prefs.setString("structure", value);
+  }
+
+
+  Future<List<APICollection>> getCollections() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    String structure = prefs.getString("structure") ?? 'name';
+
+    return parseStructure(structure);
+  }
+
+  List<APICollection> parseStructure(String responseBody) {
+    Map map = jsonDecode(responseBody);
+    List<dynamic> data = map["structure"];
+
+    List<APICollection> collectionList = new List<APICollection>();
+
+    for(int i = 0; i < data.length;i++){
+      //Map userMap = jsonDecode(data[i]);
+      Map<String, dynamic> myMap = new Map<String, dynamic>.from(data[i]);
+      print(myMap);
+      var response = APICollection.fromJson(myMap);
+      collectionList.add(response);
+    }
+
+    return collectionList;
   }
 
   setServerUrl(String value) async {

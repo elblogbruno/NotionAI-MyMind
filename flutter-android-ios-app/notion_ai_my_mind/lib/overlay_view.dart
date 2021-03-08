@@ -12,39 +12,39 @@ class AddLinkPage extends StatelessWidget  {
   Widget build(BuildContext context) {
     final Arguments args = ModalRoute.of(context).settings.arguments;
     return Scaffold(
-        appBar: AppBar(
-          title: const Text(Strings.titleAddNewLinkPage),
-        ),
-        body: FutureBuilder<APIResponse>(
-          future:  Api().addContentToMind(args.url,args.isImage), // a previously-obtained Future<String> or null
-          builder: (BuildContext context, AsyncSnapshot<APIResponse> snapshot) {
-            List<Widget> children;
-            if (snapshot.hasData) {
-              return _buildText(context,snapshot.data, snapshot.data.status_text == 'error');
-            } else if (snapshot.hasError) {
-              return _buildText(context,snapshot.error, true);
-            } else {
-              children = <Widget>[
-                SizedBox(
-                  child: CircularProgressIndicator(),
-                  width: 60,
-                  height: 60,
-                ),
-                const Padding(
-                  padding: EdgeInsets.only(top: 16),
-                  child: Text(Strings.waitText),
-                )
-              ];
-            }
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: children,
+      appBar: AppBar(
+        title: const Text(Strings.titleAddNewLinkPage),
+      ),
+      body: FutureBuilder<APIResponse>(
+        future:  Api().addContentToMind(args.url,args.isImage,args.collection_index), // a previously-obtained Future<String> or null
+        builder: (BuildContext context, AsyncSnapshot<APIResponse> snapshot) {
+          List<Widget> children;
+          if (snapshot.hasData) {
+            return _buildText(context,snapshot.data, snapshot.data.status_text == 'error');
+          } else if (snapshot.hasError) {
+            return _buildText(context,snapshot.error, true);
+          } else {
+            children = <Widget>[
+              SizedBox(
+                child: CircularProgressIndicator(),
+                width: 60,
+                height: 60,
               ),
-            );
-          },
-        ),
+              const Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: Text(Strings.waitText),
+              )
+            ];
+          }
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: children,
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -123,5 +123,4 @@ class AddLinkPage extends StatelessWidget  {
     );
   }
 }
-
 
