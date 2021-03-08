@@ -235,7 +235,7 @@ class Api {
 
   Future<List<APICollection>> getCollections() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String structure = prefs.getString("structure") ?? 'name';
+    String structure = prefs.getString("structure") ?? null;
 
     return parseStructure(structure);
   }

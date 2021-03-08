@@ -517,7 +517,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
               minWidth: 200.0,
               height: 50.0,
               child: RaisedButton(
-                onPressed:() => Api().refreshCollections(),
+                onPressed:() => Api().refreshCollections().then((value) => _buildRefreshNot()),
                 splashColor: Color(0xFFDD5237),
                 color: Colors.teal,
                 child: new Text(
@@ -546,7 +546,14 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
       ),
     );
   }
-
+  Widget _buildRefreshNot(){
+    return AlertDialog(
+      // Retrieve the text the that user has entered by using the
+      // TextEditingController.
+      title: Text("Collections refreshed"),
+      content: Text("Succesfully refreshed the collections"),
+    );
+  }
 
   Widget _buildWebView(BuildContext context,String url){
       return new WebView(

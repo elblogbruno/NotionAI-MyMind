@@ -40,7 +40,8 @@ class settingsState extends State<settingsPage> {
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
-              children: <Widget>[TextField(
+              children: <Widget>[
+                TextField(
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Server url (do not forget the / at the end)' ,
