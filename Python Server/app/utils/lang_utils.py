@@ -7,5 +7,7 @@ def get_response_text(status_code):
         return "No Notion credentials where provided. Please add them on the server.", "error"
     elif status_code == 204:
         return "Title and Url was modified correctly", "success"
+    elif status_code == 429:
+        return "Too much requests to Notion API", "error"
     else:
         return "Invalid url or text was provided.", "error"

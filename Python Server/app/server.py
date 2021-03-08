@@ -1,13 +1,12 @@
 import logging
 
-from quart import Quart, render_template, flash, request
+from quart import Quart, render_template, flash, request, jsonify
 from werkzeug.utils import secure_filename
 
 import secrets
 
 from NotionAI.NotionAI import *
 from utils.utils import ask_server_port, save_options, save_data, createFolder
-
 
 UPLOAD_FOLDER = '../app/uploads/'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp'])
@@ -25,20 +24,25 @@ notion = None
 async def add_url_to_mind():
     url = request.args.get('url')
     title = request.args.get('title')
+    collection_index = request.args.get('collection_index')
     notion.set_mind_extension(request.user_agent.platform)
-    return str(notion.add_url_to_database(url, title))
+    return str(notion.add_url_to_database(url, title,int(collection_index)))
 
 
 @app.route('/add_text_to_mind')
 async def add_text_to_mind():
     url = request.args.get('url')
     text = request.args.get('text')
+    collection_index = request.args.get('collection_index')
     notion.set_mind_extension(request.user_agent.platform)
-    if len(request.args) > 2:
-        l = request.args.to_dict()
-        text = text + " & " + str(list(l)[-1])
 
-    return str(notion.add_text_to_database(text, url))
+    if len(request.args) > 4:
+        l = request.args.to_dict()
+        addition_list = list(l)[3:]
+        addition = '&'.join(str(text) for text in addition_list)
+        text = text + "&" + addition
+
+    return str(notion.add_text_to_database(text, url,int(collection_index)))
 
 
 @app.route('/add_image_to_mind')
@@ -46,8 +50,15 @@ async def add_image_to_mind():
     url = request.args.get('url')
     image_src = request.args.get('image_src')
     image_src_url = request.args.get('image_src_url')
+    collection_index = request.args.get('collection_index')
+
     notion.set_mind_extension(request.user_agent.platform)
-    return str(notion.add_image_to_database(image_src, url, image_src_url))
+    return str(notion.add_image_to_database(image_src, url, image_src_url,int(collection_index)))
+
+
+@app.route('/get_mind_structure')
+async def get_mind_structure():
+    return jsonify(structure=notion.mind_structure.get_mind_structure())
 
 
 @app.route('/modify_element_by_id')

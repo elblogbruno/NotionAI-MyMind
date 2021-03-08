@@ -1,11 +1,21 @@
 function saveSettings() {
   var ip = document.getElementById("serverip").value;
-  browser.storage.local.set({ "serverIP" : ip }, function() {
-    if (browser.runtime.error) {
-      console.log("Runtime error.");
+  if(ValidURL(ip)){
+    
+    var res = ip.charAt(ip.length-1);
+    if (res != "/"){
+      ip = ip+"/";
     }
-    alert("Settings were successfully saved !" + ip);
-  });
+    
+    browser.storage.local.set({ "serverIP" : ip }, function() {
+      if (chrome.runtime.error) {
+        console.log("Runtime error.");
+      }
+      alert("Settings were successfully saved! " + ip);
+    });
+  }else{
+    alert("Please make sure you enter a correct url.")
+  }
 }
 
 function restore_options() {
@@ -18,6 +28,15 @@ function restore_options() {
   cookies_utils.getTokenFromCookie();
 }
 
+function ValidURL(str) {
+  var regex = /(http|https):\/\/(\w+:{0,1}\w*)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%!\-\/]))?/;
+  if(!regex .test(str)) {
+
+    return false;
+  } else {
+    return true;
+  }
+}
 
 
 document.addEventListener('DOMContentLoaded', function() {

@@ -1,0 +1,127 @@
+/*
+ * Notification Component
+ */
+ #collection-notification {
+	font-family: Avenir, sans-serif !important;
+	position: fixed;
+	right: 30px;
+	top: 30px;
+	box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1);
+	border-radius: 4px;
+	width: 350px;
+	box-sizing: border-box;
+	user-select: none;
+
+	animation: caimmNotificationSlideIn 300ms ease-out forwards;
+	animation-delay: 300ms;
+	opacity: 0;
+	will-change: opacity, transform;
+	z-index: 2147483647;
+}
+
+#collection-notification[status="error"] .collection-notification-inner {
+	border: 2px solid #FF0000 !important;
+}
+
+#collection-notification[status="limited"] .collection-notification-inner {
+	background: #FF5924 !important;
+	border: none !important;
+}
+#collection-notification[status="success"] .collection-notification-inner {
+	border: 2px solid coral!important;
+}
+
+#collection-notification[closing="true"] {
+	pointer-events: none !important;
+	animation: caimmNotificationSlideOut 300ms ease-out forwards;
+}
+
+#collection-notification .collection-notification-wrap {
+	overflow: hidden;
+	border-radius: 4px;
+}
+
+#collection-notification .collection-notification-inner {
+	border-radius: 4px;
+	display: flex;
+	flex-direction: row;
+	justify-content: flex-start;
+	align-items: center;
+	background: #FFFFFF;
+	color: #000000 !important;
+	position: relative;
+	z-index: 3;
+	min-height: 90px;
+	padding: 20px;
+	box-sizing: border-box;
+	border: 1px solid #EFEFEF;
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+	cursor: pointer;
+}
+
+#collection-notification .collection-notification-inner img {
+	width: 30px;
+	margin: 0 20px;
+}
+
+#collection-notification .collection-notification-inner span {
+	color: inherit !important;
+	font-family: Avenir, sans-serif !important;
+	font-weight: normal !important;
+	font-size: 20px !important;
+	line-height: 26px !important;
+	letter-spacing: 0 !important;
+	text-transform: none !important;
+}
+
+
+/*
+Buttons
+*/
+.collection-button-div button {
+	background-color: white;
+    color: black;
+	border-radius: 4px;
+  	border: 3px solid coral;
+	display: block;
+	margin: 5px;
+}
+
+.collection-button-div {
+	display: flex;
+	flex-direction: column;
+  	justify-content: normal;
+}
+  
+/* Add a background color on hover */
+.collection-button-div button:hover {
+	background-color: #f1f1f1;
+}
+
+/*
+ * Animations
+ */
+
+@keyframes caimmNotificationSlideIn {
+	0% {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+
+	100% {
+		opacity: 1;
+		transform: translateY(0px);
+	}
+}
+
+@keyframes caimmNotificationSlideOut {
+	0% {
+		opacity: 1;
+		transform: translateY(0px);
+	}
+
+	100% {
+		opacity: 0;
+		transform: translateY(-30px);
+	}
+}

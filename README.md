@@ -13,7 +13,7 @@
     <a href="https://github.com/elblogbruno/NotionAI-MyMind/wiki"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="https://www.notion.so/glassear/172f159e4203410ea4b22aa83fde416d?v=4328ac5f98894ee7900d39600c882cfa">View Demo</a>
+    <a href="https://www.notion.so/glassear/My-Mind-Demo-Structure-ebd913d0cfa14889b122d391a883db94">View Demo</a>
     ·
     <a href="https://github.com/elblogbruno/NotionAI-MyMind/issues">Report Bug</a>
     ·

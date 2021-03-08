@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.2]
+
+### Breaking changes
+- Notion API has changed. Maybe you get this error: "400 error on get_block() call",the fix is in here https://github.com/jamalex/notion-py/issues/292 but you need to modify manually the library. Meanwhile I am waiting for the library owner to update it.
+- If you make a lot of request to notion API, means adding lot of content in a short amount of time, you may get now a 429 error(Too Many Requests). I may look into finding a solution or workaround to this, but it is a problem on notion's not my repo or @jamalex notion-py repo.
+
+### Added 
+
+- Added collections! Now you can have different collections or databases, so you can add the content to the collection you choose. More info here as you need to change your current notion setup:  https://github.com/elblogbruno/NotionAI-MyMind/wiki/Notion-AI-My-Mind-Collections
+
+### Fixed
+
+- Added more exceptions for error handling.
+- Added notification for Notion's recent API change that limits api requests.
+
 ## [2.0.1]
 
 ### Added 
@@ -69,6 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed server issues adding callback capabilities. Before some websites images were not added due to timeouts.
 
+[2.0.2]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.2
 [2.0.1]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.1
 [2.0]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0
 [1.9]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/1.9

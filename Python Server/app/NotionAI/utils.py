@@ -6,6 +6,8 @@ from time import sleep
 
 import requests
 import validators
+import webbrowser
+import socket
 
 
 ##Makes a web request to the notion web clipper API to add url's and returns the rowId
@@ -28,7 +30,7 @@ def web_clipper_request(self, url, title):
         }
         data_dict = {
             "type": "block",
-            "blockId": "{}".format(self.mind_id),
+            "blockId": "{}".format(self.current_mind_id),
             "property": "P#~d",
             "items": [url_object],
             "from": "chrome"
@@ -41,6 +43,7 @@ def web_clipper_request(self, url, title):
         response_text = response.text
         json_response = json.loads(response_text)
         rowId = json_response['createdBlockIds'][0]
+        print(rowId)
         return rowId
     else:
         raise OnUrlNotValid("Invalid url was sent", self)
@@ -74,12 +77,12 @@ def extract_image_from_content(self, page_content, row_id):
         content = row.get('content')
         sleep(0.15)
         self.counter += 1
-        return self.extract_image_from_content(content, row_id)
+        return extract_image_from_content(content, row_id)
     return list_of_img_url
 
 
 def create_json_response(self, status_code=None, rowId=None):
-    url = "https://github.com/elblogbruno/NotionAI-MyMind#love-to-try-it"
+    url = "https://github.com/elblogbruno/NotionAI-MyMind/wiki/Common-Issues"
 
     block_title = "-1"
     block_attached_url = "-1"
@@ -88,9 +91,7 @@ def create_json_response(self, status_code=None, rowId=None):
         status_code = self.statusCode
 
     if rowId is not None:
-        rowIdExtracted = rowId.split("-")
-        str1 = ''.join(str(e) for e in rowIdExtracted)
-        url = "https://www.notion.so/" + str1
+        url = get_joined_url(rowId)
         row = self.client.get_block(rowId)
         block_title = row.title
         block_attached_url = row.url
@@ -126,3 +127,24 @@ def get_current_extension_name(platform):
         return "phone-app-extension"
     else:
         return "browser-extension"
+
+
+def open_browser_at_start(self, port):
+    hostname = socket.gethostname()
+    local_ip = socket.gethostbyname(hostname)
+    final_url = "http://{0}:{1}/".format(str(local_ip), str(port))
+
+    print("You should go to the homepage and set the credentials. The url will open in your browser now. If can't "
+          "access a browser you can access {0}".format(final_url))
+
+    self.logging.info("You should go to the homepage and set the credentials. The url will open in your browser "
+                      "now. If can't access a browser you can access {0}".format(final_url))
+
+    webbrowser.open(final_url)
+
+
+def get_joined_url(rowId):
+    rowIdExtracted = rowId.split("-")
+    str1 = ''.join(str(e) for e in rowIdExtracted)
+    url = "https://www.notion.so/" + str1
+    return url

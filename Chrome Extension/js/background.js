@@ -15,6 +15,11 @@ const menuConfig = [
 		title: "Open server",
 		id: "naimm-open",
 		contexts: [ "browser_action" ]
+	},
+  {
+		title: "Refresh collections",
+		id: "naimm-collections-refresh",
+		contexts: [ "browser_action" ]
 	}
 ];
 
@@ -43,7 +48,10 @@ chrome.runtime.onInstalled.addListener(function(details){
       openNewTab("https://github.com/elblogbruno/NotionAI-MyMind/wiki/Extension-Changelog");
   }
 });
-
+// //when browser loads it gets the mind structure. Currently deprecated as it makes a lot of request to notion api.
+// chrome.webNavigation.onCompleted.addListener(function(details) {
+//   GetMindStructure();
+// });
 
 // Browser Action
 chrome.browserAction.onClicked.addListener((tab) => {
@@ -68,22 +76,31 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   else if (menuItemId === "naimm-open-mind") {
 		openMindUrl();
 	}
+  else if (menuItemId === "naimm-collections-refresh") {
+		GetMindStructure();
+	}
 });
 
-async function AddUrlToMind(tab) {
+async function GetMindStructure() {
   let mainUrl = await getFromStorage("serverIP");
   const req = new XMLHttpRequest();
   if(!isEmpty(mainUrl)){
     const baseUrl = mainUrl;
 
-    var url = tab.url;
-    var title = tab.title;
-    const urlParams = `add_url_to_mind?url=${url}&title=${title}`;
+    const urlParams = `get_mind_structure`;
     req.open("GET", baseUrl+urlParams, true);
 
     req.onreadystatechange = function() { // Call a function when the state changes.
         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-            parseAndSwitchResponse(this.responseText);
+            //var jsonData = JSON.parse(this.responseText);
+            // return jsonData;
+            chrome.storage.sync.set({ "struct" : this.responseText }, function() {
+              if (chrome.runtime.error) {
+                console.log("Runtime error.");
+              }
+              console.log("Succesfully saved data");
+            });
+            switchResponse("-2");
         } else if (this.status === 0) {
             switchResponse("-1");
         }
@@ -94,16 +111,28 @@ async function AddUrlToMind(tab) {
   }
 }
 
-async function AddTextToMind(info,tab) {
+async function AddUrlToMind(tab) {
   let mainUrl = await getFromStorage("serverIP");
-  const req = new XMLHttpRequest();
+  
   if(!isEmpty(mainUrl)){
     const baseUrl = mainUrl;
+    let struct = await getFromStorage("struct");
+    
+    createCollectionHandler(
+        () =>
+          showCollectionPopup(String(struct) , (result) => addUrlRequest(tab,baseUrl,result))
+      );
 
-    var text = info.selectionText;
+  }else{
+    switchResponse("-1");
+  }
+}
+async function addUrlRequest(tab,baseUrl,collection_index)
+{
+    const req = new XMLHttpRequest();
     var url = tab.url;
-    urlParams = `add_text_to_mind?url=${url}&text=${text}`;
-  
+    var title = tab.title;
+    const urlParams = `add_url_to_mind?url=${url}&title=${title}&collection_index=${collection_index}`;
     req.open("GET", baseUrl+urlParams, true);
     req.onreadystatechange = function() { // Call a function when the state changes.
         if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
@@ -113,51 +142,93 @@ async function AddTextToMind(info,tab) {
         }
     }
     req.send();
+}
+
+//Adds text to mind
+async function AddTextToMind(info,tab) {
+  let mainUrl = await getFromStorage("serverIP");
+  if(!isEmpty(mainUrl)){
+    const baseUrl = mainUrl;
+    
+    let struct = await getFromStorage("struct");
+    createCollectionHandler(
+        () =>
+          showCollectionPopup(String(struct) , (result) => addTextRequest(info,tab,baseUrl,result))
+      );
+
   }else{
     switchResponse("-1");
   }
+}
+async function addTextRequest(info,tab,baseUrl,collection_index){
+  const req = new XMLHttpRequest();
+  
+  var text = info.selectionText;
+  var url = tab.url;
+  urlParams = `add_text_to_mind?url=${url}&collection_index=${collection_index}&text=${text}`;
+
+  req.open("GET", baseUrl+urlParams, true);
+  req.onreadystatechange = function() { // Call a function when the state changes.
+      if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+          parseAndSwitchResponse(this.responseText);
+      } else if (this.status === 0) {
+          switchResponse("-1");
+      }
+  }
+  req.send();
 }
 
 async function ProcessSelection(info,tab) {
   let mainUrl = await getFromStorage("serverIP");
-  const req = new XMLHttpRequest();
   if(!isEmpty(mainUrl)){
       const baseUrl = mainUrl;
-      var urlParams = "";
 
-      var url = info["linkUrl"];
-      switch (info["mediaType"]) {
-        case 'image':
-          var src = info["srcUrl"];
-          var image_src_url =  info["pageUrl"];
-          urlParams = `add_image_to_mind?url=${url}&image_src=${src}&image_src_url=${image_src_url}`;
-          break;
-        case 'video':
-          var src = info["srcUrl"];
-          var video_src_url =  info["pageUrl"];
-          urlParams = `add_video_to_mind?url=${url}&video_src=${src}&video_src_url=${video_src_url}`;
-          break;
-        case 'audio':
-          var src = info["srcUrl"];
-          var image_src_url =  info["pageUrl"];
-          urlParams = `add_audio_to_mind?url=${url}&audio_src=${src}&audio_src_url=${audio_src_url}`;
-          break;
-        default:
-          break;
-      }
-      req.open("GET", baseUrl+urlParams, true);
-      req.send();
-  
-      req.onreadystatechange = function() { // Call a function when the state changes.
-        if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
-            parseAndSwitchResponse(this.responseText);
-        } else if (this.status === 0) {
-            switchResponse("-1");
-        }
-      }
+      let struct = await getFromStorage("struct");
+      createCollectionHandler(
+            () =>
+              showCollectionPopup(String(struct) , (result) => addSelectionToMind(info,baseUrl,result))
+          );  
+      
+      
   }else{
     switchResponse("-1");
   }
+}
+async function addSelectionToMind(info,baseUrl,collection_index){
+    const req = new XMLHttpRequest();
+  
+    var urlParams = "";
+
+    var url = info["linkUrl"];
+    switch (info["mediaType"]) {
+      case 'image':
+        var src = info["srcUrl"];
+        var image_src_url =  info["pageUrl"];
+        urlParams = `add_image_to_mind?collection_index=${collection_index}&url=${url}&image_src=${src}&image_src_url=${image_src_url}`;
+        break;
+      case 'video':
+        var src = info["srcUrl"];
+        var video_src_url =  info["pageUrl"];
+        urlParams = `add_video_to_mind?collection_index=${collection_index}&url=${url}&video_src=${src}&video_src_url=${video_src_url}`;
+        break;
+      case 'audio':
+        var src = info["srcUrl"];
+        var image_src_url =  info["pageUrl"];
+        urlParams = `add_audio_to_mind?collection_index=${collection_index}&url=${url}&audio_src=${src}&audio_src_url=${audio_src_url}`;
+        break;
+      default:
+        break;
+    }
+    req.open("GET", baseUrl+urlParams, true);
+    req.send();
+
+    req.onreadystatechange = function() { // Call a function when the state changes.
+      if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+          parseAndSwitchResponse(this.responseText);
+      } else if (this.status === 0) {
+          switchResponse("-1");
+      }
+    }
 }
 
 function parseAndSwitchResponse(response_from_api){
@@ -173,10 +244,21 @@ function switchResponse(status_code,block_url,status_text,text_response)
         showNotification({
           message: "Error during accessing server. Make sure the ip/port are corrects, and the server is running.",
           status: "error",
-          redirect: "https://github.com/elblogbruno/NotionAI-MyMind#love-to-try-it",
+          redirect: "https://github.com/elblogbruno/NotionAI-MyMind/wiki/Common-Issues",
         })
     );
-  }else{
+  }
+  else if (status_code == '-2'){
+    createHandler(
+      () =>
+        showNotification({
+          message: "Succesfully refreshed available collections.",
+          status: "success",
+          redirect: "https://github.com/elblogbruno/NotionAI-MyMind/wiki/Common-Issues",
+        })
+    );
+  }
+  else{
     createHandler(
       () =>
         showNotification({
@@ -216,9 +298,66 @@ chrome.cookies.onChanged.addListener(function(info)
   }
 });
 
+
 chrome.runtime.onMessage.addListener(function(request, sender) {
-    openNewTab(request.redirect);
+    if(Number.isInteger(request.index)){
+      //alert(request.index);
+    }else{
+      openNewTab(request.redirect);
+    }
 });
+
+// undefined
+function createCollectionHandler(callback) {
+  chrome.tabs.insertCSS({
+    file: "css/collection.css",
+  });
+
+  const config = { file: "js/collectionPopupCreate.js" };
+
+  if (usePromise) {
+    browser.tabs.executeScript(config).then(callback);
+  } else {
+    chrome.tabs.executeScript(config, callback);
+  }
+}
+//We have a callback here from when user chooses a collection index, so we call the function that makes a request to the api with the index.
+function showCollectionPopup(structure,callback_from_caller) {
+  props = {
+    structure,
+	}
+
+	function callback() {
+    chrome.tabs.executeScript({file: 'js/collectionPopupBehaviour.js'},
+    function (result) {
+      chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+        if (request.action === 'done') {
+            console.log(request.result);
+            sendResponse({ action: 'next', arg: 2 });
+            callback_from_caller(request.result);
+            chrome.runtime.onMessage.removeListener(arguments.callee);
+        }
+        // uncomment this if code is also asynchronous
+        return true;
+      });
+      
+    }
+    );
+	};
+
+	const config = {
+		code: `
+			window.caimm = {};
+			${Object.entries(props).map(([key, value]) => `window.caimm.${key} = ${value};`).join('')}
+		`
+	};
+
+	if (usePromise) {
+		browser.tabs.executeScript(config).then(callback);
+	} else {
+		chrome.tabs.executeScript(config, callback);
+	}
+}
 
 // undefined
 function createHandler(callback) {
