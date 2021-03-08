@@ -21,14 +21,18 @@
   </p>
 </p>
 
-### Add content
+### Add content 
+<a href="https://github.com/elblogbruno/NotionAI-MyMind/wiki/Notion-AI-My-Mind-Collections"><strong>This is collections example, where you can have different collections or databases of contents, fully customizable on notion. »</strong></a>
 
-![Alt Text](doc/header_collections_example.gif)
+<a href="https://github.com/elblogbruno/NotionAI-MyMind/wiki/Notion-AI-My-Mind-Collections">
+    <img src="doc/header_collections_example.gif" alt="collections" width="690" height="388">
+ </a>
 
 ### Search
-
-![Alt Text](doc/header_gif_search.gif)
-
+<a href="https://www.notion.so/Searching-with-Quick-Find-af945b6e69b64437afba2d143e4b546f">
+    <img src="doc/header_gif_search.gif" alt="collections" width="690" height="388">
+ </a>
+ 
 ### Free your mind!
 
 <!-- TABLE OF CONTENTS -->
