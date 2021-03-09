@@ -29,11 +29,13 @@
  </a>
 
 ### Search
-<a href="https://www.notion.so/Searching-with-Quick-Find-af945b6e69b64437afba2d143e4b546f">
+<a href="https://www.notion.so/Intro-to-databases-fd8cd2d212f74c50954c11086d85997e"><strong>This is a fully customizable and searchable database in Notion. »</strong></a>
+
+<a href="https://www.notion.so/Intro-to-databases-fd8cd2d212f74c50954c11086d85997e">
     <img src="doc/header_gif_search.gif" alt="collections" width="690" height="388">
  </a>
  
-### Free your mind!
+# Free your mind!
 
 <!-- TABLE OF CONTENTS -->
 <details open="open">
@@ -65,6 +67,17 @@ The idea is to have extensions for your mind on the browser, and app on android 
 
 Right now, there's a working Python Local Server, that receives all the data from the extension and the app, and publishes it to your fully customizable and searchable database in Notion. So it is 100% open source and fully private!
 
+## Examples of what you can do.
+
+Add text to your mind  |  Add images to your mind
+:---: | :---:
+![](doc/add_text.gif)  |  ![](doc/add_image.gif)
+
+
+Add websites to your mind |  Search on your mind
+:---: | :---:
+![](doc/add_website.gif)  |  ![](doc/header_gif_search.gif)
+
 ### Extensions
 ### Chromium users
 https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 the chromium browsers such as google chrome or microsoft edge can install the extension from the store!
@@ -77,18 +90,6 @@ https://play.google.com/store/apps/details?id=com.elblogbruno.notion_ai_my_mind
 
 I won't be releasing the app on the Apple App Store, as I don't have an Apple Developer Account either Mac OS based computer.
 Meanwhile, you can clone the flutter project and build the app yourself.
-
-## Examples of what you can do.
-
-Add text to your mind  |  Add images to your mind
-:---: | :---:
-![](doc/add_text.gif)  |  ![](doc/add_image.gif)
-
-
-Add websites to your mind |  Search on your mind
-:---: | :---:
-![](doc/add_website.gif)  |  ![](doc/header_gif_search.gif)
-
 
 # Installing
 
