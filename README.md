@@ -19,6 +19,10 @@
     ·
     <a href="https://github.com/elblogbruno/NotionAI-MyMind/discussions/categories/ideas">Request Feature</a>
   </p>
+  <p align="center">
+    <a href='https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 '><img align="center" style="overflow: hidden; display: inline-block;" alt='Get it on Chrome Web Store' width=200          height=60 src='https://storage.googleapis.com/chrome-gcs-uploader.appspot.com/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/HRs9MPufa1J1h5glNhut.png'/></a>  <a href='https://addons.mozilla.org/en-US/firefox/addon/notion-ai-my-mind/'><img align="center" style="overflow: hidden; display: inline-block;" alt='Get it on Firefox Add-On Store' width=172 height=60  src='https://ffp4g1ylyit3jdyti1hqcvtb-wpengine.netdna-ssl.com/addons/files/2015/11/get-the-addon.png'/></a>  <a href='https://play.google.com/store/apps/details?id=com.elblogbruno.notion_ai_my_mind&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img align="center" style=" overflow: hidden; display: inline-block;" alt='Get it on Google Play' width=250 height=100 src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a>
+  
+  </p>
 </p>
 
 ### Add content 
@@ -29,11 +33,13 @@
  </a>
 
 ### Search
-<a href="https://www.notion.so/Searching-with-Quick-Find-af945b6e69b64437afba2d143e4b546f">
+<a href="https://www.notion.so/Intro-to-databases-fd8cd2d212f74c50954c11086d85997e"><strong>This is a fully customizable and searchable database in Notion. »</strong></a>
+
+<a href="https://www.notion.so/Intro-to-databases-fd8cd2d212f74c50954c11086d85997e">
     <img src="doc/header_gif_search.gif" alt="collections" width="690" height="388">
  </a>
  
-### Free your mind!
+# Free your mind!
 
 <!-- TABLE OF CONTENTS -->
 <details open="open">
@@ -65,19 +71,6 @@ The idea is to have extensions for your mind on the browser, and app on android 
 
 Right now, there's a working Python Local Server, that receives all the data from the extension and the app, and publishes it to your fully customizable and searchable database in Notion. So it is 100% open source and fully private!
 
-### Extensions
-### Chromium users
-https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 the chromium browsers such as google chrome or microsoft edge can install the extension from the store!
-### Firefox users
-https://addons.mozilla.org/en-US/firefox/addon/notion-ai-my-mind/ firefox users can install the extension from the store!
-### Android and Ios users
-
-Users can install the android app from android store
-https://play.google.com/store/apps/details?id=com.elblogbruno.notion_ai_my_mind
-
-I won't be releasing the app on the Apple App Store, as I don't have an Apple Developer Account either Mac OS based computer.
-Meanwhile, you can clone the flutter project and build the app yourself.
-
 ## Examples of what you can do.
 
 Add text to your mind  |  Add images to your mind
@@ -89,15 +82,37 @@ Add websites to your mind |  Search on your mind
 :---: | :---:
 ![](doc/add_website.gif)  |  ![](doc/header_gif_search.gif)
 
+### Extensions
+### Chromium users
+The chromium based browsers such as Google Chrome,Brave or Microsoft edge among others, can install the extension from the store!
+
+<a href='https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 '><img alt='Get it on Chrome Web Store' width=200 height=60 src='https://storage.googleapis.com/chrome-gcs-uploader.appspot.com/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/HRs9MPufa1J1h5glNhut.png'/></a>
+
+### Firefox users
+Firefox users can install the extension from the store!
+
+<a href='https://addons.mozilla.org/en-US/firefox/addon/notion-ai-my-mind/'><img alt='Get it on Firefox Add-On Store' width=172 height=60 src='https://ffp4g1ylyit3jdyti1hqcvtb-wpengine.netdna-ssl.com/addons/files/2015/11/get-the-addon.png'/></a>
+
+### Android and Ios users
+
+Users can install the android app from android store. On Ios you can clone the flutter project and build the app.
+
+<a href='https://play.google.com/store/apps/details?id=com.elblogbruno.notion_ai_my_mind&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Get it on Google Play' width=250 height=100 src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a>
+
+
+I won't be releasing the app on the Apple App Store, as I don't have an Apple Developer Account either Mac OS based computer.
+Meanwhile, you can clone the flutter project and build the app yourself.
 
 # Installing
+- It is very easy, and there are different ways from click to install one's to more advanced ones, in case you want to install it from source.
 
 - You can check it out on the wiki: [Installing the Notion AI My Mind Server](https://github.com/elblogbruno/NotionAI-MyMind/wiki/Installing-the-Notion-AI-My-Mind-Server)
 
 - This covers:
-    - Notion AI My Mind Server installation
+    - Notion AI My Mind Server installation. 
 
 ### I have installed the server, what to do next?
+- If you don't enter the Notion credentials either create the notion page, you would be not having fun with it!
 
 - You can check it out on the wiki: [I have installed the server, what to do next?](https://github.com/elblogbruno/NotionAI-MyMind/wiki/I-have-installed-the-server,-what-to-do-next%3F)
 
