@@ -1,4 +1,3 @@
-import os
 import json
 import requests  # to get image from the web
 import shutil  # to save it locally
@@ -7,6 +6,8 @@ import uuid
 import os, re
 
 path = "/proc/self/cgroup"
+
+settings_folder = "settings/"
 
 
 def is_docker():
@@ -23,10 +24,10 @@ def ask_server_port(logging):
         print("running on docker")
         return int("5000")
     else:
-        if os.path.isfile('port.json'):
+        if os.path.isfile(settings_folder + 'port.json'):
             logging.info("Initiating with a found port.json file.")
 
-            with open('port.json') as json_file:
+            with open(settings_folder + 'port.json') as json_file:
                 options = json.load(json_file)
                 logging.info("Using {} port".format(options['port']))
             return options['port']
@@ -44,7 +45,7 @@ def ask_server_port(logging):
                 'port': port
             }
 
-            with open('port.json', 'w') as outfile:
+            with open(settings_folder + 'port.json', 'w') as outfile:
                 json.dump(options, outfile)
 
             logging.info("Port saved succesfully!")
@@ -57,15 +58,30 @@ def save_options(logging, **kwargs):
 
     data = {}
     for key, value in kwargs.items():
-        if isinstance(value, bool):
+        if key == "confidence_treshold":
+            data[key] = value
+        elif isinstance(value, bool):
             data[key] = value
         else:
             data[key] = True if len(value) > 0 else False
 
-    with open('options.json', 'w') as outfile:
+    with open(settings_folder + 'options.json', 'w') as outfile:
         json.dump(data, outfile)
 
     logging.info("Options saved succesfully!")
+
+
+def save_properties_name(logging, **kwargs):
+    logging.info("Saving properties.")
+    data = {}
+
+    for key, value in kwargs.items():
+        data[key] = value
+
+    with open(settings_folder + 'properties.json', 'w') as outfile:
+        json.dump(data, outfile)
+
+    logging.info("Properties saved succesfully!")
 
 
 def save_data(logging, **kwargs):
@@ -75,7 +91,7 @@ def save_data(logging, **kwargs):
     for key, value in kwargs.items():
         data[key] = value
 
-    with open('data.json', 'w') as outfile:
+    with open(settings_folder + 'data.json', 'w') as outfile:
         json.dump(data, outfile)
 
     logging.info("Data saved succesfully!")
@@ -83,7 +99,7 @@ def save_data(logging, **kwargs):
 
 def append_data(logging, **kwargs):
     logging.info("Appending data.")
-    with open("data.json", "r+") as file:
+    with open(settings_folder + "data.json", "r+") as file:
         current_data = json.load(file)
         data = {}
         for key, value in kwargs.items():

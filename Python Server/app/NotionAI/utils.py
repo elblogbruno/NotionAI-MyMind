@@ -11,7 +11,7 @@ import socket
 
 
 ##Makes a web request to the notion web clipper API to add url's and returns the rowId
-def web_clipper_request(self, url, title):
+def web_clipper_request(self, url, title, current_mind_id):
     cookies = {
         'token_v2': self.token_v2,
     }
@@ -30,7 +30,7 @@ def web_clipper_request(self, url, title):
         }
         data_dict = {
             "type": "block",
-            "blockId": "{}".format(self.current_mind_id),
+            "blockId": "{}".format(current_mind_id),
             "property": "P#~d",
             "items": [url_object],
             "from": "chrome"
@@ -41,6 +41,7 @@ def web_clipper_request(self, url, title):
         response = requests.post('https://www.notion.so/api/v3/addWebClipperURLs', headers=headers, cookies=cookies,
                                  data=data)
         response_text = response.text
+        # print(response_text)
         json_response = json.loads(response_text)
         rowId = json_response['createdBlockIds'][0]
         print(rowId)
@@ -77,11 +78,11 @@ def extract_image_from_content(self, page_content, row_id):
         content = row.get('content')
         sleep(0.15)
         self.counter += 1
-        return extract_image_from_content(content, row_id)
+        return extract_image_from_content(self,content, row_id)
     return list_of_img_url
 
 
-def create_json_response(self, status_code=None, rowId=None):
+def create_json_response(self, status_code=None, rowId=None,custom_sentence=None,append_content=None):
     url = "https://github.com/elblogbruno/NotionAI-MyMind/wiki/Common-Issues"
 
     block_title = "-1"
@@ -104,6 +105,9 @@ def create_json_response(self, status_code=None, rowId=None):
     if len(block_title) == 0:
         block_title = "-1"
 
+    if custom_sentence:
+        text_response = custom_sentence
+
     x = {
         "status_code": status_code,
         "text_response": text_response,
@@ -111,8 +115,11 @@ def create_json_response(self, status_code=None, rowId=None):
         "block_url": url,
         "block_title": block_title,
         "block_attached_url": block_attached_url,
+        "extra_content": "null",
     }
 
+    if append_content:
+        x["extra_content"] = append_content
     # convert into JSON:
     json_response = json.dumps(x)
 
@@ -121,11 +128,15 @@ def create_json_response(self, status_code=None, rowId=None):
 
 # based on the machine doing the request we know which extension is being used
 def get_current_extension_name(platform):
+    print("Extension request platform is {}".format(platform))
     if platform is None or len(platform) == 0:
+        print("Final platform is unknown")
         return "Unknown mind extension"
-    elif platform in ['android', 'ipad', 'iphone', 'symbian', 'blackberry']:
+    elif 'dart' in platform:
+        print("Final platform is android")
         return "phone-app-extension"
     else:
+        print("Final platform is browser")
         return "browser-extension"
 
 

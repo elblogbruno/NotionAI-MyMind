@@ -28,20 +28,6 @@ class OnUrlNotValid(Exception):
             return 'OnImageUrlNotValid has been raised'
 
 
-class NoTagsFound(Exception):
-    def __init__(self, *args):
-        if args:
-            self.message = args[0]
-        else:
-            self.message = None
-        args[1].statusCode = 200
-
-    def __str__(self):
-        if self.message:
-            return 'NoTagsFound, {0} '.format(self.message)
-        else:
-            return 'NoTagsFound has been raised'
-
 
 class OnTokenV2NotValid(Exception):
     def __init__(self, *args):

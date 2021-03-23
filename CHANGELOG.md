@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [2.0.3]
+
+### Breaking changes
+- Now you can tell on the server the name of the properties, in case you want to customize the name of the basic properties that Notion AI My Mind contacts.
+
+### Added 
+
+- Now you can modify the title and url of the added content on the fly from the mind Extensions.
+- You can add and remove multiple tags on the content you add. The tags you write will be saved to notion, so they will be suggested to you next time as you write.
+  It also gets the current tags you may have added in notion for that property, and suggests them to you as you write!
+- All this implements the ideas given by the community on #13 and #8.
+
+- Added ability to scan QR Code on the android app, so you configure the app in no-time. When you access the server, you can scan it with the phone app.
+- Fixed bugs and revamped the phone app UI. 
+- Added more error handling on the phone app.
+### Fixed
+
+- More error handling
+
 ## [2.0.2]
 
 ### Breaking changes
@@ -86,6 +106,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed server issues adding callback capabilities. Before some websites images were not added due to timeouts.
 
+[2.0.3]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.3
 [2.0.2]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.2
 [2.0.1]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.1
 [2.0]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0

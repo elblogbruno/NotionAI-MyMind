@@ -9,7 +9,9 @@ class ClarifaiAI:
         self.channel = ClarifaiChannel.get_json_channel()
         self.key = key
 
-    def get_tags(self,image_url, is_local_image):
+    def get_tags(self,image_url, is_local_image, treshold):
+        if treshold is None:
+            treshold = 0.20
         stub = service_pb2_grpc.V2Stub(self.channel)
         file_bytes = {}
         file = ""
@@ -43,8 +45,9 @@ class ClarifaiAI:
 
         tags = []
         for concept in response.outputs[0].data.concepts:
-            tags.append(str(concept.name))
-            print(concept.name)
+            if concept.value > treshold:
+                tags.append(str(concept.name))
 
-        str1 = ','.join(str(e) for e in tags)
-        return str1
+        print('Predicted:', tags)
+
+        return tags

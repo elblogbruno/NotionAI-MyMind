@@ -17,7 +17,7 @@
     ·
     <a href="https://github.com/elblogbruno/NotionAI-MyMind/issues">Report Bug</a>
     ·
-    <a href="https://github.com/elblogbruno/NotionAI-MyMind/issues">Request Feature</a>
+    <a href="https://github.com/elblogbruno/NotionAI-MyMind/discussions/categories/ideas">Request Feature</a>
   </p>
 </p>
 

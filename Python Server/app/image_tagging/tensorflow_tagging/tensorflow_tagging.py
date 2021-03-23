@@ -17,9 +17,12 @@ class TensorFlowTag:
         self.model = InceptionV3(weights='imagenet')
         createFolder("./image_tagging/temp_image_folder")
 
-    def get_tags(self, image_url, is_local_image):
+    def get_tags(self, image_url, is_local_image, treshold):
+        if treshold is None:
+            treshold = 0.10
+
         if is_local_image:
-            file = "./uploads/"+image_url.split("/")[-1]
+            file = "./uploads/" + image_url.split("/")[-1]
         else:
             file = download_image_from_url(image_url)
 
@@ -35,12 +38,12 @@ class TensorFlowTag:
 
         tags = []
         for element in prediction_decoded:
-            if element[2] > 0.20:
+            if element[2] > treshold:
                 tags.append(element[1])
 
         if self.delete_after_tagging:
             os.remove(file)
 
-        str1 = ','.join(str(e) for e in tags)
+        #str1 = ','.join(str(e) for e in tags)
 
-        return str1
+        return tags

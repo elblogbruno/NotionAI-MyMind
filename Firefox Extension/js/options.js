@@ -11,16 +11,19 @@ function saveSettings() {
       if (chrome.runtime.error) {
         console.log("Runtime error.");
       }
-      alert("Settings were successfully saved! " + ip);
+      alert("Settings were successfully saved! Let me take you to the server settings!" + ip);
+      add_credentials(ip);
     });
+    
   }else{
     alert("Please make sure you enter a correct url.")
   }
+  
 }
 
 function restore_options() {
   browser.storage.local.get("serverIP", function(items) {
-    if (!browser.runtime.error) {
+    if (!chrome.runtime.error) {
       console.log(items["serverIP"]);
       document.getElementById("ip_status").innerHTML  = items["serverIP"];
     }
@@ -38,6 +41,26 @@ function ValidURL(str) {
   }
 }
 
+function add_credentials(ip){
+      console.log(ip);
+      const baseUrl = ip;
+      
+      var value =  document.getElementById("token_info").innerHTML;
+
+      if(value != null){
+        const urlParams = `?tokenv2_from_extension=${value}`; 
+        openNewTab(baseUrl+urlParams);
+      }else{
+        openNewTab(baseUrl);
+      }
+     
+}
+
+function openNewTab(url) {
+	if (url) {
+		chrome.tabs.create({ url });
+	}
+}
 
 document.addEventListener('DOMContentLoaded', function() {
   restore_options();

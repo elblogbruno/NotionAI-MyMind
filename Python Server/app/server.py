@@ -1,17 +1,25 @@
 import logging
 
-from quart import Quart, render_template, flash, request, jsonify
+from quart import Quart, render_template, flash, request, jsonify, send_file
 from werkzeug.utils import secure_filename
 
 import secrets
+import sys
 
 from NotionAI.NotionAI import *
-from utils.utils import ask_server_port, save_options, save_data, createFolder
+from utils.utils import ask_server_port, save_options, save_data, createFolder, save_properties_name
+
+from NotionAI.utils import create_json_response
 
 UPLOAD_FOLDER = '../app/uploads/'
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp'])
 
-app = Quart(__name__)
+if getattr(sys, 'frozen', False):
+    template_folder = os.path.join(sys._MEIPASS, 'templates')
+    static_folder = os.path.join(sys._MEIPASS, 'static')
+    app = Quart(__name__, template_folder=template_folder, static_folder=static_folder)
+else:
+    app = Quart(__name__)
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 logging.basicConfig(filename='app.log', filemode='w', format='%(name)s - %(levelname)s - %(message)s',
@@ -24,8 +32,9 @@ notion = None
 async def add_url_to_mind():
     url = request.args.get('url')
     title = request.args.get('title')
-    collection_index = request.args.get('collection_index')
-    notion.set_mind_extension(request.user_agent.platform)
+    collection_index = request.args.get('collection_index') if request.args.get('collection_index') else 0
+    notion.set_mind_extension(request)
+    print(url,title)
     return str(notion.add_url_to_database(url, title, int(collection_index)))
 
 
@@ -33,8 +42,8 @@ async def add_url_to_mind():
 async def add_text_to_mind():
     url = request.args.get('url')
     text = request.args.get('text')
-    collection_index = request.args.get('collection_index')
-    notion.set_mind_extension(request.user_agent.platform)
+    collection_index = request.args.get('collection_index') if request.args.get('collection_index') else 0
+    notion.set_mind_extension(request)
 
     if len(request.args) > 4:
         l = request.args.to_dict()
@@ -50,9 +59,9 @@ async def add_image_to_mind():
     url = request.args.get('url')
     image_src = request.args.get('image_src')
     image_src_url = request.args.get('image_src_url')
-    collection_index = request.args.get('collection_index')
+    collection_index = request.args.get('collection_index') if request.args.get('collection_index') else 0
 
-    notion.set_mind_extension(request.user_agent.platform)
+    notion.set_mind_extension(request)
     return str(notion.add_image_to_database(image_src, url, image_src_url, int(collection_index)))
 
 
@@ -61,12 +70,39 @@ async def get_mind_structure():
     return jsonify(structure=notion.mind_structure.get_mind_structure())
 
 
+@app.route('/get_multi_select_tags')
+async def get_multi_select_tags():
+    try:
+        collection_index = request.args.get('collection_index') if request.args.get('collection_index') else 0
+        notion.set_mind_extension(request)
+        # multi_select_tag_list
+        return str(notion.property_manager.multi_tag_manager.get_multi_select_tags(collection_index))
+    except ValueError as e:
+        print(str(e))
+        logging.info(e)
+        return str(create_json_response(notion, status_code=404,custom_sentence=str(e)))
+
+
+@app.route('/update_multi_select_tags', methods=['POST'])
+async def update_multi_select_tags():
+    try:
+        collection_index = request.headers["collection_index"]
+        id = request.headers["id"]
+        tags = await request.get_json()
+        print(tags)
+        notion.set_mind_extension(request)
+        return str(notion.property_manager.multi_tag_manager.update_multi_select_tags(id, tags, collection_index))
+    except ValueError as e:
+        print(e)
+        logging.info(e)
+        return str(create_json_response(notion, status_code=404, custom_sentence=str(e)))
+
 @app.route('/modify_element_by_id')
 async def modify_element_by_id():
     id = request.args.get('id')
     title = request.args.get('new_title')
     url = request.args.get('new_url')
-    notion.set_mind_extension(request.user_agent.platform)
+    notion.set_mind_extension(request)
     return str(notion.modify_row_by_id(id, title, url))
 
 
@@ -106,12 +142,20 @@ async def upload_file():
     else:
         print("This file is not allowed to be post")
         status_code = 500
-    return str(notion.create_json_response(status_code=status_code))
+    return str(create_json_response(notion, status_code=status_code))
 
 
 @app.route('/get_current_mind_url')
 async def get_current_mind_url():
     return str(notion.data['url'])
+
+
+@app.route('/log')
+async def return_log_file():
+    try:
+        return await send_file('app.log', attachment_filename='app.log')
+    except Exception as e:
+        return str(e)
 
 
 @app.route('/update_notion_tokenv2')
@@ -152,6 +196,8 @@ async def handle_data():
 
     notion_token = data['notion_token']
 
+    process_properties(logging,data)
+
     use_email = data['email'] and data['password']
 
     if data['clarifai_key']:
@@ -167,7 +213,12 @@ async def handle_data():
     else:
         delete_after_tagging = False
 
-    save_options(logging, use_clarifai=use_clarifai, delete_after_tagging=delete_after_tagging)
+    confidence_treshold = 0.10
+    if "confidence_treshold" in data:
+        confidence_treshold = data['confidence_treshold']
+
+    save_options(logging, use_clarifai=use_clarifai, delete_after_tagging=delete_after_tagging,
+                 confidence_treshold=confidence_treshold)
 
     if use_email:
         has_run = notion.run(logging, email=data['email'], password=data['password'])
@@ -180,9 +231,28 @@ async def handle_data():
         return "500"
 
 
+def process_properties(logging, data):
+    multi_tag_property = 'Tags'
+    if data['multi_tag_property']:
+        multi_tag_property = data['multi_tag_property']
+
+    mind_extension_property = 'mind_extension'
+    if data['mind_extension_property']:
+        mind_extension_property = data['mind_extension_property']
+
+    ai_tags_property = 'AITagsText'
+    if data['ai_tags_property']:
+        ai_tags_property = data['ai_tags_property']
+
+    logging.info("Current properties --> Multi Tag Property:  {0} , Mind extension Property: {1} , AI Tags Property: {2}".format(multi_tag_property,mind_extension_property,ai_tags_property))
+
+    save_properties_name(logging, multi_tag_property=multi_tag_property, mind_extension_property=mind_extension_property, ai_tags_property=ai_tags_property)
+
+
 if __name__ == "__main__":
     secret = secrets.token_urlsafe(32)
     app.secret_key = secret
+    createFolder("settings")
     port = ask_server_port(logging)
     notion = NotionAI(logging, port)
     app.run(host="0.0.0.0", port=port, debug=True)

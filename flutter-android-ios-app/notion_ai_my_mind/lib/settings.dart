@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:notion_ai_my_mind/qrcode.dart';
 import 'api/api.dart';
 
 class settings extends StatelessWidget {
@@ -47,9 +48,6 @@ class settingsState extends State<settingsPage> {
                     labelText: 'Server url (do not forget the / at the end)' ,
                     hintText: "http://xxx.xxx.x.xx:xxxx/",
                   ),
-                  onChanged: (text) {
-                    print("First text field: $text");
-                  },
                   controller: myController,
                 ),
                 SizedBox(height: 50),
@@ -66,7 +64,23 @@ class settingsState extends State<settingsPage> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20),
                 ),
-
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => QRViewExample()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.teal,
+                  ),
+                  child:  Icon(
+                    Icons.qr_code,
+                    color: Colors.white,
+                    size: 50,
+                  ),
+                ),
               ]
           )
         ),
@@ -74,32 +88,54 @@ class settingsState extends State<settingsPage> {
           // When the user presses the button, show an alert dialog containing
           // the text that the user has entered into the text field.
           onPressed: () {
-            return showDialog(
-              context: context,
-              builder: (context) {
-                Api().setServerUrl(myController.text);
-                Api().getServerUrl().then((val) => setState(() {
-                  _textFromFile = val;
-                }));
-                return AlertDialog(
-                  // Retrieve the text the that user has entered by using the
-                  // TextEditingController.
-                  title: Text("URL Saved: "),
-                  content: Text(_textFromFile),
-                );
-
-              },
-            );
+            Api().setServerUrl(myController.text);
+            showDialog(context: context, builder: (x) => _ShowAlert(context));
           },
           tooltip: 'Save!',
           child: Icon(Icons.save),
         ),
       ),
     );
-
-
   }
-
+  Widget _ShowAlert(BuildContext context) {
+    return FutureBuilder<String>(
+        future:  Api().getServerUrl(), // a previously-obtained Future<String> or null
+        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+          List<Widget> children;
+          if (snapshot.hasData) {
+            final dialog = AlertDialog(
+              // Retrieve the text the that user has entered by using the
+              // TextEditingController.
+              title: Text("URL Saved: "),
+              content: Text(snapshot.data),
+            );
+            return dialog;
+          } else if (snapshot.hasError) {
+            final dialog = AlertDialog(
+              // Retrieve the text the that user has entered by using the
+              // TextEditingController.
+              title: Text("URL Not Saved: "),
+              content: Text(snapshot.error),
+            );
+            return dialog;
+          } else {
+            children = <Widget>[
+              SizedBox(
+                child: CircularProgressIndicator(),
+                width: 60,
+                height: 60,
+              )
+            ];
+          }
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: children,
+            ),
+          );
+        });
+  }
 
 }
 

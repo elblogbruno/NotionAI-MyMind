@@ -8,7 +8,8 @@
 	top: 30px;
 	box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1);
 	border-radius: 4px;
-	width: 350px;
+	/*width: 350px;*/
+	width: auto;
 	box-sizing: border-box;
 	user-select: none;
 
@@ -36,6 +37,11 @@
 	animation: caimmNotificationSlideOut 300ms ease-out forwards;
 }
 
+
+.collection-button-div[show="false"] {
+	display: none;
+}
+
 #collection-notification .collection-notification-wrap {
 	overflow: hidden;
 	border-radius: 4px;
@@ -59,10 +65,10 @@
 	cursor: pointer;
 }
 
-#collection-notification .collection-notification-inner img {
+/* #collection-notification .collection-notification-inner img {
 	width: 30px;
 	margin: 0 20px;
-}
+} */
 
 #collection-notification .collection-notification-inner span {
 	color: inherit !important;
@@ -78,25 +84,57 @@
 /*
 Buttons
 */
-.collection-button-div button {
-	background-color: white;
-    color: black;
-	border-radius: 4px;
-  	border: 3px solid coral;
+.container-image {
+	position: relative;
+
 	display: block;
-	margin: 5px;
+}
+
+.btn-collection {
+	/* width: auto;
+	height: auto; */
+
+	background-color: #fff;
+	border-radius: 4px;
+	border: 0 solid coral;
+	background-color: transparent;
+
+	font-size: 1rem;
+	color: rgb(255, 255, 255);
+	box-shadow: inset 0 0 0 1px rgba(255,255,255,.05), inset 0 1px 0 0 rgba(255,255,255,.45), inset 0 -1px 0 0 rgba(255,255,255,.15), 0 1px 0 0 rgba(255,255,255,.15);
+	text-shadow: 0 1px rgba(255,255,255,.4);
+}
+
+.btn-collection:hover {
+	opacity: 0.5;
+	background-color: transparent;
+	border: 0 solid coral;
+}
+
+.btn-img {
+	position: relative;
+	border-radius: 4px;
+	border: 2px solid coral;
+	display: block;
+	
+	width: 100px;
+	height: 100px;
 }
 
 .collection-button-div {
-	display: flex;
-	flex-direction: column;
-  	justify-content: normal;
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	grid-row-gap: 15px;
+	grid-column-gap: 15px;
 }
-  
-/* Add a background color on hover */
-.collection-button-div button:hover {
-	background-color: #f1f1f1;
-}
+
+.centered {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+} 
+
 
 /*
  * Animations

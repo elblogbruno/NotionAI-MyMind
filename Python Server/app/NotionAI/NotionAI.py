@@ -1,34 +1,35 @@
-import json
-
 from notion.client import NotionClient
 from notion.block import ImageBlock, TextBlock
-
-from utils.custom_errors import OnImageNotFound, OnUrlNotValid, NoTagsFound
-
-import requests
-
 from threading import Thread
+
+from utils.custom_errors import OnImageNotFound, OnUrlNotValid
 from image_tagging.image_tagging import ImageTagging
 from NotionAI.utils import create_json_response, web_clipper_request, extract_image_from_content, \
     get_current_extension_name, open_browser_at_start
 from NotionAI.mind_structure import *
+from NotionAI.property_manager.property_manager import PropertyManager
+from utils.utils import settings_folder
+
+import validators
+import json
 
 
 class NotionAI:
     def __init__(self, logging, port):
         self.logging = logging
         logging.info("Initiating NotionAI Class.")
-        if os.path.isfile('data.json'):  # If we have a data.json with credentials, we start with these credentials
+        if os.path.isfile(
+                settings_folder + 'data.json'):  # If we have a data.json with credentials, we start with these credentials
             print("Initiating with a found config file.")
             logging.info("Initiating with a found config file.")
             self.loaded = self.run(logging)
         else:  # Instead it is  the first time running the server, so we open the server url.
-            open_browser_at_start(self,port)
+            open_browser_at_start(self, port)
 
     def run(self, logging, email=None, password=None):
         loaded = False
         data = {}
-        with open('data.json') as json_file:
+        with open(settings_folder + 'data.json') as json_file:
             data = json.load(json_file)
         try:
             self.logging = logging
@@ -52,39 +53,36 @@ class NotionAI:
             self.token_v2 = token_v2
 
             self.image_tagger = ImageTagging(data, logging)  # we initialize the image tagger with our data.
-            self.mind_structure = MindStructure(client=self.client,data=self.data)
+            self.mind_structure = MindStructure(client=self.client,data=self.data)  # we initialize the structure of the mind manager.
+            self.property_manager = PropertyManager(logging, self.client,
+                                                    self.mind_structure)  # we initialize the property manager.
+
             self.counter = 0
+
             self.times_to_retry = 5  # if no image is found initially, it will retry this many times
+
             self.collection_index = 0
+
             loaded = True
 
         except requests.exceptions.HTTPError:
             self.logging.info("Incorrect token V2 from notion")
         return loaded
 
-    def set_current_collection(self, index=0):
-        print("Getting collection at index {}".format(index))
-        try:
-            if self.mind_structure is None:
-                self.mind_structure = MindStructure(client=self.client, data=self.data)
-
-            collection_id, id = self.mind_structure.get_collection_by_index(index)  # collection is our database or "mind" in notion, as be have multiple, if not suplied, it will get the first one as the priority one.
-            self.collection = self.client.get_collection(collection_id=collection_id)
-            self.current_mind_id = id
-            self.collection_index = index
-        except requests.exceptions.HTTPError as e:
-            print("Http error : " + str(e))
-
     def add_url_to_database(self, url, title, collection_index=0):
-        if url is None or title is None:
+        if url is None:
             self.statusCode = 500
             return create_json_response(self)
         else:
+            if title is None:
+                title = "No title found for the content"
+
             self.logging.info("Adding url to mind: {0} {1}".format(url.encode('utf8'), title.encode('utf8')))
             self.statusCode = 200  # at start we asume everything will go ok
             try:
-                self.set_current_collection(collection_index)
-                rowId = web_clipper_request(self, url, title)
+
+                self.mind_structure.set_current_collection(collection_index)
+                rowId = web_clipper_request(self, url, title, self.mind_structure.current_mind_id)
 
                 thread = Thread(target=self.add_url_thread, args=(rowId,))
                 thread.daemon = True  # Daemonize thread
@@ -101,6 +99,10 @@ class NotionAI:
                 print(e)
                 self.statusCode = 404
                 return create_json_response(self)
+            except requests.exceptions.HTTPError as e:
+                self.logging.info(e)
+                print("Adding url: " + str(e))
+                self.statusCode = 429
 
     def add_text_to_database(self, text, url, collection_index=0):
         self.statusCode = 200  # at start we asume everything will go ok
@@ -110,9 +112,9 @@ class NotionAI:
                 return create_json_response(self)
             else:
                 self.logging.info("Adding text to mind: {0} {1}".format(url.encode('utf8'), text.encode('utf8')))
-                self.set_current_collection(collection_index)
+                self.mind_structure.set_current_collection(collection_index)
 
-                row = self.collection.add_row()
+                row = self.mind_structure.collection.add_row()
                 self.row = row
 
                 thread = Thread(target=self.add_text_thread, args=(url, text,))
@@ -143,9 +145,9 @@ class NotionAI:
         self.statusCode = 200  # at start we asume everything will go ok
 
         try:
-            self.set_current_collection(collection_index)
+            self.mind_structure.set_current_collection(collection_index)
 
-            row = self.collection.add_row()
+            row = self.mind_structure.collection.add_row()
             self.row = row
 
             thread = Thread(target=self.add_image_thread, args=(image_src, url, image_src_url, is_local,))
@@ -169,18 +171,26 @@ class NotionAI:
         try:
             block = self.client.get_block(id)
 
-            if url == "" or title == "":
-                self.statusCode = 500
-                return create_json_response(self)
-            else:
+            if url is None or title is None:
+                return create_json_response(self, rowId=block.id, status_code=304)
+
+            if title != "":
                 block.title = title
-                block.url = url
-                return create_json_response(self)
+
+            if url != "":
+                valid = validators.url(url)
+                if valid:
+                    block.url = url
+                else:
+                    return create_json_response(self, rowId=block.id, status_code=400)
+
+            return create_json_response(self, rowId=block.id)
 
         except OnUrlNotValid as invalidUrl:
             self.logging.info(invalidUrl)
             self.statusCode = 500
             return create_json_response(self)
+
         except AttributeError as e:
             self.logging.info(e)
             print(e)
@@ -189,33 +199,32 @@ class NotionAI:
 
     def row_callback(self, record, difference):
         try:
-            if len(self.row.AITagsText) == 0 and len(self.row.mind_extension) == 0 and len(difference[0][-1][0][1]) != 0:
+            new = len(self.property_manager.get_properties(self.row, multi_tag_property=1)) == 0 and len(
+                self.property_manager.get_properties(self.row, ai_tags_property=1)) == 0 and len(
+                self.property_manager.get_properties(self.row, mind_extension_property=1)) == 0 and len(
+                difference[0][-1][0][1]) != 0
+            if new:
                 print("Callback from row. Here's what was changed:")
                 self.page_content = difference[0][-1][0][1]
                 try:
                     img_url_list = extract_image_from_content(self, self.page_content, record.id)
-                    try:
-                        self.row.remove_callbacks(self.row_callback)
-                        self.add_tags_to_row(img_url_list, False)
-                    except NoTagsFound as e:
-                        print(e)
-                        self.add_tags_to_row(None, False)
-                        self.logging.info(e)
-                    except ValueError as e:
-                        print(e)
-                        self.add_tags_to_row(None, False)
-                        self.logging.info(e)
-                    except Exception as e:
-                        self.add_tags_to_row(None, False)
-                        self.logging.info(e)
+                    self.add_tags_to_row(img_url_list, False)
+                    self.row.remove_callbacks(self.row.id)
+                except ValueError as e:
+                    print(e)
+                    self.add_tags_to_row(None, False)
+                    self.logging.info(e)
+                except Exception as e:
+                    self.add_tags_to_row(None, False)
+                    self.logging.info(e)
                 except OnImageNotFound as e:
                     print(e)
                     self.add_tags_to_row(None, False)
                     self.logging.info(e)
             else:
-                print("This row is added already")
+                print("This row was added already")
         except AttributeError as e:
-            print(e)
+            print("Row callback: " + str(e))
             self.logging.info(e)
 
     def add_url_thread(self, rowId):
@@ -223,14 +232,14 @@ class NotionAI:
         self.page_content = None
         try:
             self.row = self.client.get_block(rowId)
-            self.row.add_callback(self.row_callback)
+            self.row.add_callback(self.row_callback, rowId)
 
             while self.page_content is None:
                 self.row.refresh()
 
             self.logging.info("Thread %s: finishing", rowId)
         except requests.exceptions.HTTPError as e:
-            print(e)
+            print("Adding url thread: " + str(e))
             self.statusCode = 429
             self.logging.info(e)
 
@@ -249,7 +258,7 @@ class NotionAI:
             self.row.mind_extension = get_current_extension_name(self.request_platform)
             self.logging.info("Add text Thread %s: finished", row.id)
         except AttributeError as e:
-            print(e)
+            print("Add text thread: " + str(e))
             self.logging.info(e)
 
     def add_image_thread(self, image_src, url=None, image_src_url=None, is_local=False):
@@ -272,30 +281,38 @@ class NotionAI:
 
     def add_tags_to_row(self, img_url_list, is_image_local):
         try:
+            print(img_url_list, is_image_local)
             if img_url_list is None or len(img_url_list) == 0:
                 self.logging.info("No image was found or no tags are available.")
-                self.row.AITagsText = "no-tags-available"
+                self.property_manager.update_properties(self.row, ai_tags_property="no-tags-available")
             else:
                 self.logging.info("Found {0} images.".format(len(img_url_list)))
-                result = ""
+                result = []
+                tags_string = "no-tags-available"
+
                 for img_url in img_url_list:
                     self.logging.info("Adding tags to image {0}".format(img_url))
                     tags = self.image_tagger.get_tags(img_url, is_image_local)
                     self.logging.info("Tags from image {0} : {1}".format(img_url, tags))
-                    result = tags + "," + result
-                self.row.AITagsText = result
-                self.row.mind_extension = get_current_extension_name(self.request_platform)
+                    result.append(tags)
+
+                filtered_list = self.image_tagger.remove_duplicated_tags(result)  # removes duplicated tags
+                if len(filtered_list) > 0:
+                    tags_string = ",".join(filtered_list)  # converts the tags to a string
+
+                self.logging.info("Tags from block {0}".format(tags_string))
+                self.property_manager.update_properties(self.row, ai_tags_property=tags_string,
+                                                        mind_extension_property=get_current_extension_name(
+                                                            self.request_platform))
+
         except AttributeError as e:
-            print(e)
+            print("Add tags to row: " + str(e))
             self.logging.info(e)
 
     def analyze_image_thread(self, image_src, row, is_image_local=False):
         try:
             self.add_tags_to_row(image_src, is_image_local)
             self.logging.info("Image tag Thread %s: finished", row.id)
-        except NoTagsFound as e:
-            print(e)
-            self.logging.info(e)
         except ValueError as e:
             print(e)
             self.logging.info(e)
@@ -307,5 +324,8 @@ class NotionAI:
             self.logging.info(e)
 
     # sets the current platform making the request, so we know if content is added from phone or desktop
-    def set_mind_extension(self, platform):
-        self.request_platform = platform
+    def set_mind_extension(self, request):
+        extension_platform_name = str(request.user_agent.platform)
+        if extension_platform_name is None:
+            extension_platform_name = str(request.user_agent)
+        self.request_platform = extension_platform_name
