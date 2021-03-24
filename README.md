@@ -103,6 +103,9 @@ Users can install the android app from android store. On Ios you can clone the f
 I won't be releasing the app on the Apple App Store, as I don't have an Apple Developer Account either Mac OS based computer.
 Meanwhile, you can clone the flutter project and build the app yourself.
 
+## Installation Tutorial
+[![Installation Tutorial](https://img.youtube.com/vi/v2wWtCYED1U/0.jpg)](https://www.youtube.com/watch?v=v2wWtCYED1U)
+
 # Installing
 - It is very easy, and there are different ways from click to install one's to more advanced ones, in case you want to install it from source.
 
