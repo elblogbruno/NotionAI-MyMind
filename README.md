@@ -123,6 +123,10 @@ Meanwhile, you can clone the flutter project and build the app yourself.
     - Notion database creation
     - Browser or app walktrough with explanations.
 
+- You can watch the video also on how to create the structure!
+ 
+[![Installation Tutorial](https://img.youtube.com/vi/sRn6Pk1PnSY/0.jpg)](https://www.youtube.com/watch?v=sRn6Pk1PnSY)
+
 ### Docker-Compose
 
 - You can check it out on the wiki: [Installing the Notion AI My Mind Server on Docker](https://github.com/elblogbruno/NotionAI-MyMind/wiki/Installing-the-Notion-AI-My-Mind-Server-on-Docker)
