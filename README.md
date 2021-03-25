@@ -30,6 +30,7 @@
 
 <a href="https://github.com/elblogbruno/NotionAI-MyMind/wiki/Notion-AI-My-Mind-Collections">
     <img src="doc/header_collections_example_modify_title_tags.gif" alt="collections" width="690" height="388">
+    <img src="doc/header_phone_demo.gif" alt="collections" height="388">
  </a>
 
 ### Search
