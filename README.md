@@ -29,7 +29,7 @@
 <a href="https://github.com/elblogbruno/NotionAI-MyMind/wiki/Notion-AI-My-Mind-Collections"><strong>This is collections example, where you can have different collections or databases of contents, fully customizable on notion. »</strong></a>
 
 <a href="https://github.com/elblogbruno/NotionAI-MyMind/wiki/Notion-AI-My-Mind-Collections">
-    <img src="doc/header_collections_example.gif" alt="collections" width="690" height="388">
+    <img src="doc/header_collections_example_modify_title_tags.gif" alt="collections" width="690" height="388">
  </a>
 
 ### Search
