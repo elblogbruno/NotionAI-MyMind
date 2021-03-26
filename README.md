@@ -72,6 +72,8 @@ The idea is to have extensions for your mind on the browser, and app on android 
 
 Right now, there's a working Python Local Server, that receives all the data from the extension and the app, and publishes it to your fully customizable and searchable database in Notion. So it is 100% open source and fully private!
 
+Maybe we can say it is an Open Source Alternative to [Raindrop](https://raindrop.io/) and [Microsoft Edge Collections](https://support.microsoft.com/en-us/microsoft-edge/organize-your-ideas-with-collections-in-microsoft-edge-60fd7bba-6cfd-00b9-3787-b197231b507e), but much cooler with Community driven opinion and AI Capabilities, and a repo maintainer with lot of imagination (yes my brain goes at 150% speed)!
+
 ## Examples of what you can do.
 
 Add text to your mind  |  Add images to your mind
