@@ -14,6 +14,7 @@ key.properties
 *.zip
 *.log
 *.json
+!Chrome and Firefox Extension/*.json
 ### Images ###
 # JPEG
 *.jpg
