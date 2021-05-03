@@ -4,16 +4,17 @@
 
 *.jks
 key.properties
-/Python Server/output
-/Python Server/app/.idea
-/Python Server/app/image_tagging/temp_image_folder
-/Python Server/app/__pycache__
-/Python Server/app/uploads
+/Python-Server/output
+/Python-Server/app/.idea
+/Python-Server/app/image_tagging/temp_image_folder
+/Python-Server/app/__pycache__
+/Python-Server/app/uploads
 
 
 *.zip
 *.log
 *.json
+!/Python-Server/app/static/*.json
 !Chrome and Firefox Extension/*.json
 ### Images ###
 # JPEG
