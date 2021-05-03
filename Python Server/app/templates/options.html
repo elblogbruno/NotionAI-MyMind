@@ -22,13 +22,24 @@
                     <input type="text" name="notion_url" id="notion_url" class="form-control"  aria-describedby="url_help" placeholder="Enter the URL">
                     <small id="url_help" class="form-text text-muted">Please set the https:// at start. Don't know what is this url? More info here: <a href="https://github.com/elblogbruno/NotionAI-MyMind/wiki/Notion-AI-My-Mind-Collections">Notion AI My Mind Collections</a></small>
 
-                    <h2>Properties customization :</h2>
+                    <h3>Properties customization :</h3>
                     <smalL>If you have set custom names to properties, you can set them here. More info<a href="https://github.com/elblogbruno/NotionAI-MyMind/wiki/Notion-AI-My-Mind-Collections#step-2-create-collections"> here</a> </smalL>
 
                     <input type="text" name="multi_tag_property" id="multi_tag_property" class="form-control" placeholder="Enter the Multi-select property name. (If blank default will be named 'Tags')">
                     <input type="text" name="mind_extension_property" id="mind_extension_property" class="form-control" placeholder="Enter the mind_extension property name. (If blank default will be named 'mind_extension')">
                     <input type="text" name="ai_tags_property" id="ai_tags_property" class="form-control" placeholder="Enter the AITagsText  property name. (If blank default will be named 'AITagsText')">
+                    <input type="text" name="notion_date_property" id="notion_date_property" class="form-control" placeholder="Coming sooon....">
                 </div>
+
+                <h3>Location Options :</h3>
+                 <div class="form-group">
+                     <label for="language_code">Language</label>
+                     <select id="language_code" name="language_code" class="form-select form-select-lg mb-3" aria-label=".form-select-lg example">
+                        <option value="en_US">English</option>
+                        <option value="es_ES">Español</option>
+                     </select>
+                 </div>
+
                 <h3>Login options: </h3>
                 <p> If you reload the server, you will need to enter the email and password again if using this credential system. It is so, so your password or email is not stored on the server. If you instead use the TokenV2 login method it will be saved and used on the next startup of the server.</p>
                 <div class="form-group">

@@ -15,12 +15,8 @@ class TensorFlowTag:
     def __init__(self, delete_image_after_tagging=True):
         self.delete_after_tagging = delete_image_after_tagging
         self.model = InceptionV3(weights='imagenet')
-        createFolder("./image_tagging/temp_image_folder")
 
     def get_tags(self, image_url, is_local_image, treshold):
-        if treshold is None:
-            treshold = 0.10
-
         if is_local_image:
             file = "./uploads/" + image_url.split("/")[-1]
         else:
@@ -44,6 +40,6 @@ class TensorFlowTag:
         if self.delete_after_tagging:
             os.remove(file)
 
-        #str1 = ','.join(str(e) for e in tags)
+        # str1 = ','.join(str(e) for e in tags)
 
         return tags

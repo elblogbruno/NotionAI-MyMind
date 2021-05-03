@@ -1,15 +1,15 @@
 from random import choice
 from uuid import uuid1
+
 import json
-import matplotlib
 import requests
 
+from NotionAI.property_manager.tag_object import TagObject
 from NotionAI.utils import create_json_response
-from utils.utils import settings_folder
+from utils.utils import SETTINGS_FOLDER, DEFAULT_COLOR
 
 
 ## This class manages the multi-choice tag property on a mind element. We can get current tags and add tags.
-
 class MultiTagManager:
     def __init__(self, logging, client, mind_structure, options):
         self.logging = logging
@@ -18,8 +18,8 @@ class MultiTagManager:
         self.mind_structure = mind_structure
         self.multi_tag_property = options['multi_tag_property']
 
-    def get_multi_select_tags(self, collection_index=0):
-        self.mind_structure.set_current_collection(int(collection_index))
+    def get_multi_select_tags(self,notion_ai, append_tags, collection_index=None):
+        #self.mind_structure.set_current_collection(int(collection_index))
         prop = self.multi_tag_property
         print(prop)
         collection_schema = self.mind_structure.collection.get("schema")
@@ -36,23 +36,22 @@ class MultiTagManager:
 
         if "options" in prop_schema:
             for element in prop_schema["options"]:
-                color = "#505558"
+                color = DEFAULT_COLOR
 
                 if element["color"]:
-                    if element["color"] == 'default':
-                        color = "#505558"
-                    elif matplotlib.colors.cnames[element["color"]]:
-                        color = matplotlib.colors.cnames[element["color"]]
+                    color = self._notion_color_to_hex(element["color"])
 
-                x = {
-                    "option_name": element["value"],
-                    "option_id": element["id"],
-                    "option_color": color,
-                }
+                x = TagObject().parse_from_notion_element(element=element,tag_color=color)
+
                 l.append(x)
-            return create_json_response(self, status_code=200, append_content=l)
+
+            l = l + append_tags
+            return create_json_response(notion_ai, status_code=200, append_content=l)
         else:
-            raise ValueError(f'"{prop}" property has no tags on it.')
+            if len(append_tags) > 0:
+                return create_json_response(notion_ai, status_code=200, append_content=append_tags)
+            else:
+                raise ValueError(f'"{prop}" property has no tags on it.')
 
     def get_multi_select_tags_as_list(self, collection_index=0):
         self.mind_structure.set_current_collection(int(collection_index))
@@ -77,22 +76,21 @@ class MultiTagManager:
         else:
             return l
 
-    def update_multi_select_tags(self, id, tags_json, collection_index=0, color=None):
+    def update_multi_select_tags(self,notion_ai, id, tags_json, collection_index=0, color=None):
         try:
             # self.mind_structure.set_current_collection(int(collection_index))
-            self.logging.info("Updating multi select tags for row {0} {1} {2}".format(id,tags_json,collection_index))
-            print("Updating multi select tags for row {0} {1} {2}".format(id,tags_json,collection_index))
+            self.logging.info("Updating multi select tags for row {0} {1} {2}".format(id, tags_json, collection_index))
+            print("Updating multi select tags for row {0} {1} {2}".format(id, tags_json, collection_index))
             block = self.client.get_block(id)
 
             current_tags_notion = self.get_multi_select_tags_as_list(collection_index)
-            current_tags = block.get_property(self.multi_tag_property)
             tag_to_add = []
 
             for tag in tags_json:
 
                 if tag['option_name'] not in current_tags_notion or len(current_tags_notion) == 0:
                     print(tag['option_name'] + " is new")
-                    value = self.add_new_multi_select_value(self.multi_tag_property, tag['option_name'])
+                    value = self.add_new_multi_select_value(self.multi_tag_property, tag['option_name'], tag['option_color'])
                 else:
                     print(tag['option_name'] + " already exists")
                     value = tag['option_name']
@@ -101,9 +99,9 @@ class MultiTagManager:
             block.set_property(self.multi_tag_property, tag_to_add)
 
             if len(block.get_property(self.multi_tag_property)) > 0:
-                return create_json_response(self, status_code=205, rowId=id)
+                return create_json_response(notion_ai, status_code=205, rowId=id)
             else:
-                return create_json_response(self, status_code=404, rowId=id)
+                return create_json_response(notion_ai, status_code=404, rowId=id)
 
         except ValueError as e:
             self.logging.info(e)
@@ -111,7 +109,7 @@ class MultiTagManager:
         except requests.exceptions.HTTPError as e:
             print(e)
             self.logging.info(e)
-            return create_json_response(self, status_code=429, rowId=id)
+            return create_json_response(notion_ai, status_code=429, rowId=id)
 
     def add_new_multi_select_value(self, prop, value, color=None):
         colors = [
@@ -129,6 +127,10 @@ class MultiTagManager:
         """`prop` is the name of the multi select property."""
         if color is None:
             color = choice(colors)
+        else:
+            color = self._hex_to_notion_color(color)
+
+        print("Tag color for {0} will be {1}".format(value,color))
 
         collection_schema = self.mind_structure.collection.get("schema")
         prop_schema = next(
@@ -141,7 +143,7 @@ class MultiTagManager:
         if prop_schema["type"] != "multi_select":
             raise ValueError(f'"{prop}" is not a multi select property!')
 
-        if "options" in prop_schema: # if there are no options in it, means there's no tags.
+        if "options" in prop_schema:  # if there are no options in it, means there's no tags.
             dupe = next(
                 (o for o in prop_schema["options"] if o["value"] == value), None
             )
@@ -161,3 +163,52 @@ class MultiTagManager:
 
             self.mind_structure.collection.set("schema", collection_schema)
             return value
+
+    def _notion_color_to_hex(self,color_name):
+        if color_name == None:
+            return  "#505558"
+        elif color_name == "default":
+            return  "#505558"
+        elif color_name == "gray":
+            return  "#6B6F71"
+        elif color_name == "brown":
+            return  "#695B55"
+        elif color_name == "orange":
+            return  "#9F7445"
+        elif color_name == "yellow":
+            return  "#9F9048"
+        elif color_name == "green":
+            return  "#467870"
+        elif color_name == "blue":
+            return  "#487088"
+        elif color_name == "purple":
+            return  "#6C598F"
+        elif color_name == "pink":
+            return  "#904D74"
+        elif color_name == "red":
+            return  "#9F5C58"
+
+    def _hex_to_notion_color(self,color_name):
+        if color_name == None:
+            return  "default"
+        if color_name == "#505558":
+            return  "default"
+        elif color_name == "#6B6F71":
+            return  "gray"
+        elif color_name == "#695B55":
+            return  "brown"
+        elif color_name == "#9F7445":
+            return  "orange"
+        elif color_name == "#9F9048":
+            return  "yellow"
+        elif color_name == "#467870":
+            return  "green"
+        elif color_name == "#487088":
+            return  "blue"
+        elif color_name == "#6C598F":
+            return  "purple"
+        elif color_name == "#904D74":
+            return  "pink"
+        elif color_name == "#9F5C58":
+            return  "red"
+

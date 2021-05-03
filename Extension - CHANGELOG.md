@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1]
+
+### Added 
+
+- It notifies you when there is an update on the server.
+- Added option to reload the collections from the menu and close the menu.
+- Added Spanish language. More info on how to collaborate in translating [here](https://github.com/elblogbruno/NotionAI-MyMind-Translations)
+- Added tag colors as on phone App.
+### Fixed
+
+- Removed unused code.
+- Fixed bugs.
+
 ## [1.1.0]
 
 ### Added 

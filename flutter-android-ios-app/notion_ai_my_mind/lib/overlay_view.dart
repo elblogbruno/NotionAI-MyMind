@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tagging/flutter_tagging.dart';
 import 'package:notion_ai_my_mind/Arguments.dart';
+import 'package:notion_ai_my_mind/api/models/multi_select_tag_list_response.dart';
 
 
 import 'package:notion_ai_my_mind/resources/strings.dart';
@@ -10,6 +11,8 @@ import 'dart:math';
 
 import 'api/models/api_response.dart';
 import 'api/models/tag.dart';
+import 'locales/main.i18n.dart';
+
 Random random = new Random();
 
 class AddLinkPage extends StatelessWidget  {
@@ -26,7 +29,7 @@ class AddLinkPage extends StatelessWidget  {
     return Scaffold(
       resizeToAvoidBottomInset: false, //https://stackoverflow.com/questions/63743330/how-to-a-renderflex-overflowed-by-61-pixels-on-the-bottom-on-the-top-of-the-v
       appBar: AppBar(
-        title: const Text(Strings.titleAddNewLinkPage),
+        title:  Text(Strings.titleAddNewLinkPage.i18n),
       ),
       body: FutureBuilder<APIResponse>(
         future:  Api().addContentToMind(args.url,args.isImage,args.collection_index), // a previously-obtained Future<String> or null
@@ -85,9 +88,10 @@ class AddLinkPage extends StatelessWidget  {
           style: ElevatedButton.styleFrom(
             primary: Colors.teal,
           ),
-          child: new Text(
-            Strings.exitButtonText,
-            style: new TextStyle(fontSize: 20.0, color: Colors.white),
+          child: Icon(
+            Icons.close,
+            color: Colors.white,
+            size: 50,
           ),
         ),
       ];
@@ -160,12 +164,12 @@ class AddLinkPage extends StatelessWidget  {
 
   /*Makes the tag request to get available tags*/
   Widget _TagRequest(){
-    return FutureBuilder<List<Tag>>(
+    return FutureBuilder<MultiSelectTagListResponse>(
       future:  Api().get_multi_select_tags(args.collection_index), // a previously-obtained Future<String> or null
-      builder: (BuildContext context, AsyncSnapshot<List<Tag>> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<MultiSelectTagListResponse> snapshot) {
         List<Widget> children;
         if (snapshot.hasData) {
-          TagSearchService.tagList = snapshot.data;
+          TagSearchService.tagList = snapshot.data.multi_select_tag_list;
           _Tags = [];
           return _buildDropDown(context, snapshot.data);
         } else if (snapshot.hasError) {
@@ -177,9 +181,9 @@ class AddLinkPage extends StatelessWidget  {
               width: 60,
               height: 60,
             ),
-            const Padding(
+            Padding(
               padding: EdgeInsets.only(top: 16),
-              child: Text(Strings.waitText),
+              child: Text(Strings.waitText.i18n),
             )
           ];
         }
@@ -194,80 +198,92 @@ class AddLinkPage extends StatelessWidget  {
   }
 
   /*Builds the dropwdown with the tags*/
-  Widget _buildDropDown(context,List<Tag> tags){
-    return Card(
+  Widget _buildDropDown(context,MultiSelectTagListResponse response){
+    List<Tag> tags = response.multi_select_tag_list;
+    if(tags.isEmpty || tags == null){
+      return Card(
         child:  Column(
-          children: <Widget> [
-          FlutterTagging<Tag>(
-            initialItems: _Tags,
-            textFieldConfiguration: TextFieldConfiguration(
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                filled: true,
-                fillColor: Colors.green.withAlpha(30),
-                hintText: 'Search Tags',
-                labelText: 'Select Tags',
-              ),
-            ),
-            findSuggestions: TagSearchService.getTags,
-            additionCallback: (value) {
-              return Tag(option_name: value,option_id: value,option_color: value);
-            },
-            onAdded: (language){
-              // api calls here, triggered when add to tag button is pressed
-              print(language.option_name);
-              return Tag();
-            },
-            configureSuggestion: (lang)
-            {
-              return SuggestionConfiguration(
-                title:Text(lang.option_name),
-                additionWidget: Chip(
-                  avatar: Icon(
-                    Icons.add_circle,
-                    color: Colors.white,
+            children: <Widget> [
+                Text(response.response.text_response)
+              ],
+        ),
+      );
+    }else{
+      return Card(
+        child:  Column(
+            children: <Widget> [
+              FlutterTagging<Tag>(
+                initialItems: _Tags,
+                textFieldConfiguration: TextFieldConfiguration(
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    filled: true,
+                    fillColor: Colors.green.withAlpha(30),
+                    hintText: 'Search Tags',
+                    labelText: Strings.addTagsText.i18n,
                   ),
-                  label: Text('Add New Tag'),
-                  labelStyle: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w300,
-                  ),
-                  backgroundColor: Colors.green,
                 ),
-              );
-            },
-            configureChip: (lang) {
-              return ChipConfiguration(
-                label: Text(lang.option_name),
-                backgroundColor: colorFor(lang.option_color),
-                labelStyle: TextStyle(color: Colors.white),
-                deleteIconColor: Colors.white,
-              );
-            },
-            onChanged: () {
-              _selectedValuesJson = _Tags
+                findSuggestions: TagSearchService.getTags,
+                additionCallback: (value) {
+                  return Tag(option_name: value,option_id: value,option_color: value);
+                },
+                onAdded: (language){
+                  // api calls here, triggered when add to tag button is pressed
+                  print(language.option_name);
+                  return Tag();
+                },
+                configureSuggestion: (lang)
+                {
+                  return SuggestionConfiguration(
+                    title:Text(lang.option_name),
+                    additionWidget: Chip(
+                      avatar: Icon(
+                        Icons.add_circle,
+                        color: Colors.white,
+                      ),
+                      label: Text('Add New Tag'),
+                      labelStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w300,
+                      ),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                },
+                configureChip: (lang) {
+                  return ChipConfiguration(
+                    label: Text(lang.option_name),
+                    backgroundColor: colorFor(lang.option_color),
+                    labelStyle: TextStyle(color: Colors.white),
+                    deleteIconColor: Colors.white,
+                  );
+                },
+                onChanged: () {
+                  _selectedValuesJson = _Tags
                       .map<String>((lang) => '\n${lang.toJson()}')
                       .toList()
                       .toString();
                   _selectedValuesJson =
                       _selectedValuesJson.replaceFirst('}]', '}\n]');
-            },
-          ),
-          ElevatedButton(
-              onPressed:()=> showDialog(context: context, builder: (x) => _AddTagsToBlockRequest(context)),
-              style: ElevatedButton.styleFrom(
-              primary: Colors.teal,
+                },
               ),
-              child: new Text(
-                  Strings.addTagsText,
+              ElevatedButton(
+                onPressed:()=> showDialog(context: context, builder: (x) => _AddTagsToBlockRequest(context)),
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.teal,
+                ),
+                child: new Text(
+                  Strings.addTagsText.i18n,
                   style: new TextStyle(fontSize: 20.0, color: Colors.white),
+                ),
               ),
-          ),
-        ]
+            ]
 
         ),
-    );
+      );
+    }
+
   }
 
   /*Makes the request to add tags*/
@@ -392,7 +408,7 @@ class AddLinkPage extends StatelessWidget  {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: <Widget>[
-                            Text("Current Title:",
+                            Text(Strings.currentTitleTitle.i18n,
                                 style: TextStyle(fontSize: 24),
                                 textAlign: TextAlign.center
                             ),
@@ -411,7 +427,7 @@ class AddLinkPage extends StatelessWidget  {
                               ),
                               controller: titleController,
                             ),
-                            Text("Current URL:",
+                            Text(Strings.currentUrlTitle.i18n,
                                 style: TextStyle(fontSize: 24),
                                 textAlign: TextAlign.center
                             ),
@@ -436,7 +452,7 @@ class AddLinkPage extends StatelessWidget  {
                                 primary: Colors.teal,
                               ),
                               child: new Text(
-                                Strings.modifyTitleText,
+                                Strings.modifyTitleText.i18n,
                                 style: new TextStyle(fontSize: 20.0, color: Colors.white),
                               ),
                             ),
@@ -453,7 +469,7 @@ class AddLinkPage extends StatelessWidget  {
                             color: Colors.white
                         ),
                         padding: EdgeInsets.fromLTRB(5, 10, 5, 5),
-                        child: Text("Modify Block",
+                        child: Text(Strings.modifyTitleText.i18n,
                             style: TextStyle(fontSize: 24),
                             textAlign: TextAlign.center
                         ),

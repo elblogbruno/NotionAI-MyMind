@@ -54,3 +54,16 @@ class OnCollectionNotAvailable(Exception):
             return 'OnCollectionNotAvailable, {0} '.format(self.message)
         else:
             return 'OnCollectionNotAvailable has been raised'
+
+class OnServerNotConfigured(Exception):
+    def __init__(self, *args):
+        if args:
+            self.message = args[0]
+        else:
+            self.message = None
+
+    def __str__(self):
+        if self.message:
+            return 'OnServerNotConfigured, {0} '.format(self.message)
+        else:
+            return 'OnServerNotConfigured has been raised'

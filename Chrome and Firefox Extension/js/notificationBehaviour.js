@@ -1,14 +1,14 @@
 (() => {
 	const usePromise = typeof browser !== "undefined";
 
-	const { id, icon,  message, status, redirect , show_tags, block_title,block_attached_url } = window.naimm;
+	const { id, icon,  message, status, redirect , show_tags, block_title,block_attached_url,timeout } = window.naimm;
 
 	const events = {};
-	const tags = [];
+	var tags = [];
 	var tagCache = [];
+	var tagSuggestionsCache = [];
 
-	
-
+	console.log("TIMEOUT: " + timeout)
 	let previousValue = "";
 	const createListener = (id, target, name, callback) => {
 		events[id] = {
@@ -17,9 +17,6 @@
 			callback: target.addEventListener(name, callback)
 		}
 	};
-	
-	
-
 	const notification = document.getElementById("naimm-notification");
 
 	notification.removeAttribute("closing");
@@ -53,7 +50,7 @@
 
 		const notificationInput = document.createElement("input");
 		notificationInput.type = "text";
-		notificationInput.placeholder = "Add tags";
+		notificationInput.placeholder = chrome.i18n.getMessage("add_tags_placeholder");
 
 
 		const notificationTagsUpdateButton = document.createElement("button");
@@ -71,7 +68,7 @@
 
 		const notificationTagSuggestionsTitle = document.createElement("p");
 		notificationTagSuggestionsTitle.className = "naimm-notification-suggestions-title";
-		notificationTagSuggestionsTitle.innerText = "Tag Suggestions";
+		notificationTagSuggestionsTitle.innerText = chrome.i18n.getMessage("tag_title");
 
 		const notificationTagSuggestionsStorage = document.createElement("div");
 		notificationTagSuggestionsStorage.className = "naimm-notification-suggestions-storage";
@@ -102,7 +99,7 @@
 		notificationEdit.className = "naimm-notification-edit";
 
 		const notificationEditTitle = document.createElement("p");
-		notificationEditTitle.innerHTML = "Modify Block";
+		notificationEditTitle.innerHTML = chrome.i18n.getMessage("modify_block_title");
 		notificationEditTitle.className = "naimm-edit-title";
 
 		const notificationEditStorage = document.createElement("div");
@@ -138,7 +135,7 @@
 		notificationEditStorage.appendChild(notificationEditStatus);
 
 		const notificationEditButton = document.createElement("button");
-		notificationEditButton.innerHTML = "Modify";
+		notificationEditButton.innerHTML = chrome.i18n.getMessage("modify_block_button");
 		notificationEditButton.className = "edit_button";
 
 		notificationEdit.appendChild(notificationEditTitle);
@@ -146,6 +143,7 @@
 		notificationEdit.appendChild(notificationEditButton);
 		
 		notificationEdit.setAttribute("closing", true);
+		notification.setAttribute("requesting", false);
 
 		createListener("keyup", notificationInput, "keyup", event => {
 			const value = event.target.value.trim();
@@ -208,7 +206,11 @@
 					const newTag = itemValue || value;
 
 					if (newTag) {
-						addTag(newTag);
+						console.log(newTag);
+						tag = createNewTagObject(tagCache,newTag);
+						console.log("New tag " + tag);	
+						addTag(tag);
+						
 						showSuggestions();
 						previousValue = "";
 						notificationInput.value = "";
@@ -233,7 +235,11 @@
 			const value = event.target.dataset.value;
 
 			if (value) {
-				addTag(value);
+				console.log(value);
+				tag = createNewTagObject(tagCache,value);
+				console.log("New tag " + tag);	
+				addTag(tag);
+				
 				showSuggestions();
 				notificationInput.focus();
 				notificationInput.value = "";
@@ -262,25 +268,30 @@
 			notificationInput.focus();
 
 			createListener("focus", notificationInput, "focus", event => {
+				console.log("Focus event from notifiaction timeout");
 				notification.setAttribute("focus", true);
 			});
 		}, 100);
 
 		createListener("keydown", notificationInput, "keydown", event => {
+			console.log("Keydown event from notifiaction");
 			notification.setAttribute("focus", true);
 		});
 
 		createListener("blur", notificationInput, "blur", event => {
+			console.log("Blur event from notifiaction");
 			notification.removeAttribute("focus");
-			//createRemovalTimeout(4000);
+			createRemovalTimeout(timeout);
 		});
 		
 		const getSuggestionsList = function() {
 			function callback(response) {
-				if (response.status_code == 200){
+				if (response.status_code == 200)
+				{
+					notification.setAttribute("requesting", false);
 					console.log(response);
 					for (var i = 0, len = response.extra_content.length; i < len; i++){
-						tagCache.push(response.extra_content[i].option_name);
+						tagCache.push(response.extra_content[i]);
 					}
 				}else{
 					console.log(response);
@@ -296,90 +307,106 @@
 			} else {
 				chrome.runtime.sendMessage(config, callback);
 			}
+
+			notification.setAttribute("requesting", true);
 		}.bind(this);
 
 		getSuggestionsList();
 
 		const getSuggestions = function(value) {
-			var tags = [];
+			//var tags = [];
+			tagSuggestionsCache = [];
 			for (var i = 0, len = tagCache.length; i < len; i++){
-				if (tagCache[i].toLowerCase().includes(value.toLowerCase())){
-					tags.push(tagCache[i]);
+				if (tagCache[i] != null){
+					if (tagCache[i]['option_name'].toLowerCase().includes(value.toLowerCase())){
+						tagSuggestionsCache.push(tagCache[i]);
+					}
 				}
 			}
 
-			if (tags) {
-				showSuggestions(tags);
+			if (tagSuggestionsCache) {
+				showSuggestions(tagSuggestionsCache);
 				return;
 			}
 		}.bind(this);
 
 		const updateTags = function(tags) {
-			if (0 === tags.lenght){
-				notificationEdit.setAttribute("closing", true);	
-			}else{
-				function callback(response) {
-					notificationTagsLoading.setAttribute("loading", false);
-					notificationTagsStatus.innerHTML = String(response['text_response']);
-					setTimeout(function () {
-						notificationTagsButtonParent.style.display = 'block';
-						notificationTagsStatus.innerHTML = "";
-						notificationTagsLoading.setAttribute("closing", true);	
-						notification.setAttribute("mouse", false);
-					}, 2000);		
-				};
+			console.log(tags.lenght)
+			
+			function callback(response) {
+				notificationTagsLoading.setAttribute("loading", false);
+				notificationTagsStatus.innerHTML = String(response['text_response']);
+				setTimeout(function () {
+					notificationTagsButtonParent.style.display = 'block';
+					notificationTagsStatus.innerHTML = "";
+					notificationTagsLoading.setAttribute("closing", true);	
+					notification.setAttribute("mouse", false);
+					notification.setAttribute("requesting", false);
 
-				var msg = { updateMultiSelectTags: tags,block_id: redirect};
-				console.log(msg);
-
-				if (usePromise) {
-					browser.runtime.sendMessage(msg).then(callback);
-				} else {
-					chrome.runtime.sendMessage(msg, callback);
-				}
-
-				notificationInput.value = "";
-				notificationTagsButtonParent.style.display = 'none';
-				notificationTagsLoading.setAttribute("loading", true);
-				notification.setAttribute("mouse",true);
+					if (tags.length == 0){
+						notificationTagsDivButton.style.display = 'none';
+					}
+				}, 2000);		
+			};
+			if (tags.length == null)
+			{
+				tags = [];
 			}
+			var msg = { updateMultiSelectTags: tags,block_id: redirect};
+			console.log(msg);
+
+			if (usePromise) {
+				browser.runtime.sendMessage(msg).then(callback);
+			} else {
+				chrome.runtime.sendMessage(msg, callback);
+			}
+
+			notificationInput.value = "";
+			notificationTagsButtonParent.style.display = 'none';
+			notificationTagsLoading.setAttribute("loading", true);
+			notification.setAttribute("mouse",true);
+			notification.setAttribute("requesting", true);
+			
 		}.bind(this);
 
 		const removeTag = function(option_id) {
-			
-			const tag = tags.find(item => item.option_id === option_id);
-			
-			if (tag && tag.element) {
-				const index = tags.indexOf(tag);
-				const element = tag.element;
+			if (Array.isArray(tags) && tags.length){
+				var tag = tags.find(item => item.option_id === option_id);
+				
+				if (tag && tag.element) {
+					const index = tags.indexOf(tag);
+					const element = tag.element;
 
-				tags.splice(index, 1);
-				element.parentElement.removeChild(element);
+					tags.splice(index, 1);
+					element.parentElement.removeChild(element);
+				}
 			}
-			console.log(tags.length);
-			if (tags.length == 0){
-				notificationTagsDivButton.style.display = 'none';
+            else{
+				tags = [];
 			}
+				
 		}.bind(this);
 
-		const addTag = function(value, response) {
+		const addTag = function(value) {
+			console.log("Adding this tag to input " + value['option_name'])
 			notificationTagsDivButton.style.display = 'block';
 
 			const notificationTag = document.createElement("div");
 			const notificationTagIcon = document.createElement("div");
 
 			notificationTag.className = "naimm-notification-tag";
-			notificationTag.innerText = value;
-
+			notificationTag.style.backgroundColor = value['option_color'];
+			notificationTag.innerText = value['option_name'];
 			notificationTagIcon.className = "naimm-notification-tag-icon";
 
 			notificationTag.appendChild(notificationTagIcon);
 			notificationTagsStorage.appendChild(notificationTag);
-			var id = Math.random().toString(36).replace(/[^a-z]+/g, '').substr(0, 5);
-			tags.push({ option_name: notificationTag.innerText, option_id: id , element: notificationTag});
+			
+			tags.push({ option_name: notificationTag.innerText, option_id: value['option_id'] ,option_color: value['option_color'] , element: notificationTag});
 
 			createListener("click", notificationTag, "click", () => {
-				removeTag(id);
+				console.log("Notification tag remove click event from notifiaction");
+				removeTag(value['option_id']);
 			});
 		}.bind(this);
 
@@ -399,7 +426,8 @@
 						editInput1.placeholder = String(response['block_title']);
 						editInput2.placeholder = String(response['block_attached_url']);
 						notification.setAttribute("mouse", false);
-					}, 4000);		
+						notification.setAttribute("requesting", false);
+					}, timeout);		
 				};
 				
 				var msg = { new_title: title, new_url: url ,block_id_modify: redirect};
@@ -418,6 +446,7 @@
 				notificationEditInputDiv.style.display = 'none';
 				notificationEditLoading.setAttribute("loading", true);
 				notification.setAttribute("mouse",true);
+				notification.setAttribute("requesting", true);
 			}
 			
 		}.bind(this);
@@ -428,9 +457,10 @@
 
 				data.forEach((item) => {
 					const notificationTagSuggestion = document.createElement("div");
-
-					notificationTagSuggestion.dataset.value = item;
-					notificationTagSuggestion.innerText = item;
+					console.log(item);
+					notificationTagSuggestion.dataset.value = item['option_id'];
+					notificationTagSuggestion.innerText = item['option_name'];
+					notificationTagSuggestion.color = item['option_color']
 					notificationTagSuggestion.className = "naimm-notification-suggestion";
 
 					fragment.appendChild(notificationTagSuggestion);
@@ -450,21 +480,25 @@
 	notification.appendChild(notificationWrap);
 
 	createListener("click", notificationText, "click", event => {
+		console.log("Text click event from notifiaction");
 		if (redirect && redirect !== "undefined") {
 			chrome.runtime.sendMessage({ openTab: redirect });
 		}
-
 		createRemovalTimeout(0, true);
 	});
 
 	createListener("mouseleave", notification, "mouseleave", event => {
-		if (notification.getAttribute("mouse") == 'false'){
-			notification.removeAttribute("mouse");
-			createRemovalTimeout(4000);
-		}
+		console.log("Mouse leave event from notifiaction");
+		notification.removeAttribute("mouse");
+		createRemovalTimeout(timeout);
+		// if (notification.getAttribute("mouse") == 'false'){
+		// 	notification.removeAttribute("mouse");
+		// 	createRemovalTimeout(timeout);
+		// }
 	});
 
 	createListener("mouseenter", notification, "mouseenter", event => {
+		console.log("Mouse enter event from notifiaction");
 		notification.setAttribute("mouse", true);
 	});
 
@@ -475,10 +509,13 @@
 		}
 
 		setTimeout(() => {
+			const doingRequest = notification.getAttribute("requesting");
 			const isActive = notification.getAttribute("focus") || notification.getAttribute("mouse");
 			const isClosing = notification.getAttribute("closing");
 
-			if (forceClose || (!isActive && !isClosing)) {
+			console.log(isActive + " " + isClosing);
+
+			if (forceClose || (!isActive && !isClosing && !doingRequest) || (isActive == null && isClosing == null)) {
 				notification.addEventListener("animationend", () => {
 					if (window.naimm.id === id) notification.parentElement.removeChild(notification);
 				});
@@ -494,5 +531,28 @@
 
 	setTimeout(() => {
 		createRemovalTimeout(0);
-	}, 9000);
+	}, timeout);
 })();
+
+function createNewTagObject(tagCache,tag_value)
+{
+	console.log(tagCache);
+	
+	for (var i = 0; i < tagCache.length; i++){
+		console.log(tagCache[i]);
+		if (tagCache[i]['option_id'] == tag_value)
+			return { option_name: tagCache[i]['option_name'], option_id: tagCache[i]['option_id'] ,option_color: tagCache[i]['option_color'] }
+	}
+
+	var id = uuidv4();
+	var color_list = ['#505558','#6B6F71','#695B55','#9F7445','#9F9048','#467870','#487088','#6C598F','#904D74','#9F5C58'];
+	var color_item = color_list[Math.floor(Math.random() * color_list.length)];
+	return { option_name: tag_value, option_id: id ,option_color: color_item }
+	
+}
+function uuidv4() {
+	return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+	  (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+	);
+}
+  

@@ -7,7 +7,7 @@
 	right: 30px;
 	top: 30px;
 	box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1);
-	border-radius: 4px;
+	border-radius: 4px 4px 0px 0px; 
 	/*width: 350px;*/
 	width: auto;
 	box-sizing: border-box;
@@ -32,7 +32,7 @@
 	border: 2px solid coral!important;
 }
 
-#collection-notification[closing="true"] {
+#collection-notification[hide="true"] {
 	pointer-events: none !important;
 	animation: caimmNotificationSlideOut 300ms ease-out forwards;
 }
@@ -44,11 +44,11 @@
 
 #collection-notification .collection-notification-wrap {
 	overflow: hidden;
-	border-radius: 4px;
+	border-radius: 4px 4px 0px 0px; 
 }
 
 #collection-notification .collection-notification-inner {
-	border-radius: 4px;
+	border-radius: 4px 4px 0px 0px; 
 	display: flex;
 	flex-direction: row;
 	justify-content: flex-start;
@@ -60,7 +60,7 @@
 	min-height: 90px;
 	padding: 20px;
 	box-sizing: border-box;
-	border: 1px solid #EFEFEF;
+	border: 1px 1px 0px 0px solid #EFEFEF;
 	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 	cursor: pointer;
 }
@@ -135,6 +135,43 @@ Buttons
 	transform: translate(-50%, -50%);
 } 
 
+.collection-buttons-settings {
+  border-radius: 0px 0px 4px 4px; 
+  
+  background: #FFFFFF;
+  box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  gap: 10px;
+  
+  z-index: 3; 
+  min-height: 5px;
+  padding: 10px;
+  box-sizing: border-box; 
+	
+  cursor: pointer;
+  
+} 
+
+.btn-settings {
+  width: 180px;
+  
+  opacity: 1;
+  color: -internal-light-dark(black, white);
+  background-color: -internal-light-dark(rgb(239, 239, 239), rgb(59, 59, 59));
+  border-radius: 4px;
+  border: 0px solid coral;
+}
+
+.btn-settings:hover {
+  opacity: 1;
+  
+  border-radius: 4px;
+	border: 1px solid coral;
+}
 
 /*
  * Animations

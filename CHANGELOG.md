@@ -5,7 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.4]
 
+### Added 
+
+- Now you can add Audio files from web or phone!
+- Added multilanguage-support! Now server, phone app and extension is translated to English and Spanish! Would you like to have it translated into your own language? You can have more info on how to collaborate it helps out people from all comunities and languages access this amazing tool! More info [here](https://github.com/elblogbruno/NotionAI-MyMind-Translations).
+
+- Chrome extension notifies you when there is a new update on the server!
+- The server tells you now if there is a newer version of it on startup!
+- Started the base for adding the ability to add notion reminders to content so it is reminded to you in the future. (Coming soon)
+- Tags added from the AI tagging system are also suggested to you now when adding tags!
+
+### Fixed
+- Bug when first image was invalid, it did not add the next ones on the list.
+- Bug that when adding content from phone, mind_extension property tell browser-extension instead of phone-extension
+- More error handling
+- Bug fix https://github.com/elblogbruno/NotionAI-MyMind/discussions/17
 ## [2.0.3]
 
 ### Breaking changes
@@ -105,7 +121,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed server issues adding callback capabilities. Before some websites images were not added due to timeouts.
-
+[2.0.4]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.4
 [2.0.3]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.3
 [2.0.2]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.2
 [2.0.1]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.1

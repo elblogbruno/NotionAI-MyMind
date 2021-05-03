@@ -1,13 +1,15 @@
 import json
-from utils.lang_utils import get_response_text
+
+from translation.translation_manager import TranslationManager
 from utils.custom_errors import OnUrlNotValid, OnImageNotFound
 from notion.block import ImageBlock
 from time import sleep
 
 import requests
 import validators
-import webbrowser
 import socket
+
+from utils.utils import open_website
 
 
 ##Makes a web request to the notion web clipper API to add url's and returns the rowId
@@ -67,6 +69,7 @@ def extract_image_from_content(self, page_content, row_id):
 
     if len(list_of_img_url) == 0 and self.counter == self.times_to_retry:
         self.counter = 0
+        print("Thumbnail Image URL not found. Value is None")
         raise OnImageNotFound("Thumbnail Image URL not found. Value is None", self)
     elif len(list_of_img_url) > 0:
         self.counter = 0
@@ -78,52 +81,74 @@ def extract_image_from_content(self, page_content, row_id):
         content = row.get('content')
         sleep(0.15)
         self.counter += 1
-        return extract_image_from_content(self,content, row_id)
+        return extract_image_from_content(self, content, row_id)
     return list_of_img_url
 
 
-def create_json_response(self, status_code=None, rowId=None,custom_sentence=None,append_content=None):
-    url = "https://github.com/elblogbruno/NotionAI-MyMind/wiki/Common-Issues"
+def create_json_response(notion_ai, status_code=None, rowId=None, custom_sentence=None, append_content=None, port=None, custom_url="https://github.com/elblogbruno/NotionAI-MyMind/wiki/Common-Issues"):
+    notion_ai.logging.info("Creating json response.")
+    if hasattr(notion_ai, 'loaded') and notion_ai.loaded:
+        url = custom_url
 
-    block_title = "-1"
-    block_attached_url = "-1"
-
-    if status_code is None:
-        status_code = self.statusCode
-
-    if rowId is not None:
-        url = get_joined_url(rowId)
-        row = self.client.get_block(rowId)
-        block_title = row.title
-        block_attached_url = row.url
-
-    text_response, status_text = get_response_text(status_code)
-
-    if len(block_attached_url) == 0:
+        block_title = "-1"
         block_attached_url = "-1"
 
-    if len(block_title) == 0:
-        block_title = "-1"
+        if status_code is None:
+            status_code = notion_ai.statusCode
 
-    if custom_sentence:
-        text_response = custom_sentence
+        if rowId is not None:
+            url = get_joined_url(rowId)
+            row = notion_ai.client.get_block(rowId)
+            block_title = row.title
+            block_attached_url = row.url
 
-    x = {
-        "status_code": status_code,
-        "text_response": text_response,
-        "status_text": status_text,
-        "block_url": url,
-        "block_title": block_title,
-        "block_attached_url": block_attached_url,
-        "extra_content": "null",
-    }
+        text_response, status_text = notion_ai.translation_manager.get_response_text(status_code)
 
-    if append_content:
-        x["extra_content"] = append_content
-    # convert into JSON:
-    json_response = json.dumps(x)
+        if len(block_attached_url) == 0:
+            block_attached_url = "-1"
+            if notion_ai.counter <= notion_ai.times_to_retry:
+                notion_ai.counter = notion_ai.counter + 1
+                return create_json_response(notion_ai=notion_ai, rowId=rowId)
 
-    return json_response
+        if len(block_title) == 0:
+            block_title = "-1"
+
+        if custom_sentence:
+            text_response = custom_sentence
+
+        x = {
+            "status_code": status_code,
+            "text_response": text_response,
+            "status_text": status_text,
+            "block_url": url,
+            "block_title": block_title,
+            "block_attached_url": block_attached_url,
+            "extra_content": "null",
+        }
+
+        if append_content:
+            x["extra_content"] = append_content
+        # convert into JSON:
+        json_response = json.dumps(x, ensure_ascii=False)
+        print(json_response)
+        return json_response
+    else:
+        notion_ai.translation_manager = TranslationManager(notion_ai.logging,notion_ai.static_folder)  # we initialize the translation manager
+        text_response, status_text = notion_ai.translation_manager.get_response_text(404)
+
+        x = {
+            "status_code": '404',
+            "text_response": text_response,
+            "status_text": status_text,
+            "block_url": get_server_url(port),
+            "block_title": "-1",
+            "block_attached_url": "-1",
+            "extra_content": "null",
+        }
+        # convert into JSON:
+        json_response = json.dumps(x)
+        print(json_response)
+        return json_response
 
 
 # based on the machine doing the request we know which extension is being used
@@ -141,9 +166,7 @@ def get_current_extension_name(platform):
 
 
 def open_browser_at_start(self, port):
-    hostname = socket.gethostname()
-    local_ip = socket.gethostbyname(hostname)
-    final_url = "http://{0}:{1}/".format(str(local_ip), str(port))
+    final_url = get_server_url(port)
 
     print("You should go to the homepage and set the credentials. The url will open in your browser now. If can't "
           "access a browser you can access {0}".format(final_url))
@@ -151,7 +174,14 @@ def open_browser_at_start(self, port):
     self.logging.info("You should go to the homepage and set the credentials. The url will open in your browser "
                       "now. If can't access a browser you can access {0}".format(final_url))
 
-    webbrowser.open(final_url)
+    open_website(final_url)
+
+
+def get_server_url(port):
+    hostname = socket.gethostname()
+    local_ip = socket.gethostbyname(hostname)
+    final_url = "http://{0}:{1}/".format(str(local_ip), str(port))
+    return final_url
 
 
 def get_joined_url(rowId):

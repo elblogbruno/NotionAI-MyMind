@@ -10,4 +10,3 @@ keras
 pillow
 Quart~=0.14.1
 numpy~=1.19.2
-matplotlib

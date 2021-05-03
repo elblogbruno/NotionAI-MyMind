@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:notion_ai_my_mind/qrcode.dart';
+import 'package:notion_ai_my_mind/resources/strings.dart';
 import 'api/api.dart';
+import 'locales/main.i18n.dart';
 
 class settings extends StatelessWidget {
   @override
@@ -36,7 +38,7 @@ class settingsState extends State<settingsPage> {
       theme: ThemeData(primarySwatch: Colors.teal, accentColor: Color(0xFFDD5237)),
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Notion AI My Mind Settings'),
+          title:  Text(Strings.settingsTitle.i18n),
         ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -45,14 +47,14 @@ class settingsState extends State<settingsPage> {
                 TextField(
                   decoration: InputDecoration(
                     border: OutlineInputBorder(),
-                    labelText: 'Server url (do not forget the / at the end)' ,
+                    labelText: Strings.settingsHint.i18n,
                     hintText: "http://xxx.xxx.x.xx:xxxx/",
                   ),
                   controller: myController,
                 ),
                 SizedBox(height: 50),
                 Text(
-                  "Current url: ",
+                  Strings.actualUrlHint.i18n,
                   textAlign: TextAlign.center,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontWeight: FontWeight.bold,fontSize: 35),

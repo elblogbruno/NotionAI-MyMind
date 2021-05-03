@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
-
 import 'package:http/http.dart' as http;
+import 'package:notion_ai_my_mind/api/models/mind_collection_list_response.dart';
 import 'package:notion_ai_my_mind/api/models/multi_select_tag_list_response.dart';
 
 
@@ -18,9 +18,11 @@ import 'models/mind_collection.dart';
 import 'models/api_response.dart';
 import 'models/tag.dart';
 
+import 'package:notion_ai_my_mind/locales/main.i18n.dart';
+
 class Api {
   static const int TIMEOUT_TIME = 5;
-  Future<String> refreshCollections() async {
+  Future<MindCollectionListResponse> refreshCollections() async {
     try {
       String _serverUrl = await getServerUrl();
 
@@ -31,17 +33,19 @@ class Api {
       );
 
       if (response.statusCode == 200) {
-        setCollections(response.body.toString());
-        return '200';
+        Map map = jsonDecode(response.body);
+        MindCollectionListResponse api_response = MindCollectionListResponse.fromJson(map);
+        setCollections(response.body);
+        return api_response;
       } else {
-        return Future.error(Strings.serverTimeout);
+        return Future.error(Strings.serverTimeout.i18n.i18n);
       }
     }
     on TimeoutException catch (_) {
-      return Future.error(Strings.serverTimeout);
+      return Future.error(Strings.serverTimeout.i18n.i18n);
     }
     on SocketException catch (_) {
-      return Future.error(Strings.noInternet);
+      return Future.error(Strings.noInternet.i18n.i18n);
     }
   }
   Future<String> getMindUrl() async {
@@ -58,14 +62,14 @@ class Api {
       if (response.statusCode == 200) {
         return response.body.toString();
       } else {
-        return Future.error(Strings.serverTimeout);
+        return Future.error(Strings.serverTimeout.i18n);
       }
     }
     on TimeoutException catch (_) {
-      return Future.error(Strings.serverTimeout);
+      return Future.error(Strings.serverTimeout.i18n);
     }
     on SocketException catch (_) {
-      return Future.error(Strings.noInternet);
+      return Future.error(Strings.noInternet.i18n);
     }
   }
 
@@ -89,7 +93,7 @@ class Api {
             if (response.statusCode == 200) {
               return parseResponse(response.body);
             } else {
-              return APIResponse.createBadResponse(Strings.badResultResponse);
+              return APIResponse.createBadResponse(Strings.badResultResponse.i18n);
             }
           }
           else if(urlToAdd == matches.first.group(0)) { //It is just an url, as the text and the url extracted from it are equal.
@@ -107,7 +111,7 @@ class Api {
             if (response.statusCode == 200) {
               return  parseResponse(response.body);
             } else {
-              return APIResponse.createBadResponse(Strings.badResultResponse);
+              return APIResponse.createBadResponse(Strings.badResultResponse.i18n);
             }
           }else{
             print(matches.first.group(0));
@@ -124,7 +128,7 @@ class Api {
             if (response.statusCode == 200) {
               return  parseResponse(response.body);
             } else {
-              return APIResponse.createBadResponse(Strings.badResultResponse);
+              return APIResponse.createBadResponse(Strings.badResultResponse.i18n);
             }
           }
 
@@ -132,11 +136,11 @@ class Api {
 
     } on TimeoutException catch (e) {
       print(e.toString());
-      return Future.error(APIResponse.createBadResponse(Strings.serverTimeout));
+      return Future.error(APIResponse.createBadResponse(Strings.serverTimeout.i18n));
     }
     on SocketException catch (e) {
       print(e.toString());
-      return Future.error(APIResponse.createBadResponse(Strings.noInternet));
+      return Future.error(APIResponse.createBadResponse(Strings.noInternet.i18n));
     }
   }
 
@@ -179,10 +183,10 @@ class Api {
         return '-1';
       }
     } on TimeoutException catch (_) {
-      return Future.error(Strings.serverTimeout);
+      return Future.error(Strings.serverTimeout.i18n);
     }
     on SocketException catch (_) {
-      return Future.error(Strings.noInternet);
+      return Future.error(Strings.noInternet.i18n);
     }
   }
 
@@ -206,19 +210,19 @@ class Api {
       if (response.statusCode == 200) {
         return  parseResponse(response.body);
       } else {
-        return APIResponse.createBadResponse(Strings.badResultResponse);
+        return APIResponse.createBadResponse(Strings.badResultResponse.i18n);
       }
     } on TimeoutException catch (e) {
-      return Future.error(APIResponse.createBadResponse(Strings.serverTimeout));
+      return Future.error(APIResponse.createBadResponse(Strings.serverTimeout.i18n));
     }
     on SocketException catch (e) {
-      return Future.error(APIResponse.createBadResponse(Strings.noInternet));
+      return Future.error(APIResponse.createBadResponse(Strings.noInternet.i18n));
     }
   }
 
   Future<APIResponse> uploadImage(File imageFile,int index) async {
     try {
-      setCollectionIndex(index);
+      //setCollectionIndex(index);
 
       var stream = new http.ByteStream(
           DelegatingStream.typed(imageFile.openRead()));
@@ -230,11 +234,17 @@ class Api {
 
       var uri = Uri.parse(uploadURL);
       var request = new http.MultipartRequest("POST", uri);
+
+      Map<String, String> requestHeaders = {
+        'collection_index': index.toString(),
+      };
+      request.headers.addAll(requestHeaders);
       var multipartFile = new http.MultipartFile('file', stream, length,
           filename: basename(imageFile.path));
       //contentType: new MediaType('image', 'png'));
 
       request.files.add(multipartFile);
+
       var response = await request.send();
       print(response.statusCode);
 
@@ -243,17 +253,16 @@ class Api {
       if (response.statusCode == 200) {
         return parseResponse(response1.body);
       } else {
-        return APIResponse.createBadResponse(Strings.badResultResponse);
+        return APIResponse.createBadResponse(Strings.badResultResponse.i18n);
       }
     }
     on TimeoutException catch (e) {
-      return Future.error(APIResponse.createBadResponse(Strings.serverTimeout));
+      return Future.error(APIResponse.createBadResponse(Strings.serverTimeout.i18n));
     }
     on SocketException catch (e) {
-      return Future.error(APIResponse.createBadResponse(Strings.noInternet));
+      return Future.error(APIResponse.createBadResponse(Strings.noInternet.i18n));
     }
   }
-
 
   Future<APIResponse> set_multi_select_tags(int collection_index,String block_id,List<dynamic> jsonList) async{
     try {
@@ -285,14 +294,14 @@ class Api {
         return Future.error(APIResponse.createBadResponse(response.statusCode.toString()));
       }
     } on TimeoutException catch (e) {
-      return Future.error(APIResponse.createBadResponse(Strings.serverTimeout));
+      return Future.error(APIResponse.createBadResponse(Strings.serverTimeout.i18n));
     }
     on SocketException catch (e) {
-      return Future.error(APIResponse.createBadResponse(Strings.noInternet));
+      return Future.error(APIResponse.createBadResponse(Strings.noInternet.i18n));
     }
   }
 
-  Future<List<Tag>> get_multi_select_tags(int collectionIndex) async{
+  Future<MultiSelectTagListResponse> get_multi_select_tags(int collectionIndex) async{
     try {
       String _serverUrl = await getServerUrl();
       String finalUrl = _serverUrl + "get_multi_select_tags?collection_index="+collectionIndex.toString();
@@ -304,13 +313,13 @@ class Api {
       if (response.statusCode == 200) {
         return  parseMultiSelectResponse(response.body);
       } else {
-        return  createBadTagResponse();
+        return  MultiSelectTagListResponse.createBadResponse(Strings.badResultResponse.i18n);
       }
     } on TimeoutException catch (e) {
-      return Future.error(APIResponse.createBadResponse(Strings.serverTimeout));
+      return Future.error(MultiSelectTagListResponse.createBadResponse(Strings.serverTimeout.i18n));
     }
     on SocketException catch (e) {
-      return Future.error(APIResponse.createBadResponse(Strings.noInternet));
+      return Future.error(MultiSelectTagListResponse.createBadResponse(Strings.noInternet.i18n));
     }
   }
 
@@ -333,10 +342,10 @@ class Api {
         return  data;
       }
     } on TimeoutException catch (e) {
-      return Future.error(APIResponse.createBadResponse(Strings.serverTimeout));
+      return Future.error(APIResponse.createBadResponse(Strings.serverTimeout.i18n));
     }
     on SocketException catch (e) {
-      return Future.error(APIResponse.createBadResponse(Strings.noInternet));
+      return Future.error(APIResponse.createBadResponse(Strings.noInternet.i18n));
     }
   }
 
@@ -353,7 +362,7 @@ class Api {
         return addUrlToMind(url,index);
       }
     }else{
-      return APIResponse.createBadResponse(Strings.badResultResponse);
+      return APIResponse.createBadResponse(Strings.badResultResponse.i18n);
     }
   }
 
@@ -363,7 +372,7 @@ class Api {
     return response;
   }
 
-  List<Tag> parseMultiSelectResponse(String responseBody) {
+  MultiSelectTagListResponse parseMultiSelectResponse(String responseBody) {
     Map map = jsonDecode(responseBody);
 
     MultiSelectTagListResponse m = MultiSelectTagListResponse.fromJson(map);
@@ -379,7 +388,7 @@ class Api {
       m.multi_select_tag_list.add(response);
     }
 
-    return m.multi_select_tag_list;
+    return m;
   }
 
   List<Tag> createBadTagResponse() {
@@ -404,24 +413,25 @@ class Api {
   Future<List<MindCollection>> getCollections() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String structure = prefs.getString("structure") ?? null;
-
     return parseStructure(structure);
   }
 
   List<MindCollection> parseStructure(String responseBody) {
     Map map = jsonDecode(responseBody);
-    List<dynamic> data = map["structure"];
 
-    List<MindCollection> collectionList = new List<MindCollection>();
+    MindCollectionListResponse resp = MindCollectionListResponse.fromJson(map);
+
+    List<dynamic> data = resp.extra_content;
+
+    resp.collections = new List<MindCollection>();
 
     for(int i = 0; i < data.length;i++){
       //Map userMap = jsonDecode(data[i]);
       Map<String, dynamic> myMap = new Map<String, dynamic>.from(data[i]);
       var response = MindCollection.fromJson(myMap);
-      collectionList.add(response);
+      resp.collections.add(response);
     }
-
-    return collectionList;
+    return  resp.collections;
   }
 
   /*Server API*/

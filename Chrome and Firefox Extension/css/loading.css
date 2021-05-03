@@ -1,0 +1,45 @@
+#naimm-loading-div {
+  font-family: Avenir, sans-serif !important;
+	position: fixed;
+	right: 30px;
+	top: 30px;
+	
+	box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.1);
+	border-radius: 4px 4px 0px 0px; 
+	
+	padding: 20px;
+	/* width: auto; */
+	box-sizing: border-box;
+	user-select: none;
+
+	/* background-color: #B3BCCA; */
+	
+	background-color: #f3f3f3;
+
+	animation: caimmNotificationSlideIn 300ms ease-out forwards;
+	animation-delay: 300ms;
+	opacity: 0;
+	will-change: opacity, transform;
+	z-index: 2147483647;
+}
+
+#naimm-loading { 
+	border: 16px solid #f3f3f3; /* Light grey */
+	border-top: 16px solid #3498db; /* Blue */
+	border-radius: 50%;
+	width: 100px;
+	height: 100px;
+	animation: spin 2s linear infinite;
+	margin-left: auto;
+ 	margin-right: auto;
+}
+
+#naimm-loading-div[loading="false"] {
+	pointer-events: none !important;
+  	display: none;
+}
+
+#naimm-loading-div[loading="true"] {
+	pointer-events: none !important;
+  	display: block;
+}

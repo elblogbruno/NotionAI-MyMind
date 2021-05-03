@@ -10,11 +10,16 @@ import 'package:notion_ai_my_mind/list_view.dart';
 import 'package:notion_ai_my_mind/overlay_view.dart';
 import 'package:notion_ai_my_mind/resources/strings.dart';
 import 'package:notion_ai_my_mind/settings.dart';
-import 'package:notion_ai_my_mind/tutorial_steps.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import 'package:notion_ai_my_mind/api/api.dart';
-import 'package:tutorial/tutorial.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:i18n_extension/i18n_widget.dart';
+
+import 'api/models/mind_collection_list_response.dart';
+
+import 'locales/main.i18n.dart';
+
 
 final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
 
@@ -26,11 +31,25 @@ final keySettings = GlobalKey();
 bool isSharing = false;
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  TranslationData translations = TranslationData();
+  await translations.initTranslations();
   runApp(
     MaterialApp(
+      localizationsDelegates: [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: [
+        const Locale('en', "US"),
+        const Locale('es', "ES"),
+      ],
       navigatorKey: navigatorKey,
       theme: ThemeData(primarySwatch: Colors.teal, accentColor: Color(0xFFDD5237)),
-      home: MyHomePage(),
+      home: I18n(
+        child: MyHomePage(),
+      ),
       routes: {
         '/add': (BuildContext context) => AddLinkPage(),
       },
@@ -45,16 +64,18 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
+
   StreamSubscription _intentDataStreamSubscription;
   List<SharedMediaFile> _sharedFiles;
   String _sharedText;
-  List<TutorialItens> itens = [];
+
+
 
   @override
   void initState() {
     super.initState();
     _initShareIntent();
-    itens = Tutorial_Steps().initTutorialItems(keyOpenMindButton,keySettings,keyRefreshCollections,keyOpenServerButton);
+    //itens = Tutorial_Steps().initTutorialItems(keyOpenMindButton,keySettings,keyRefreshCollections,keyOpenServerButton);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -231,7 +252,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
       theme: ThemeData(primarySwatch: Colors.teal, accentColor: Color(0xFFDD5237)),
       home: Scaffold(
         appBar: AppBar(
-          title:  const Text(Strings.title),
+          title:   Text(Strings.title),
         ),
         body: FutureBuilder<String>(
           future: _calculation, // a previously-obtained Future<String> or null
@@ -239,9 +260,6 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
             List<Widget> children;
             if (snapshot.hasData) {
               print("Data: " + snapshot.data);
-              /*Future.delayed(Duration(microseconds: 200)).then((value) {
-                Tutorial.showTutorial(context, itens);
-              });*/
               return _buildButtons(context,snapshot.data);
             } else if (snapshot.hasError) {
               children = <Widget>[
@@ -262,9 +280,9 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
                   width: 60,
                   height: 60,
                 ),
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(top: 16),
-                  child: Text(Strings.waitText),
+                  child: Text(Strings.waitText.i18n),
                 )
               ];
             }
@@ -317,7 +335,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             SizedBox(height: 30),
-            Text('Welcome to your mind!',textAlign: TextAlign.center,
+            Text(Strings.welcomeTitle.i18n,textAlign: TextAlign.center,
               overflow: TextOverflow.visible,
               style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30)),
             SizedBox(height: 30),
@@ -325,7 +343,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
                 key: keyOpenMindButton,
                 icon: Icon(Icons.open_in_browser),
                 label: Text(
-                    Strings.openMindButton,
+                    Strings.openMindButton.i18n,
                   style: new TextStyle(fontSize: 20.0, color: Colors.white)),
                 onPressed:() => Api().launchURL(url),
                 style: ElevatedButton.styleFrom(
@@ -339,7 +357,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
               key: keyOpenServerButton,
               icon: Icon(Icons.web),
               label: Text(
-                  Strings.openServerButton,
+                  Strings.openServerButton.i18n,
                   style: new TextStyle(fontSize: 20.0, color: Colors.white)),
                 onPressed:() => Api().launchSettings(),
                 style: ElevatedButton.styleFrom(
@@ -353,7 +371,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
               key: keyRefreshCollections,
               icon: Icon(Icons.refresh),
               label: Text(
-                  Strings.refreshCollectionButton,
+                  Strings.refreshCollectionButton.i18n,
                   style: new TextStyle(fontSize: 20.0, color: Colors.white)),
                 onPressed:() => showDialog(context: context, builder: (x) => _buildRefreshNot()),
                 style: ElevatedButton.styleFrom(
@@ -361,14 +379,14 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
                 ),
             ),
             SizedBox(height: 30),
-            Text(Strings.sloganBottom, textAlign: TextAlign.center,
+            Text(Strings.sloganBottom.i18n, textAlign: TextAlign.center,
                 overflow: TextOverflow.visible,
                 style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20)),
             SizedBox(height: 25),
             ElevatedButton.icon(
               icon: Icon(Icons.feedback),
               label: Text(
-                  Strings.openGithubRepo,
+                  Strings.openGithubRepo.i18n,
                   style: new TextStyle(fontSize: 20.0, color: Colors.white)),
               onPressed:() => Api().launchRepo(false),
               style: ElevatedButton.styleFrom(
@@ -379,7 +397,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
             ElevatedButton.icon(
               icon: Icon(Icons.report_problem),
               label: Text(
-                  Strings.openGithubRepoIssue,
+                  Strings.openGithubRepoIssue.i18n,
                   style: new TextStyle(fontSize: 20.0, color: Colors.white)),
               onPressed:() => Api().launchRepo(true),
               style: ElevatedButton.styleFrom(
@@ -393,24 +411,22 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   Widget _buildRefreshNot() {
-    return FutureBuilder<String>(
+    return FutureBuilder<MindCollectionListResponse>(
         future:  Api().refreshCollections(), // a previously-obtained Future<String> or null
-        builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+        builder: (BuildContext context, AsyncSnapshot<MindCollectionListResponse> snapshot) {
           List<Widget> children;
           if (snapshot.hasData) {
             final dialog = AlertDialog(
               // Retrieve the text the that user has entered by using the
               // TextEditingController.
-              title: Text("Collections refreshed"),
-              content: Text("Succesfully refreshed the collections"),
+              content: Text(snapshot.data.response.text_response),
             );
             return dialog;
           } else if (snapshot.hasError) {
             final dialog = AlertDialog(
               // Retrieve the text the that user has entered by using the
               // TextEditingController.
-              title: Text("Collections not refreshed"),
-              content: Text('Error: ${snapshot.error}'),
+              content: Text('Error refreshing collections: ${snapshot.error}'),
             );
             return dialog;
           } else {
