@@ -52,7 +52,7 @@ fi
 
 git clone https://github.com/elblogbruno/NotionAI-MyMind
 
-cd NotionAI-MyMind && pip -r install requirements.txt
+cd NotionAI-MyMind/Python-Server/app && pip -r install requirements.txt
 
 if [ "$?" = "1" ]
 then
