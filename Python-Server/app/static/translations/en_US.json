@@ -1,0 +1,69 @@
+{
+    "sentences": {
+      "200":
+        {
+          "response": "Added to your mind.",
+          "status": "success"
+        },
+      "404":
+        {
+          "response": "No Notion credentials where provided. Please configure server before adding content.",
+          "status": "error"
+        },
+      "204":
+        {
+          "response": "Title and Url was modified correctly",
+          "status": "success"
+        },
+      "205":
+        {
+          "response": "Tags updated succesfully.",
+          "status": "success"
+        },
+      "429":
+        {
+          "response": "Too much requests to Notion API.",
+          "status": "error"
+        },
+      "400":
+        {
+          "response": "Invalid url provided.",
+          "status": "error"
+        },
+      "300":
+        {
+          "response": "Succesfully refreshed available collections.",
+          "status": "success"
+        },
+      "403":
+        {
+          "response": "Invalid url or text was provided.",
+          "status": "error"
+        },
+      "1":
+        {
+          "response": "There is an update available for the server.",
+          "status": "success"
+        },
+      "0":
+        {
+          "response": "Server is up to date.",
+          "status": "success"
+        },
+      "2":
+        {
+          "response": "Notion Token V2 was updated succesfully!",
+          "status": "success"
+        },
+      "3":
+        {
+          "response": "Notion Token V2 could not be updated. Please do it manually!",
+          "status": "success"
+        },
+      "404":
+        {
+          "response": "Please configure the server. You can click this box to do so.",
+          "status": "error"
+        }
+    }
+}

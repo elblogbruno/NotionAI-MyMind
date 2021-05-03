@@ -1,0 +1,69 @@
+{
+    "sentences": {
+      "200":
+        {
+          "response": "Añadido a tu mente.",
+          "status": "success"
+        },
+      "404":
+        {
+          "response": "No se han proporcionado las credenciales de Notion. Por favor, configure el servidor antes de añadir contenido.",
+          "status": "error"
+        },
+      "204":
+        {
+          "response": "El título y la url se han modificado correctamente",
+          "status": "success"
+        },
+      "205":
+        {
+          "response": "Etiquetas actualizadas con éxito.",
+          "status": "success"
+        },
+      "429":
+        {
+          "response": "Demasiadas peticiones a la API de Notion.",
+          "status": "error"
+        },
+      "400":
+        {
+          "response": "Url no válida proporcionada.",
+          "status": "error"
+        },
+      "300":
+        {
+          "response": "Se han renovado con éxito las colecciones disponibles.",
+          "status": "success"
+        },
+      "403":
+        {
+          "response": "Se ha proporcionado una url o un texto no válido.",
+          "status": "error"
+        },
+      "1":
+        {
+          "response": "Hay una actualización disponible para el servidor.",
+          "status": "success"
+        },
+      "0":
+        {
+          "response": "El servidor está al día.",
+          "status": "success"
+        },
+      "2":
+        {
+          "response": "El Token V2 de Notion ha sido actualizado con éxito.",
+          "status": "success"
+        },
+      "3":
+        {
+          "response": "El Token V2 de Notion no pudo ser actualizado. Por favor, hágalo manualmente.",
+          "status": "error"
+        },
+      "404":
+        {
+          "response": "Por favor, configure el servidor. Puede hacer clic en esta casilla para hacerlo.",
+          "status": "error"
+        }
+    }
+}
