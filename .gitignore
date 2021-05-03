@@ -14,7 +14,7 @@ key.properties
 *.zip
 *.log
 *.json
-!/Python-Server/app/static/*.json
+!Python-Server/app/static/*.json
 !Chrome and Firefox Extension/*.json
 ### Images ###
 # JPEG
