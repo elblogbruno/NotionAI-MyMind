@@ -121,6 +121,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fixed server issues adding callback capabilities. Before some websites images were not added due to timeouts.
+
 [2.0.4]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.4
 [2.0.3]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.3
 [2.0.2]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.2
