@@ -56,6 +56,7 @@
       <ul>
         <li><a href="#examples-of-what-you-can-do">Examples</a></li>
         <li><a href="#extensions">Mind Extensions</a></li>
+        <li><a href="#multilanguage-support-and-translation-collaboration">Translation into your language</a></li>
       </ul>
     </li>
     <li>
@@ -110,6 +111,16 @@ Users can install the android app from android store. On Ios you can clone the f
 
 I won't be releasing the app on the Apple App Store, as I don't have an Apple Developer Account either Mac OS based computer.
 Meanwhile, you can clone the flutter project and build the app yourself.
+
+## Multilanguage Support and Translation Collaboration
+
+Since version 2.0.4 NotionAI-MyMind has multilanguage support! Now server, phone app and extension is translated to English and Spanish! 
+Would you like to have it translated into your own language? 
+
+You can have more info on how to collaborate it helps out people from all comunities and languages access this amazing tool! 
+More info here:
+
+https://github.com/elblogbruno/NotionAI-MyMind-Translations
 
 ## Installation Tutorial
 [![Installation Tutorial](https://img.youtube.com/vi/v2wWtCYED1U/0.jpg)](https://www.youtube.com/watch?v=v2wWtCYED1U)
