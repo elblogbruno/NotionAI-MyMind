@@ -54,6 +54,7 @@
       <ul>
         <li><a href="#ejemplos-de-lo-que-puedes-hacer">Ejemplos</a></li>
         <li><a href="#extensiones-de-la-mente">Extensiones de la mente</a></li>
+        <li><a href="#soporte-multilingüe-y-colaboración-en-la-traducción">Traducción a su idioma</a></li>
       </ul>
     </li>
     <li>
@@ -108,6 +109,16 @@ Los usuarios pueden instalar la aplicación para Android desde la tienda de Andr
 
 No voy a publicar la aplicación en la App Store de Apple, ya que no tengo una cuenta de desarrollador de Apple ni un ordenador basado en Mac OS.
 Mientras tanto, puedes clonar el proyecto Flutter y construir la aplicación tú mismo.
+
+## Soporte multilingüe y colaboración en la traducción
+
+¡Desde la versión 2.0.4 NotionAI-MyMind tiene soporte multi-idioma! ¡Ahora el servidor, la aplicación de teléfono y la extensión está traducida al inglés y al español! 
+¿Te gustaría tenerlo traducido a tu propio idioma? 
+
+Puedes tener más información sobre cómo colaborar para que personas de todas las comunidades e idiomas puedan acceder a esta increíble herramienta. 
+Más información aquí:
+
+https://github.com/elblogbruno/NotionAI-MyMind-Translations
 
 ## Tutorial de instalación
 [![Tutorial de instalación](https://img.youtube.com/vi/v2wWtCYED1U/0.jpg)](https://www.youtube.com/watch?v=v2wWtCYED1U)
