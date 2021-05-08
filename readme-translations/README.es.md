@@ -2,7 +2,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/elblogbruno/NotionAI-MyMind/">
-    <img src="Chrome%20and%20Firefox%20Extension/icon/icon.png" alt="Logo" width="80" height="80">
+    <img src="../Chrome%20and%20Firefox%20Extension/icon/icon.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">NotionAI MyMind</h3>
@@ -23,21 +23,24 @@
     <a href='https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 '><img align="center" style="overflow: hidden; display: inline-block;" alt='Get it on Chrome Web Store' width=200          height=60 src='https://storage.googleapis.com/chrome-gcs-uploader.appspot.com/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/HRs9MPufa1J1h5glNhut.png'/></a>  <a href='https://addons.mozilla.org/en-US/firefox/addon/notion-ai-my-mind/'><img align="center" style="overflow: hidden; display: inline-block;" alt='Get it on Firefox Add-On Store' width=172 height=60  src='https://ffp4g1ylyit3jdyti1hqcvtb-wpengine.netdna-ssl.com/addons/files/2015/11/get-the-addon.png'/></a>  <a href='https://play.google.com/store/apps/details?id=com.elblogbruno.notion_ai_my_mind&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img align="center" style=" overflow: hidden; display: inline-block;" alt='Get it on Google Play' width=250 height=100 src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a>
   
   </p>
+  <a href="https://github.com/elblogbruno/NotionAI-MyMind/blob/master/README.md">
+    <img src="https://img.shields.io/badge/lang-en-yellow.svg" alt="Logo">
+  </a>
 </p>
 
 ### Añadir contenido 
 <a href="https://github.com/elblogbruno/NotionAI-MyMind/wiki/Notion-AI-My-Mind-Collections"><strong>Este es el ejemplo de las colecciones, donde se pueden tener diferentes colecciones o bases de datos de contenidos, totalmente personalizables en Notion. »</strong></a>
 
 <a href="https://github.com/elblogbruno/NotionAI-MyMind/wiki/Notion-AI-My-Mind-Collections">
-    <img src="doc/header_collections_example_modify_title_tags.gif" alt="collections" width="690" height="388">
-    <img src="doc/header_phone_demo.gif" alt="collections" height="388">
+    <img src="../doc/header_collections_example_modify_title_tags.gif" alt="collections" width="690" height="388">
+    <img src="../doc/header_phone_demo.gif" alt="collections" height="388">
  </a>
 
 ### Buscar en
 <a href="https://www.notion.so/Intro-to-databases-fd8cd2d212f74c50954c11086d85997e"><strong>Se trata de una base de datos totalmente personalizable y con capacidad de búsqueda en Notion. »</strong></a>
 
 <a href="https://www.notion.so/Intro-to-databases-fd8cd2d212f74c50954c11086d85997e">
-    <img src="doc/header_gif_search.gif" alt="collections" width="690" height="388">
+    <img src="../doc/header_gif_search.gif" alt="collections" width="690" height="388">
  </a>
  
 # ¡Libera tu mente!
@@ -47,22 +50,22 @@
   <summary>Índice de contenidos</summary>
   <ol>
     <li>
-      <a href="#project-philosophy">Filosofía del proyecto</a>
+      <a href="#filosofía-del-proyecto">Filosofía del proyecto</a>
       <ul>
-        <li><a href="#examples-of-what-you-can-do">Ejemplos</a></li>
-        <li><a href="#extensions">Extensiones de la mente</a></li>
+        <li><a href="#ejemplos-de-lo-que-puedes-hacer">Ejemplos</a></li>
+        <li><a href="#extensiones-de-la-mente">Extensiones de la mente</a></li>
       </ul>
     </li>
     <li>
-      <a href="#installing">Instalación</a>
+      <a href="#instalación">Instalación</a>
       <ul>
-        <li><a href="#i-have-installed-the-server-what-to-do-next">He instalado el servidor, ¿qué hacer a continuación?</a></li>
+        <li><a href="#he-instalado-el-servidor-qué-hacer-a-continuación">He instalado el servidor, ¿qué hacer a continuación?</a></li>
         <li><a href="#docker-compose">Docker-Compose</a></li>
        </ul>
       </ul>
     </li>
-    <li><a href="#common-issues">Problemas comunes</a></li>
-    <li><a href="#roadmap">Hoja de ruta</a></li>
+    <li><a href="#problemas-comunes">Problemas comunes</a></li>
+    <li><a href="#hoja-de-ruta">Hoja de ruta</a></li>
   </ol>
 </details>
 
@@ -78,12 +81,12 @@ En este momento, hay un servidor local de Python en funcionamiento, que recibe t
 
 Añade texto a tu mente   |  Añade imágenes a tu mente
 :---: | :---:
-![](doc/add_text.gif)  |  ![](doc/add_image.gif)
+![](../doc/add_text.gif)  |  ![](../doc/add_image.gif)
 
 
 Añade sitios web a tu mente |  Busca en tu mente
 :---: | :---:
-![](doc/add_website.gif)  |  ![](doc/header_gif_search.gif)
+![](../doc/add_website.gif)  |  ![](../doc/header_gif_search.gif)
 
 ### Extensiones de la mente
 ### Chromium users
