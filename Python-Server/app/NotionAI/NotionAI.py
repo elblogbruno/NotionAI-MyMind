@@ -22,6 +22,7 @@ class NotionAI:
     def __init__(self, logging, port, static_folder):
         self.logging = logging
         self.static_folder = static_folder
+        self.port = port
         logging.info("Initiating NotionAI Class.")
         if os.path.isfile(
                 SETTINGS_FOLDER + 'data.json'):  # If we have a data.json with credentials, we start with these credentials
@@ -58,12 +59,12 @@ class NotionAI:
             self.token_v2 = token_v2
 
             self.image_tagger = ImageTagging(data, logging)  # we initialize the image tagger with our data.
-            self.translation_manager = TranslationManager(logging, self.static_folder)  # we initialize the translation manager
+            self.translation_manager = TranslationManager(logging,
+                                                          self.static_folder)  # we initialize the translation manager
             self.mind_structure = MindStructure(notion_ai=self, client=self.client, data=self.data,
                                                 logging=self.logging)  # we initialize the structure of the mind manager.
-            self.property_manager = PropertyManager(logging, self.client,self.mind_structure)  # we initialize the property manager.
-
-
+            self.property_manager = PropertyManager(logging, self.client,
+                                                    self.mind_structure)  # we initialize the property manager.
 
             self.counter = 0
 
@@ -75,19 +76,19 @@ class NotionAI:
 
         except requests.exceptions.HTTPError as e:
             self.logging.info("Incorrect token V2 or email and password")
-            raise OnServerNotConfigured(e)
+            open_browser_at_start(self, self.port)
         return self.loaded
 
     def add_url_to_database(self, url, title, collection_index=0):
         if url is None:
-            self.statusCode = 500
+            self.status_code = 500
             return create_json_response(self)
         else:
             if title is None:
                 title = "No title found for the content"
 
             self.logging.info("Adding url to mind: {0} {1}".format(url.encode('utf8'), title.encode('utf8')))
-            self.statusCode = 200  # at start we asume everything will go ok
+            self.status_code = 200  # at start we asume everything will go ok
             try:
 
                 self.mind_structure.set_current_collection(collection_index)
@@ -102,23 +103,22 @@ class NotionAI:
             except OnUrlNotValid as invalidUrl:
                 self.logging.error(invalidUrl)
                 print("URL Not Valid error: " + str(invalidUrl))
-                self.statusCode = 500
-                return create_json_response(self)
+                return create_json_response(self, error_sentence=str(invalidUrl), status_code=400)
             except AttributeError as e:
                 self.logging.error(e)
                 print("Atribute error: " + str(e))
-                self.statusCode = 404
+                self.status_code = 401
                 raise OnServerNotConfigured(e)
             except requests.exceptions.HTTPError as e:
                 self.logging.error(e)
                 print("Adding url: " + str(e))
-                self.statusCode = 429
+                self.status_code = e.response.status_code
 
     def add_text_to_database(self, text, url, collection_index=0):
-        self.statusCode = 200  # at start we asume everything will go ok
+        self.status_code = 200  # at start we asume everything will go ok
         try:
             if url == "" or text == "":
-                self.statusCode = 500
+                self.status_code = 500
                 return create_json_response(self)
             else:
                 self.logging.info("Adding text to mind: {0} {1}".format(url.encode('utf8'), text.encode('utf8')))
@@ -135,26 +135,25 @@ class NotionAI:
                 thread.start()  # Start the execution
 
                 return create_json_response(self, rowId=row.id)
-        except requests.exceptions.HTTPError as invalidUrl:
-            print(invalidUrl)
-            self.logging.info(invalidUrl)
-            self.statusCode = 500
-            return create_json_response(self)
+        except requests.exceptions.HTTPError as e:
+            self.logging.info(e)
+            return create_json_response(self, error_sentence=str(e), status_code=e.response.status_code)
         except AttributeError as e:
             self.logging.error(e)
             print("Atribute error adding text: " + str(e))
-            self.statusCode = 404
+            self.status_code = 404
             raise OnServerNotConfigured(e)
 
     def add_image_to_database(self, image_src, url=None, image_src_url=None, collection_index=0):
         is_local = image_src_url is None and url is None
 
         if is_local:
-            self.logging.info("Adding image to mind: {0} {1}".format(image_src.encode('utf8'),collection_index))
+            self.logging.info("Adding image to mind: {0} {1}".format(image_src.encode('utf8'), collection_index))
         else:
-            self.logging.info("Adding image to mind: {0} {1} {2} {3}".format(image_src.encode('utf8'), url.encode('utf8'),
-                                                                         image_src_url.encode('utf8'),collection_index))
-        self.statusCode = 200  # at start we asume everything will go ok
+            self.logging.info(
+                "Adding image to mind: {0} {1} {2} {3}".format(image_src.encode('utf8'), url.encode('utf8'),
+                                                               image_src_url.encode('utf8'), collection_index))
+        self.status_code = 200  # at start we asume everything will go ok
 
         try:
             self.mind_structure.set_current_collection(collection_index)
@@ -174,14 +173,12 @@ class NotionAI:
 
             return create_json_response(self, rowId=row.id)
 
-        except requests.exceptions.HTTPError as invalidUrl:
-            self.logging.info(invalidUrl)
-            self.statusCode = 500
-            return create_json_response(self,custom_sentence=str(invalidUrl))
+        except requests.exceptions.HTTPError as e:
+            self.logging.info(e)
+            return create_json_response(self, error_sentence=str(e), status_code=e.response.status_code)
         except AttributeError as e:
             self.logging.info("Atribute error on image: " + str(e))
-            self.statusCode = 404
-            return create_json_response(self,custom_sentence=str(e))
+            return create_json_response(self, error_sentence=str(e), status_code=401)
 
     def add_audio_to_database(self, audio_src, url=None, collection_index=0):
         is_local = url is None
@@ -190,8 +187,9 @@ class NotionAI:
             self.logging.info("Adding audio to mind: {0} {1}".format(audio_src.encode('utf8'), collection_index))
         else:
             self.logging.info(
-                "Adding audio to mind: {0} {1} {2}".format(audio_src.encode('utf8'), url.encode('utf8'), collection_index))
-        self.statusCode = 200  # at start we asume everything will go ok
+                "Adding audio to mind: {0} {1} {2}".format(audio_src.encode('utf8'), url.encode('utf8'),
+                                                           collection_index))
+        self.status_code = 200  # at start we asume everything will go ok
 
         try:
             self.mind_structure.set_current_collection(collection_index)
@@ -211,17 +209,15 @@ class NotionAI:
 
             return create_json_response(self, rowId=row.id)
 
-        except requests.exceptions.HTTPError as invalidUrl:
-            self.logging.info(invalidUrl)
-            self.statusCode = 500
-            return create_json_response(self, custom_sentence=str(invalidUrl))
+        except requests.exceptions.HTTPError as e:
+            self.logging.info(e)
+            return create_json_response(self, error_sentence=str(e), status_code=e.response.status_code)
         except AttributeError as e:
             self.logging.error(e)
-            self.statusCode = 404
-            return create_json_response(self, custom_sentence=str(e))
+            return create_json_response(self, error_sentence=str(e), status_code=401)
 
     def modify_row_by_id(self, id, title, url):
-        self.statusCode = 204  # at start we asume everything will go ok
+        self.status_code = 204  # at start we asume everything will go ok
         try:
             block = self.client.get_block(id)
 
@@ -240,14 +236,12 @@ class NotionAI:
 
             return create_json_response(self, rowId=block.id)
 
-        except OnUrlNotValid as invalidUrl:
-            self.logging.info(invalidUrl)
-            self.statusCode = 500
-            return create_json_response(self)
-
+        except OnUrlNotValid as e:
+            self.logging.info(e)
+            return create_json_response(self, status_code=e.response.status_code)
         except AttributeError as e:
             self.logging.error(e)
-            self.statusCode = 404
+            self.status_code = 401
             raise OnServerNotConfigured(e)
 
     def _row_callback(self, record, difference):
@@ -299,7 +293,7 @@ class NotionAI:
             ##self.logging.info("Thread %s: finishing", rowId)
         except requests.exceptions.HTTPError as e:
             print("Adding url thread: " + str(e))
-            self.statusCode = 429
+            self.status_code = e.response.status_code
             self.logging.error(e)
 
     def _add_text_thread(self, text):
@@ -310,10 +304,12 @@ class NotionAI:
             text_block = row.children.add_new(TextBlock)
             text_block.title = text
 
-            self.property_manager.update_properties(self.row, mind_extension_property=get_current_extension_name(self.request_platform))
+            self.property_manager.update_properties(self.row, mind_extension_property=get_current_extension_name(
+                self.request_platform))
             self.logging.info("Add text Thread %s: finished", row.id)
         except AttributeError as e:
             print("Add text thread: " + str(e))
+            self.status_code = e.response.status_code
             self.logging.error(e)
 
     def _add_image_thread(self, image_src, is_local=False):
@@ -390,19 +386,21 @@ class NotionAI:
         self.logging.info("Setting this mind extension user agent: {0}".format(str(extension_platform_name)))
         self.request_platform = str(extension_platform_name)
 
-    def set_reminder_date_to_block(self, logging, id, start=None, end=None, unit=None, remind_value=None, self_destruction=False):
-        logging.info("Setting reminder date for this block {0} {1} {2} {3} {4}".format(id,start,end,unit,remind_value))
+    def set_reminder_date_to_block(self, logging, id, start=None, end=None, unit=None, remind_value=None,
+                                   self_destruction=False):
+        logging.info(
+            "Setting reminder date for this block {0} {1} {2} {3} {4}".format(id, start, end, unit, remind_value))
 
         block = self.client.get_block(id)
         block.refresh()
 
-        #start = datetime.strptime("2020-01-01 09:30", "%Y-%m-%d %H:%M")
-        #end = datetime.strptime("2020-01-05 20:45", "%Y-%m-%d %H:%M")
-        print(self.property_manager.get_properties(block,notion_date_property=1).reminder)
+        # start = datetime.strptime("2020-01-01 09:30", "%Y-%m-%d %H:%M")
+        # end = datetime.strptime("2020-01-05 20:45", "%Y-%m-%d %H:%M")
+        print(self.property_manager.get_properties(block, notion_date_property=1).reminder)
         if remind_value:
             reminder = {'unit': unit, 'value': remind_value}
 
         date = NotionDate(start=start, end=end, reminder=reminder)
 
-        self.property_manager.update_properties(block=block,notion_date_property=date)
+        self.property_manager.update_properties(block=block, notion_date_property=date)
         return str(date.reminder)

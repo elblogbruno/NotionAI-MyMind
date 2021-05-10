@@ -1,7 +1,7 @@
 import json
 
 from translation.translation_manager import TranslationManager
-from utils.custom_errors import OnUrlNotValid, OnImageNotFound
+from utils.custom_errors import OnUrlNotValid, OnImageNotFound, OnServerNotConfigured
 from notion.block import ImageBlock
 from time import sleep
 
@@ -14,42 +14,45 @@ from utils.utils import open_website
 
 ##Makes a web request to the notion web clipper API to add url's and returns the rowId
 def web_clipper_request(self, url, title, current_mind_id):
-    cookies = {
-        'token_v2': self.token_v2,
-    }
-
-    headers = {
-        'Content-Type': 'application/json',
-    }
-    if title == None:
-        title = url
-
-    is_well_formed = validators.url(url)
-    if is_well_formed:
-        url_object = {
-            "url": url,
-            "title": title
+    try:
+        cookies = {
+            'token_v2': self.token_v2,
         }
-        data_dict = {
-            "type": "block",
-            "blockId": "{}".format(current_mind_id),
-            "property": "P#~d",
-            "items": [url_object],
-            "from": "chrome"
-        }
-        data = json.dumps(data_dict)
 
-        self.logging.info(data)
-        response = requests.post('https://www.notion.so/api/v3/addWebClipperURLs', headers=headers, cookies=cookies,
-                                 data=data)
-        response_text = response.text
-        # print(response_text)
-        json_response = json.loads(response_text)
-        rowId = json_response['createdBlockIds'][0]
-        print(rowId)
-        return rowId
-    else:
-        raise OnUrlNotValid("Invalid url was sent", self)
+        headers = {
+            'Content-Type': 'application/json',
+        }
+        if title == None:
+            title = url
+
+        is_well_formed = validators.url(url)
+        if is_well_formed:
+            url_object = {
+                "url": url,
+                "title": title
+            }
+            data_dict = {
+                "type": "block",
+                "blockId": "{}".format(current_mind_id),
+                "property": "P#~d",
+                "items": [url_object],
+                "from": "chrome"
+            }
+            data = json.dumps(data_dict)
+
+            self.logging.info(data)
+            response = requests.post('https://www.notion.so/api/v3/addWebClipperURLs', headers=headers, cookies=cookies,
+                                     data=data)
+            response_text = response.text
+            # print(response_text)
+            json_response = json.loads(response_text)
+            rowId = json_response['createdBlockIds'][0]
+            print(rowId)
+            return rowId
+        else:
+            raise OnUrlNotValid("Invalid url was sent", self)
+    except KeyError as e:
+        raise OnServerNotConfigured(e)
 
 
 ##Extracts all images from content as a list of url's
@@ -85,8 +88,11 @@ def extract_image_from_content(self, page_content, row_id):
     return list_of_img_url
 
 
-def create_json_response(notion_ai, status_code=None, rowId=None, custom_sentence=None, append_content=None, port=None, custom_url="https://github.com/elblogbruno/NotionAI-MyMind/wiki/Common-Issues"):
+def create_json_response(notion_ai, error_sentence=None, status_code=None, rowId=None, custom_sentence=None, append_content=None, port=None, custom_url="https://github.com/elblogbruno/NotionAI-MyMind/wiki/Common-Issues"):
     notion_ai.logging.info("Creating json response.")
+    if error_sentence is None:
+        error_sentence = "No translation found"
+
     if hasattr(notion_ai, 'loaded') and notion_ai.loaded:
         url = custom_url
 
@@ -94,7 +100,9 @@ def create_json_response(notion_ai, status_code=None, rowId=None, custom_sentenc
         block_attached_url = "-1"
 
         if status_code is None:
-            status_code = notion_ai.statusCode
+            status_code = notion_ai.status_code
+        else:
+            notion_ai.status_code = status_code
 
         if rowId is not None:
             url = get_joined_url(rowId)
@@ -102,13 +110,13 @@ def create_json_response(notion_ai, status_code=None, rowId=None, custom_sentenc
             block_title = row.title
             block_attached_url = row.url
 
-        text_response, status_text = notion_ai.translation_manager.get_response_text(status_code)
+        text_response, status_text = notion_ai.translation_manager.get_response_text(status_code, error_sentence)
 
         if len(block_attached_url) == 0:
             block_attached_url = "-1"
             if notion_ai.counter <= notion_ai.times_to_retry:
                 notion_ai.counter = notion_ai.counter + 1
-                return create_json_response(notion_ai=notion_ai, rowId=rowId)
+                return create_json_response(notion_ai=notion_ai, error_sentence=error_sentence, status_code=status_code, rowId=rowId, custom_sentence=custom_sentence, append_content=append_content, port=port, custom_url=custom_url)
 
         if len(block_title) == 0:
             block_title = "-1"
@@ -133,8 +141,8 @@ def create_json_response(notion_ai, status_code=None, rowId=None, custom_sentenc
         print(json_response)
         return json_response
     else:
-        notion_ai.translation_manager = TranslationManager(notion_ai.logging,notion_ai.static_folder)  # we initialize the translation manager
-        text_response, status_text = notion_ai.translation_manager.get_response_text(404)
+        notion_ai.translation_manager = TranslationManager(notion_ai.logging, notion_ai.static_folder)  # we initialize the translation manager
+        text_response, status_text = notion_ai.translation_manager.get_response_text(404, error_sentence=error_sentence)
 
         x = {
             "status_code": '404',
@@ -147,7 +155,6 @@ def create_json_response(notion_ai, status_code=None, rowId=None, custom_sentenc
         }
         # convert into JSON:
         json_response = json.dumps(x)
-        print(json_response)
         return json_response
 
 

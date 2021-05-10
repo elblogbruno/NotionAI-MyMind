@@ -33,7 +33,7 @@ class MindStructure:
         except requests.exceptions.HTTPError as e:
             print("Http error : " + str(e))
         except OnCollectionNotAvailable as e:
-            print("mind error: " + str(e))
+            print("Mind error: " + str(e))
 
     def get_collection_by_index(self, index=0):
         structure = self.get_mind_structure_from_json()

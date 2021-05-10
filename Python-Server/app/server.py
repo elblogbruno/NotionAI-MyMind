@@ -111,7 +111,7 @@ async def get_mind_structure():
         return str(create_json_response(notion, port=port))
     except AttributeError as e:
         logging.error("Get mind structure attribute error " + str(e))
-        return str(create_json_response(notion, port=port))
+        return str(create_json_response(notion, error_sentence=str(e), port=port))
 
 
 def toDate(dateString):
@@ -153,7 +153,7 @@ async def get_multi_select_tags():
                                                                                    append_tags=ai_tags))  # multi_select_tag_list
     except ValueError as e:
         logging.error(e)
-        return str(create_json_response(notion, status_code=404, custom_sentence=str(e)))
+        return str(create_json_response(notion, error_sentence=str(e), status_code=401))
     except OnServerNotConfigured as e:
         logging.error(e)
         return str(create_json_response(notion, port=port))
@@ -170,7 +170,7 @@ async def update_multi_select_tags():
             notion.property_manager.multi_tag_manager.update_multi_select_tags(notion, id, tags, collection_index))
     except ValueError as e:
         logging.error(e)
-        return str(create_json_response(notion, status_code=404, custom_sentence=str(e)))
+        return str(create_json_response(notion, error_sentence=str(e), status_code=401))
 
 
 @app.route('/upload_file', methods=['POST'])
@@ -211,7 +211,7 @@ async def upload_file():
             return str(create_json_response(notion, status_code=status_code))
     except werkzeug.exceptions.BadRequestKeyError as e:
         logging.error(e)
-        return str(create_json_response(notion, port=port, status_code=status_code, custom_sentence="Invalid collection index sent"))
+        return str(create_json_response(notion, error_sentence=str(e), port=port, status_code=status_code))
     except OnServerNotConfigured as e:
         logging.error(e)
         return str(create_json_response(notion, port=port))
@@ -223,7 +223,7 @@ async def get_current_mind_url():
         return str(notion.data['url'])
     except AttributeError as e:
         logging.error("get_current_mind_url atribute error" + str(e))
-        return str(create_json_response(notion, port=port))
+        return str(create_json_response(notion, error_sentence=str(e), port=port))
 
 @app.route('/check_update')
 async def check_update_api():
@@ -263,9 +263,9 @@ async def update_notion_tokenv2():
                     return create_json_response(notion, status_code=2)
                 else:
                     return create_json_response(notion, status_code=3)
-            except requests.exceptions.HTTPError:
+            except requests.exceptions.HTTPError as e:
                 logging.error("Incorrect token V2 from notion")
-                return create_json_response(notion, status_code=3)
+                return create_json_response(notion, error_sentence=str(e), status_code=3)
 
 
 @app.route('/')

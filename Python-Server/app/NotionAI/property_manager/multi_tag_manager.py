@@ -101,7 +101,7 @@ class MultiTagManager:
             if len(block.get_property(self.multi_tag_property)) > 0:
                 return create_json_response(notion_ai, status_code=205, rowId=id)
             else:
-                return create_json_response(notion_ai, status_code=404, rowId=id)
+                return create_json_response(notion_ai, status_code=206, rowId=id)
 
         except ValueError as e:
             self.logging.info(e)
@@ -109,7 +109,7 @@ class MultiTagManager:
         except requests.exceptions.HTTPError as e:
             print(e)
             self.logging.info(e)
-            return create_json_response(notion_ai, status_code=429, rowId=id)
+            return create_json_response(notion_ai, status_code=e.response.status_code, rowId=id)
 
     def add_new_multi_select_value(self, prop, value, color=None):
         colors = [
