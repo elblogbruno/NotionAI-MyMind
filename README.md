@@ -26,7 +26,7 @@
   
   </p>
   <a href="https://github.com/elblogbruno/NotionAI-MyMind/blob/master/readme-translations/README.es.md">
-    <img src="https://img.shields.io/badge/lang-es-yellow.svg" alt="Logo">
+    <img src="https://img.shields.io/badge/lang-disponible%20en%20espa%C3%B1ol-brightgreen.svg" alt="Logo">
   </a>
 </p>
 
