@@ -33,9 +33,9 @@ def get_path_file(filename):
         # PyInstaller < 1.6 (tested on 1.5 only)
         chdir(environ['_MEIPASS2'])
         filename = join(environ['_MEIPASS2'], filename)
-    else:
-        chdir(dirname(sys.argv[0]))
-        filename = join(dirname(sys.argv[0]), filename)
+    # else:
+    #     chdir(dirname(sys.argv[0]))
+    #     filename = join(dirname(sys.argv[0]), filename)
 
     return filename
 

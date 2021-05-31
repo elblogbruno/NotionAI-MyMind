@@ -14,9 +14,6 @@ def replace_version(version):
 
 def get_version(static_folder):
     print(static_folder)
-    print(get_path_file('version.cfg'))
-    print(get_path_file("app/static/version.cfg"))
-
     config = configparser.ConfigParser()
     config.read(get_path_file('static/version.cfg'))
     return config['version']['server_version']
