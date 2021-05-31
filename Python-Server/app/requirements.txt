@@ -10,6 +10,7 @@ keras
 pillow
 Quart~=0.14.1
 numpy~=1.19.2
+schedule
 #notion-py requirements
 commonmark
 bs4
