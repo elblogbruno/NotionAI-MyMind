@@ -1,18 +1,22 @@
-from NotionAI.property_manager.tag_object import TagObject
 from image_tagging.clarifai_tagging.clarifai_tagging import ClarifaiAI
 from image_tagging.tensorflow_tagging.tensorflow_tagging import TensorFlowTag
-from utils.utils import SETTINGS_FOLDER
+from server_utils.utils import SETTINGS_FOLDER
+from notion_ai.property_manager.tag_object import TagObject
+from os.path import  join
+
 import json
 
 
-# This class holds the image tagging system, and it seems as a parent for the Clarifai and Tensorflow tagging
+# This class holds the image tagging system, and it acts as a parent for the Clarifai and Tensorflow tagging
 # mechanisms.
+
 class ImageTagging:
 
     def __init__(self, data, logging):
         options = {}
         self.logging = logging
-        with open(SETTINGS_FOLDER + 'tagging_options.json') as json_file:
+        filename = SETTINGS_FOLDER + 'tagging_options.json'
+        with open(filename) as json_file:
             options = json.load(json_file)
         try:
             self.options = options
@@ -60,7 +64,7 @@ class ImageTagging:
                         res[tag] = res[tag] + 1
         return res
 
-    def get_most_used_ai_tags(self,notion_ai,collection_index):
+    def get_most_used_ai_tags(self, notion_ai, collection_index, number_of_tags=10):
         print("Getting most tags")
         #notion_ai.mind_structure.set_current_collection(collection_index)
 
@@ -78,7 +82,10 @@ class ImageTagging:
         sorted_freq = sorted(freq, key=freq.get, reverse=True)
 
         if len(sorted_freq) > 0:
-            for i in range(len(sorted_freq)):
+            if number_of_tags > len(sorted_freq):
+                number_of_tags = len(sorted_freq)
+
+            for i in range(0, number_of_tags):
                 sorted_freq[i] = TagObject(tag_value=sorted_freq[i]).to_dict()
 
         return sorted_freq

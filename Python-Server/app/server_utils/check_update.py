@@ -1,7 +1,9 @@
 import requests
-from utils.utils import open_website
-from NotionAI.utils import create_json_response
+from server_utils.utils import open_website,get_path_file
+from notion_ai.utils import create_json_response
 import configparser
+from os.path import join
+
 
 def replace_version(version):
     '''Replace version in file with new version'''
@@ -11,12 +13,16 @@ def replace_version(version):
 
 
 def get_version(static_folder):
+    print(static_folder)
+    print(get_path_file('version.cfg'))
+    print(get_path_file("app/static/version.cfg"))
+
     config = configparser.ConfigParser()
-    config.read('{0}/version.cfg'.format(static_folder))
+    config.read(get_path_file('static/version.cfg'))
     return config['version']['server_version']
 
 
-def check_update(logging,static_folder, notion=None, port=None, return_response=False):
+def check_update(logging, static_folder, notion=None, port=None, return_response=False):
     api_url = "https://api.github.com/repos/elblogbruno/NotionAI-MyMind/releases/latest"
     response = requests.get(api_url)
 
@@ -25,7 +31,7 @@ def check_update(logging,static_folder, notion=None, port=None, return_response=
         curr_version = get_version(static_folder)
         new_version = json_response['tag_name']
         print("Checking server update...")
-        print("Current version {0} - New Version Found {1}".format(curr_version,new_version))
+        print("Current version {0} - New Version Found {1}".format(curr_version, new_version))
         if new_version == curr_version or curr_version > new_version:
             print("Server is up to date")
             if return_response:

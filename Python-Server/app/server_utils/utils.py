@@ -8,9 +8,36 @@ import os, re
 path = "/proc/self/cgroup"
 
 DEFAULT_COLOR = "#505558"
-SETTINGS_FOLDER = "settings/"
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'mp3', 'wav', 'ogg'])
+UPLOAD_FOLDER = os.getcwd()+'/uploads/'
+SETTINGS_FOLDER = os.getcwd()+'/settings/'
+
+ALLOWED_EXTENSIONS = set(
+    ['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif', 'webp', 'mp3', 'wav', 'ogg', 'mp4', 'mov', 'avi', 'm4v', '3gp'])
 ALLOWED_AUDIO_EXTENSIONS = set(['mp3', 'wav', 'ogg'])
+ALLOWED_VIDEO_EXTENSIONS = set(['mp4', 'mov', 'avi', 'm4v', '3gp'])
+
+
+def get_path_file(filename):
+    import os
+    import sys
+    from os import chdir
+    from os.path import join
+    from os.path import dirname
+    from os import environ
+
+    if hasattr(sys, '_MEIPASS'):
+        # PyInstaller >= 1.6
+        chdir(sys._MEIPASS)
+        filename = join(sys._MEIPASS, filename)
+    elif '_MEIPASS2' in environ:
+        # PyInstaller < 1.6 (tested on 1.5 only)
+        chdir(environ['_MEIPASS2'])
+        filename = join(environ['_MEIPASS2'], filename)
+    else:
+        chdir(dirname(sys.argv[0]))
+        filename = join(dirname(sys.argv[0]), filename)
+
+    return filename
 
 
 def is_docker():
@@ -27,10 +54,11 @@ def ask_server_port(logging):
         print("running on docker")
         return int("5000")
     else:
-        if os.path.isfile(SETTINGS_FOLDER + 'port.json'):
+        filename = SETTINGS_FOLDER + 'port.json'
+        if os.path.isfile(filename):
             logging.info("Initiating with a found port.json file.")
 
-            with open(SETTINGS_FOLDER + 'port.json') as json_file:
+            with open(filename, 'r') as json_file:
                 options = json.load(json_file)
                 logging.info("Using {} port".format(options['port']))
             return options['port']
@@ -48,7 +76,7 @@ def ask_server_port(logging):
                 'port': port
             }
 
-            with open(SETTINGS_FOLDER + 'port.json', 'w') as outfile:
+            with open(filename, 'w') as outfile:
                 json.dump(options, outfile)
 
             logging.info("Port saved succesfully!")
@@ -128,7 +156,7 @@ def append_data(logging, **kwargs):
 
 def download_audio_from_url(audio_url):
     print("Downloading this {} audio".format(audio_url))
-    filename  = "./uploads/" + str(uuid.uuid4())
+    filename = "./uploads/" + str(uuid.uuid4())
     if 'mp3' in audio_url:
         filename = filename + ".mp3"
     elif 'wav' in audio_url:
@@ -155,7 +183,8 @@ def download_audio_from_url(audio_url):
 
 
 def download_image_from_url(image_url):
-    filename = "./image_tagging/temp_image_folder/" + str(uuid.uuid4())
+    filename = UPLOAD_FOLDER + str(uuid.uuid4())
+
     if 'png' in image_url:
         filename = filename + ".png"
     elif 'jpg' in image_url:
@@ -164,7 +193,6 @@ def download_image_from_url(image_url):
         filename = filename + ".gif"
 
     print("Downloading this {} image".format(image_url))
-
 
     # Open the url image, set stream to True, this will return the stream content.
     r = requests.get(image_url, stream=True)
@@ -198,6 +226,11 @@ def open_website(final_url):
 
 def get_file_extension(filename):
     return filename.rsplit('.', 1)[1].lower()
+
+
+def is_a_video_file(filename):
+    extension = get_file_extension(filename)
+    return extension in ALLOWED_VIDEO_EXTENSIONS
 
 
 def is_a_sound_file(filename):

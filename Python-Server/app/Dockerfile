@@ -13,7 +13,7 @@ RUN apt-get update
 RUN apt-get install git -y
 RUN python -m pip install -r requirements.txt
 
-WORKDIR /app
+# WORKDIR /app
 COPY . /app
 
 CMD python server.py

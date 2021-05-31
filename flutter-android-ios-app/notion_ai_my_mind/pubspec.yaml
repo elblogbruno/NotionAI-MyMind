@@ -36,6 +36,7 @@ dependencies:
   flutter_tagging: ^2.2.0+3
   qr_code_scanner: ^0.3.5
   i18n_extension: ^3.0.0
+  flutter_link_preview: ^1.5.6
   flutter_localizations:
     sdk: flutter
 

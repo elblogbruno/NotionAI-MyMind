@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_link_preview/flutter_link_preview.dart';
 import 'package:flutter_tagging/flutter_tagging.dart';
 import 'package:notion_ai_my_mind/Arguments.dart';
 import 'package:notion_ai_my_mind/api/models/multi_select_tag_list_response.dart';
@@ -108,6 +109,7 @@ class AddLinkPage extends StatelessWidget  {
         SizedBox(height: 30),
         _TagRequest(),
         SizedBox(height: 50),
+
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -147,8 +149,6 @@ class AddLinkPage extends StatelessWidget  {
           ],
         ),
         SizedBox(height: 30),
-        //Text("Available Tags",textAlign: TextAlign.center ,style: new TextStyle(fontSize: 20.0, color: Colors.black)),
-        SizedBox(height: 30),
 
       ];
     }
@@ -169,8 +169,6 @@ class AddLinkPage extends StatelessWidget  {
       builder: (BuildContext context, AsyncSnapshot<MultiSelectTagListResponse> snapshot) {
         List<Widget> children;
         if (snapshot.hasData) {
-          TagSearchService.tagList = snapshot.data.multi_select_tag_list;
-          _Tags = [];
           return _buildDropDown(context, snapshot.data);
         } else if (snapshot.hasError) {
           return _buildDropDown(context, snapshot.data);
@@ -198,9 +196,9 @@ class AddLinkPage extends StatelessWidget  {
   }
 
   /*Builds the dropwdown with the tags*/
-  Widget _buildDropDown(context,MultiSelectTagListResponse response){
-    List<Tag> tags = response.multi_select_tag_list;
-    if(tags.isEmpty || tags == null){
+  Widget _buildDropDown(context, MultiSelectTagListResponse response){
+
+    if(response == null || response.multi_select_tag_list.isEmpty){
       return Card(
         child:  Column(
             children: <Widget> [
@@ -209,6 +207,8 @@ class AddLinkPage extends StatelessWidget  {
         ),
       );
     }else{
+      _Tags = [];
+      TagSearchService.tagList = response.multi_select_tag_list;
       return Card(
         child:  Column(
             children: <Widget> [
@@ -375,16 +375,15 @@ class AddLinkPage extends StatelessWidget  {
     return Color(int.parse(buffer.toString(), radix: 16));
   }
 
-  String url = "";
-  String title = "";
+
   /*Builds a dialog to modify title and url on block*/
   Future<dynamic> buildModifyDialog(context,APIResponse response){
     return showDialog(
       context: context,
       builder: (context)
     {
-       url = block_response.block_attached_url;
-       title = block_response.block_title;
+      String url = block_response.block_attached_url;
+      String title = block_response.block_title;
       return StatefulBuilder(
           builder: (context, setState) {
             return Dialog(
@@ -393,7 +392,6 @@ class AddLinkPage extends StatelessWidget  {
                 backgroundColor: Colors.transparent,
                 insetPadding: EdgeInsets.all(10),
                 child: Stack(
-                  overflow: Overflow.visible,
                   alignment: Alignment.center,
                   children: <Widget>[
                     Container(
@@ -435,7 +433,17 @@ class AddLinkPage extends StatelessWidget  {
                                 child: Row(
                                   children: <Widget>[
                                     Flexible(
-                                        child: new Text(url))
+                                        child: Padding(
+                                          padding: EdgeInsets.only(top: 5 , bottom: 5, left: 5, right: 5),
+                                          child: FlutterLinkPreview(
+                                            url: url,
+                                            titleStyle: TextStyle(
+                                              color: Colors.blue,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        )
+                                    )
                                   ],
                                 )),
                             TextField(
@@ -493,8 +501,8 @@ class AddLinkPage extends StatelessWidget  {
           List<Widget> children;
           if (snapshot.hasData) {
             block_response = snapshot.data;
-            url = block_response.block_attached_url;
-            title = block_response.block_title;
+            /*url = block_response.block_attached_url;
+            title = block_response.block_title;*/
             final dialog = _buildModifiedNot(context,snapshot.data);
             return dialog;
           } else if (snapshot.hasError) {
@@ -541,7 +549,8 @@ class AddLinkPage extends StatelessWidget  {
             ),
           ),
       );
-    }else{
+    }
+    else{
       children.add(
         ElevatedButton(
           onPressed: () => Navigator.of(context, rootNavigator: true).pop('dialog'),
