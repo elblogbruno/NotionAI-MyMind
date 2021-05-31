@@ -1,5 +1,5 @@
-from NotionAI.property_manager.multi_tag_manager import MultiTagManager
-from utils.utils import SETTINGS_FOLDER
+from notion_ai.property_manager.multi_tag_manager import MultiTagManager
+from server_utils.utils import SETTINGS_FOLDER
 import json
 
 

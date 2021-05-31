@@ -1,21 +1,19 @@
-from datetime import datetime
-
-from notion.client import NotionClient
-from notion.block import ImageBlock, TextBlock, AudioBlock
 from threading import Thread
 
-from notion.collection import NotionDate
-from translation.translation_manager import TranslationManager
-from utils.custom_errors import OnImageNotFound, OnUrlNotValid, OnServerNotConfigured
-from image_tagging.image_tagging import ImageTagging
-from NotionAI.utils import create_json_response, web_clipper_request, extract_image_from_content, \
-    get_current_extension_name, open_browser_at_start
-from NotionAI.mind_structure import *
-from NotionAI.property_manager.property_manager import PropertyManager
-from utils.utils import SETTINGS_FOLDER, download_audio_from_url
-
 import validators
-import json
+from notion.block import ImageBlock, TextBlock, AudioBlock, VideoBlock
+from notion.client import NotionClient
+from notion.collection import NotionDate
+
+from background_worker.background_worker import Worker
+from image_tagging.image_tagging import ImageTagging
+from .custom_errors import OnImageNotFound, OnUrlNotValid, OnWebClipperError
+from server_utils.utils import download_audio_from_url
+from translation.translation_manager import TranslationManager
+from .mind_structure import *
+from .property_manager.property_manager import PropertyManager
+from .utils import web_clipper_request, extract_image_from_content, \
+    get_current_extension_name, open_browser_at_start
 
 
 class NotionAI:
@@ -23,9 +21,8 @@ class NotionAI:
         self.logging = logging
         self.static_folder = static_folder
         self.port = port
-        logging.info("Initiating NotionAI Class.")
-        if os.path.isfile(
-                SETTINGS_FOLDER + 'data.json'):  # If we have a data.json with credentials, we start with these credentials
+        logging.info("Initiating notion_ai Class.")
+        if os.path.isfile(SETTINGS_FOLDER + 'data.json'):  # If we have a data.json with credentials, we start with these credentials
             print("Initiating with a found config file.")
             logging.info("Initiating with a found config file.")
             self.loaded = self.run(logging)
@@ -39,7 +36,7 @@ class NotionAI:
             data = json.load(json_file)
         try:
             self.logging = logging
-            self.logging.info("Running NotionAI")
+            self.logging.info("Running notion_ai")
             self.data = data
 
             if email is not None and password is not None:
@@ -65,6 +62,7 @@ class NotionAI:
                                                 logging=self.logging)  # we initialize the structure of the mind manager.
             self.property_manager = PropertyManager(logging, self.client,
                                                     self.mind_structure)  # we initialize the property manager.
+            self.worker = Worker(client=self.client, notion_ai=self)
 
             self.counter = 0
 
@@ -81,8 +79,7 @@ class NotionAI:
 
     def add_url_to_database(self, url, title, collection_index=0):
         if url is None:
-            self.status_code = 500
-            return create_json_response(self)
+            return create_json_response(self, status_code=500)
         else:
             if title is None:
                 title = "No title found for the content"
@@ -92,129 +89,91 @@ class NotionAI:
             try:
 
                 self.mind_structure.set_current_collection(collection_index)
-                rowId = web_clipper_request(self, url, title, self.mind_structure.current_mind_id)
+                rowId = web_clipper_request(self, url, title, self.mind_structure.current_mind_id, logging=self.logging)
 
                 thread = Thread(target=self._add_url_thread, args=(rowId,))
                 thread.daemon = True  # Daemonize thread
                 thread.start()  # Start the execution
 
                 return create_json_response(self, rowId=rowId)
-
+            except OnWebClipperError as e:
+                self.logging.error("Web Clipper API error while adding url: " + str(e))
+                return create_json_response(self, error_sentence=str(e))
             except OnUrlNotValid as invalidUrl:
-                self.logging.error(invalidUrl)
-                print("URL Not Valid error: " + str(invalidUrl))
-                return create_json_response(self, error_sentence=str(invalidUrl), status_code=400)
+                self.logging.error("URL Not Valid error while adding url: " + str(invalidUrl))
+                return create_json_response(self, status_code=400, error_sentence=str(invalidUrl))
             except AttributeError as e:
-                self.logging.error(e)
-                print("Atribute error: " + str(e))
+                self.logging.error("Atribute error while adding url:" + str(e))
                 self.status_code = 401
-                raise OnServerNotConfigured(e)
+                if "views" in str(e):
+                    return self.add_url_to_database(url=url, title=title, collection_index=collection_index)
+                else:
+                    raise OnServerNotConfigured(e)
             except requests.exceptions.HTTPError as e:
-                self.logging.error(e)
-                print("Adding url: " + str(e))
+                self.logging.error("HTTP Error while adding url: " + str(e))
                 self.status_code = e.response.status_code
 
-    def add_text_to_database(self, text, url, collection_index=0):
-        self.status_code = 200  # at start we asume everything will go ok
-        try:
-            if url == "" or text == "":
-                self.status_code = 500
-                return create_json_response(self)
-            else:
-                self.logging.info("Adding text to mind: {0} {1}".format(url.encode('utf8'), text.encode('utf8')))
-                self.mind_structure.set_current_collection(collection_index)
-
-                row = self.mind_structure.collection.add_row()
-                self.row = row
-
-                row.name = "Extract from " + url
-                row.url = url
-
-                thread = Thread(target=self._add_text_thread, args=(text,))
-                thread.daemon = True  # Daemonize thread
-                thread.start()  # Start the execution
-
-                return create_json_response(self, rowId=row.id)
-        except requests.exceptions.HTTPError as e:
-            self.logging.info(e)
-            return create_json_response(self, error_sentence=str(e), status_code=e.response.status_code)
-        except AttributeError as e:
-            self.logging.error(e)
-            print("Atribute error adding text: " + str(e))
-            self.status_code = 404
-            raise OnServerNotConfigured(e)
-
-    def add_image_to_database(self, image_src, url=None, image_src_url=None, collection_index=0):
+    def add_content_to_database(self, content_src, content_type, url=None, image_src_url=None, collection_index=0):
         is_local = image_src_url is None and url is None
 
+        if url == "" or content_src == "":
+            self.status_code = 500
+            return create_json_response(self)
+
         if is_local:
-            self.logging.info("Adding image to mind: {0} {1}".format(image_src.encode('utf8'), collection_index))
+            self.logging.info(
+                "Adding {0} to mind: {1} {2}".format(content_type, content_src.encode('utf8'), collection_index))
+        elif image_src_url:
+            self.logging.info(
+                "Adding {0} to mind: {1} {2} {3} {4}".format(content_type, content_src.encode('utf8'),
+                                                             url.encode('utf8'), image_src_url, collection_index))
         else:
             self.logging.info(
-                "Adding image to mind: {0} {1} {2} {3}".format(image_src.encode('utf8'), url.encode('utf8'),
-                                                               image_src_url.encode('utf8'), collection_index))
+                "Adding {0} to mind: {1} {2} {3}".format(content_type, content_src.encode('utf8'), url.encode('utf8'),
+                                                         collection_index))
+        if content_type == 'video':
+            if "blob" in content_src:
+                content_src = url
+
         self.status_code = 200  # at start we asume everything will go ok
 
         try:
-            self.mind_structure.set_current_collection(collection_index)
+            collection = self.mind_structure.set_current_collection(collection_index)
+            self.row = collection.add_row()
 
-            row = self.mind_structure.collection.add_row()
-            self.row = row
+            self.property_manager.update_properties(self.row, mind_extension_property=get_current_extension_name(
+                self.request_platform))
 
             if is_local:
-                row.name = "Image from phone"
+                self.row.name = "{0} from phone".format(content_type.capitalize())
             else:
-                row.name = "Image from " + str(image_src_url)
-                row.url = url
+                self.row.name = "{0} from {1}".format(content_type.capitalize(), str(url))
+                self.row.url = url
 
-            thread = Thread(target=self._add_image_thread, args=(image_src, is_local,))
+            if content_type == 'video':
+                thread = Thread(target=self._add_video_thread, args=(content_src, is_local,))
+            elif content_type == 'audio':
+                thread = Thread(target=self._add_audio_thread, args=(content_src, is_local,))
+            elif content_type == 'image':
+                thread = Thread(target=self._add_image_thread, args=(content_src, image_src_url, is_local,))
+            elif content_type == 'text':
+                thread = Thread(target=self._add_text_thread, args=(content_src,))
+
             thread.daemon = True  # Daemonize thread
             thread.start()  # Start the execution
 
-            return create_json_response(self, rowId=row.id)
-
-        except requests.exceptions.HTTPError as e:
-            self.logging.info(e)
-            return create_json_response(self, error_sentence=str(e), status_code=e.response.status_code)
-        except AttributeError as e:
-            self.logging.info("Atribute error on image: " + str(e))
-            return create_json_response(self, error_sentence=str(e), status_code=401)
-
-    def add_audio_to_database(self, audio_src, url=None, collection_index=0):
-        is_local = url is None
-
-        if is_local:
-            self.logging.info("Adding audio to mind: {0} {1}".format(audio_src.encode('utf8'), collection_index))
-        else:
-            self.logging.info(
-                "Adding audio to mind: {0} {1} {2}".format(audio_src.encode('utf8'), url.encode('utf8'),
-                                                           collection_index))
-        self.status_code = 200  # at start we asume everything will go ok
-
-        try:
-            self.mind_structure.set_current_collection(collection_index)
-
-            row = self.mind_structure.collection.add_row()
-            self.row = row
-
-            if is_local:
-                row.name = "Audio from phone"
-            else:
-                row.name = "Audio from " + str(url)
-                row.url = url
-
-            thread = Thread(target=self._add_audio_thread, args=(audio_src, is_local,))
-            thread.daemon = True  # Daemonize thread
-            thread.start()  # Start the execution
-
-            return create_json_response(self, rowId=row.id)
+            return create_json_response(self, rowId=self.row.id)
 
         except requests.exceptions.HTTPError as e:
             self.logging.info(e)
             return create_json_response(self, error_sentence=str(e), status_code=e.response.status_code)
         except AttributeError as e:
             self.logging.error(e)
-            return create_json_response(self, error_sentence=str(e), status_code=401)
+            if "views" in str(e):
+                return self.add_content_to_database(content_src=content_src, content_type=content_type, url=url,
+                                                    image_src_url=image_src_url, collection_index=collection_index)
+            else:
+                return create_json_response(self, error_sentence=str(e), status_code=-1)
 
     def modify_row_by_id(self, id, title, url):
         self.status_code = 204  # at start we asume everything will go ok
@@ -256,6 +215,9 @@ class NotionAI:
                 try:
                     self.row.remove_callbacks(self.row.id)
 
+                    self.property_manager.update_properties(self.row,
+                                                            mind_extension_property=get_current_extension_name(
+                                                                self.request_platform))
                     if hasattr(self, "img_url_list"):
                         self._add_tags_to_row(self.img_url_list, False)
                     else:
@@ -304,15 +266,13 @@ class NotionAI:
             text_block = row.children.add_new(TextBlock)
             text_block.title = text
 
-            self.property_manager.update_properties(self.row, mind_extension_property=get_current_extension_name(
-                self.request_platform))
             self.logging.info("Add text Thread %s: finished", row.id)
         except AttributeError as e:
             print("Add text thread: " + str(e))
             self.status_code = e.response.status_code
             self.logging.error(e)
 
-    def _add_image_thread(self, image_src, is_local=False):
+    def _add_image_thread(self, image_src, image_src_url=None, is_local=False):
         row = self.row
         self.logging.info("Image add Thread %s: starting", row.id)
 
@@ -322,6 +282,9 @@ class NotionAI:
             img_block.upload_file(image_src)
         else:
             img_block.source = image_src
+
+        if image_src_url:
+            row.url = image_src_url
 
         row.icon = img_block.source
         self._analyze_image_thread([image_src], row, is_image_local=is_local)
@@ -338,6 +301,20 @@ class NotionAI:
             audio_block.upload_file(filename)
 
         self.logging.info("Audio add Thread %s: finishing", self.row.id)
+
+    def _add_video_thread(self, video_src, is_local=False):
+        self.logging.info("Video add Thread %s: starting", self.row.id)
+
+        video_block = self.row.children.add_new(VideoBlock)
+
+        if is_local:
+            video_block.upload_file(video_src)
+        else:
+            # filename = download_audio_from_url(video_src)
+            video_block.source = video_src
+            # video_block.upload_file(filename)
+
+        self.logging.info("Video add Thread %s: finishing", self.row.id)
 
     def _add_tags_to_row(self, img_url_list, is_image_local):
         try:
@@ -360,9 +337,7 @@ class NotionAI:
                     tags_string = ",".join(filtered_list)  # converts the tags to a string
 
                 self.logging.info("Tags from block {0}".format(tags_string))
-                self.property_manager.update_properties(self.row, ai_tags_property=tags_string,
-                                                        mind_extension_property=get_current_extension_name(
-                                                            self.request_platform))
+                self.property_manager.update_properties(self.row, ai_tags_property=tags_string)
 
         except AttributeError as e:
             self.logging.info("Add tags to row: " + str(e))

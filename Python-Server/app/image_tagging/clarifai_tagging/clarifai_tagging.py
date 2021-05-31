@@ -2,20 +2,21 @@ from clarifai_grpc.grpc.api import service_pb2_grpc, service_pb2, resources_pb2
 from clarifai_grpc.grpc.api.status import status_code_pb2
 from clarifai_grpc.channel.clarifai_channel import ClarifaiChannel
 
+
 class ClarifaiAI:
 
-    def __init__(self,key):
+    def __init__(self, key):
         # Construct one of the channels you want to use
         self.channel = ClarifaiChannel.get_json_channel()
         self.key = key
 
-    def get_tags(self,image_url, is_local_image, treshold):
+    def get_tags(self, image_url, is_local_image, treshold):
         stub = service_pb2_grpc.V2Stub(self.channel)
         file_bytes = {}
         file = ""
 
         if is_local_image:
-            file = "./uploads/"+image_url.split("/")[-1]
+            file = "./uploads/" + image_url.split("/")[-1]
             with open(file, "rb") as f:
                 file_bytes = f.read()
         else:

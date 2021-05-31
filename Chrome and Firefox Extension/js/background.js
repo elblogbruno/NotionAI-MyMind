@@ -5,7 +5,7 @@ var menuConfig = null;
 if (usePromise){
   menuConfig = [
     {
-      title: `${browser.i18n.getMessage("add_text")}: %s`,
+      title: `${browser.i18n.getMessage("add_text")} %s`,
       id: "naimm-add",
       contexts: [ "selection", "image", "video", "audio" ]
     },
@@ -28,7 +28,7 @@ if (usePromise){
 }else{
   menuConfig = [
     {
-      title: `${chrome.i18n.getMessage("add_text")}: %s`,
+      title: `${chrome.i18n.getMessage("add_text")} %s`,
       id: "naimm-add",
       contexts: [ "selection", "image", "video", "audio" ]
     },
@@ -135,25 +135,45 @@ async function GetMindStructure(sendResponse = null) {
 
 async function AddUrlToMind(tab) {
   let struct = await getFromStorage("mind_structure");
-  var url = tab.url;
+  var tab_url = tab.url;
   var title = tab.title;
-  //const urlParams = `add_url_to_mind?url=${url}&title=${title}&collection_index=${collection_index}`;
+  
   createCollectionHandler(
       () =>
-        showCollectionPopup(String(struct) , (result) => ApiRequest(`add_url_to_mind?url=${url}&title=${title}&collection_index=${result}`))
+        showCollectionPopup(String(struct) , (result) => UrlRequest(title,tab_url,result))
     );
 }
+
+async function UrlRequest(title,tab_url,collection_index){
+  var url = new URL("http://foo.bar/add_url_to_mind");
+  
+  url.searchParams.append('collection_index', collection_index);
+  url.searchParams.append('url', tab_url);
+  url.searchParams.append('title', title);
+  
+  ApiRequest(url);
+}
+
 //Adds text to mind
 async function AddTextToMind(info,tab) {
   var text = info.selectionText;
-  var url = tab.url;
-  //urlParams = `add_text_to_mind?url=${url}&collection_index=${collection_index}&text=${text}`;
-
+  var tab_url = tab.url;
+  
   let struct = await getFromStorage("mind_structure");
   createCollectionHandler(
         () =>
-          showCollectionPopup(String(struct) , (result) => ApiRequest(`add_text_to_mind?url=${url}&collection_index=${result}&text=${text}`))
+          showCollectionPopup(String(struct) , (result) => TextRequest(text,tab_url,result))
       );
+}
+
+async function TextRequest(text,tab_url,collection_index){
+    var url = new URL("http://foo.bar/add_text_to_mind");
+    
+    url.searchParams.append('collection_index', collection_index);
+    url.searchParams.append('url', tab_url);
+    url.searchParams.append('text', text);
+    
+    ApiRequest(url);
 }
 
 async function ProcessSelection(info,tab) {
@@ -165,35 +185,44 @@ async function ProcessSelection(info,tab) {
 }
 
 async function addSelectionToMind(info,collection_index){
-    var urlParams = "";
-
-    var url = info["linkUrl"];
     switch (info["mediaType"]) {
       case 'image':
-        var src = info["srcUrl"];
-        var image_src_url =  info["pageUrl"];
-        urlParams = `add_image_to_mind?collection_index=${collection_index}&url=${url}&image_src=${src}&image_src_url=${image_src_url}`;
-        ApiRequest(urlParams);
+        var image_src = info["srcUrl"];
+        var page_url =  info["pageUrl"];
+        var link_url = info["linkUrl"];
+        var url = new URL("http://foo.bar/add_image_to_mind");
+
+        url.searchParams.append('collection_index', collection_index);
+        url.searchParams.append('url', page_url);
+        url.searchParams.append('image_src', image_src);
+        url.searchParams.append('image_src_url', link_url);
+        
+        ApiRequest(url);
+
         break;
       case 'video':
         var src = info["srcUrl"];
-        var video_src_url =  info["pageUrl"];
-        urlParams = `add_video_to_mind?collection_index=${collection_index}&url=${url}&video_src=${src}&video_src_url=${video_src_url}`;
-        ApiRequest(urlParams);
+        var page_url =  info["pageUrl"];
+        var url = new URL("http://foo.bar/add_video_to_mind");
+
+        url.searchParams.append('collection_index', collection_index);
+        url.searchParams.append('url', page_url);
+        url.searchParams.append('video_src', src);
+        
+        ApiRequest(url);
+
         break;
       case 'audio':
         var src = info["srcUrl"];
         var page_url =  info["pageUrl"];
         var url = new URL("http://foo.bar/add_audio_to_mind");
 
-        // If your expected result is "http://foo.bar/?x=1&y=2&x=42"
         url.searchParams.append('collection_index', collection_index);
         url.searchParams.append('url', page_url);
         url.searchParams.append('audio_src', src);
         
         ApiRequest(url);
-        // urlParams = `add_audio_to_mind?collection_index=${collection_index}&url=${page_url}&audio_src=${src}`;
-
+        
         break;
       default:
         break;
@@ -495,7 +524,6 @@ function createCollectionHandler(callback) {
 }
 //We have a callback here from when user chooses a collection index, so we call the function that makes a request to the api with the index.
 function showCollectionPopup(structure,callback_from_caller) {
-  console.log(structure);
   if (structure != null){
     try {
     
