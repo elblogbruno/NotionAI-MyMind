@@ -88,7 +88,9 @@ class Api {
             String _serverUrl = await getServerUrl();
             String finalUrl = _serverUrl + "add_text_to_mind?collection_index="+collectionIndex.toString() + "&url=" + title + "&text=" + urlToAdd;
             print("Final sharing url: " + finalUrl);
-            http.Response response = await http.get(finalUrl);
+            http.Response response = await http.get(finalUrl).timeout(
+              Duration(seconds: TIMEOUT_TIME),
+            );
 
             if (response.statusCode == 200) {
               return parseResponse(response.body);
@@ -106,7 +108,9 @@ class Api {
             String _serverUrl = await getServerUrl();
             String finalUrl = _serverUrl + "add_url_to_mind?collection_index="+collectionIndex.toString() + "&url=" + matchedText + "&title=" + title;
             print("Final sharing url: " + finalUrl);
-            http.Response response = await http.get(finalUrl);
+            http.Response response = await http.get(finalUrl).timeout(
+              Duration(seconds: TIMEOUT_TIME),
+            );
 
             if (response.statusCode == 200) {
               return  parseResponse(response.body);
@@ -123,7 +127,9 @@ class Api {
             String finalUrl = _serverUrl + "add_text_to_mind?collection_index="+collectionIndex.toString() + "&url=" + matchedText + "&text=" + urlToAdd;
 
             print("Final sharing url: " + finalUrl);
-            http.Response response = await http.get(finalUrl);
+            http.Response response = await http.get(finalUrl).timeout(
+              Duration(seconds: TIMEOUT_TIME),
+            );
 
             if (response.statusCode == 200) {
               return  parseResponse(response.body);
@@ -153,7 +159,9 @@ class Api {
 
       print("Final sharing url: " + finalUrl);
 
-      http.Response response = await http.get(finalUrl);
+      http.Response response = await http.get(finalUrl).timeout(
+        Duration(seconds: TIMEOUT_TIME),
+      );
 
       if (response.statusCode == 200) {
         return "200";
@@ -205,7 +213,9 @@ class Api {
 
       print("Final modify_element_by_id url: " + finalUrl);
 
-      http.Response response = await http.get(finalUrl);
+      http.Response response = await http.get(finalUrl).timeout(
+        Duration(seconds: TIMEOUT_TIME),
+      );
 
       if (response.statusCode == 200) {
         return  parseResponse(response.body);
@@ -245,7 +255,9 @@ class Api {
 
       request.files.add(multipartFile);
 
-      var response = await request.send();
+      var response = await request.send().timeout(
+        Duration(seconds: TIMEOUT_TIME),
+      );
       print(response.statusCode);
 
       var response1 = await http.Response.fromStream(response);
@@ -286,6 +298,8 @@ class Api {
         },
 
         body: jsonTags,
+      ).timeout(
+        Duration(seconds: TIMEOUT_TIME),
       );
 
       if (response.statusCode == 200) {
@@ -308,7 +322,9 @@ class Api {
 
       print("Final get_multi_select_tags url: " + finalUrl);
 
-      http.Response response = await http.get(finalUrl);
+      http.Response response = await http.get(finalUrl).timeout(
+        Duration(seconds: TIMEOUT_TIME),
+      );
 
       if (response.statusCode == 200) {
         return  parseMultiSelectResponse(response.body);
@@ -330,7 +346,9 @@ class Api {
 
       print("Final get_multi_select_tags url: " + finalUrl);
 
-      http.Response response = await http.get(finalUrl);
+      http.Response response = await http.get(finalUrl).timeout(
+        Duration(seconds: TIMEOUT_TIME),
+      );
 
       if (response.statusCode == 200) {
         Map map = jsonDecode(response.body);

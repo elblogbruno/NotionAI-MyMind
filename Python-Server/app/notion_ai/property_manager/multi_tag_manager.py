@@ -4,9 +4,9 @@ from uuid import uuid1
 import json
 import requests
 
-from NotionAI.property_manager.tag_object import TagObject
-from NotionAI.utils import create_json_response
-from utils.utils import SETTINGS_FOLDER, DEFAULT_COLOR
+from notion_ai.property_manager.tag_object import TagObject
+from notion_ai.utils import create_json_response
+from server_utils.utils import SETTINGS_FOLDER, DEFAULT_COLOR
 
 
 ## This class manages the multi-choice tag property on a mind element. We can get current tags and add tags.
@@ -53,7 +53,7 @@ class MultiTagManager:
             else:
                 raise ValueError(f'"{prop}" property has no tags on it.')
 
-    def get_multi_select_tags_as_list(self, collection_index=0):
+    def _get_multi_select_tags_as_list(self, collection_index=0):
         self.mind_structure.set_current_collection(int(collection_index))
         prop = self.multi_tag_property
         collection_schema = self.mind_structure.collection.get("schema")
@@ -83,7 +83,7 @@ class MultiTagManager:
             print("Updating multi select tags for row {0} {1} {2}".format(id, tags_json, collection_index))
             block = self.client.get_block(id)
 
-            current_tags_notion = self.get_multi_select_tags_as_list(collection_index)
+            current_tags_notion = self._get_multi_select_tags_as_list(collection_index)
             tag_to_add = []
 
             for tag in tags_json:
@@ -101,7 +101,7 @@ class MultiTagManager:
             if len(block.get_property(self.multi_tag_property)) > 0:
                 return create_json_response(notion_ai, status_code=205, rowId=id)
             else:
-                return create_json_response(notion_ai, status_code=404, rowId=id)
+                return create_json_response(notion_ai, status_code=206, rowId=id)
 
         except ValueError as e:
             self.logging.info(e)
@@ -109,7 +109,7 @@ class MultiTagManager:
         except requests.exceptions.HTTPError as e:
             print(e)
             self.logging.info(e)
-            return create_json_response(notion_ai, status_code=429, rowId=id)
+            return create_json_response(notion_ai, status_code=e.response.status_code, rowId=id)
 
     def add_new_multi_select_value(self, prop, value, color=None):
         colors = [

@@ -5,7 +5,7 @@
           "response": "Añadido a tu mente.",
           "status": "success"
         },
-      "404":
+      "401":
         {
           "response": "No se han proporcionado las credenciales de Notion. Por favor, configure el servidor antes de añadir contenido.",
           "status": "error"
@@ -20,6 +20,11 @@
           "response": "Etiquetas actualizadas con éxito.",
           "status": "success"
         },
+      "206":
+        {
+          "response": "No hay etiquetas disponibles.",
+          "status": "success"
+        },
       "429":
         {
           "response": "Demasiadas peticiones a la API de Notion.",
@@ -27,7 +32,7 @@
         },
       "400":
         {
-          "response": "Url no válida proporcionada.",
+          "response": "Contenido no válido proporcionado.",
           "status": "error"
         },
       "300":

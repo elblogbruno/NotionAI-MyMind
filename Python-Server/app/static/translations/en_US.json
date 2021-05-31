@@ -5,7 +5,7 @@
           "response": "Added to your mind.",
           "status": "success"
         },
-      "404":
+      "401":
         {
           "response": "No Notion credentials where provided. Please configure server before adding content.",
           "status": "error"
@@ -20,6 +20,11 @@
           "response": "Tags updated succesfully.",
           "status": "success"
         },
+      "206":
+        {
+          "response": "No Tags are available.",
+          "status": "success"
+        },
       "429":
         {
           "response": "Too much requests to Notion API.",
@@ -27,7 +32,7 @@
         },
       "400":
         {
-          "response": "Invalid url provided.",
+          "response": "Invalid content provided.",
           "status": "error"
         },
       "300":

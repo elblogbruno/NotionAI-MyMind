@@ -1,8 +1,5 @@
 import json
-import re
-from utils.custom_errors import OnServerNotConfigured
-from utils.utils import SETTINGS_FOLDER
-import os
+from server_utils.utils import SETTINGS_FOLDER
 
 
 
@@ -10,17 +7,22 @@ class TranslationManager:
     def __init__(self, logging, static_folder):
         self.language_code = self.get_current_language_code()
         self.TRANSLATIONS_FOLDER = "{0}/translations/".format(static_folder)
+        self.logging = logging
         logging.info("Translation Manager created with this language code {0}".format(self.language_code))
 
     def get_sentence_by_code(self, status_code):
-        filename = "{0}{1}.json".format(self.TRANSLATIONS_FOLDER, self.language_code)
-        translated_sentence = "no translation found"
-        status = "error"
-        with open(filename, encoding='utf8') as json_file:
-            data = json.load(json_file)
-            translated_sentence = str(data['sentences'][str(status_code)]["response"])
-            status = str(data['sentences'][str(status_code)]["status"])
-        return translated_sentence, status
+        try:
+            filename = "{0}{1}.json".format(self.TRANSLATIONS_FOLDER, self.language_code)
+            translated_sentence = "error"
+            status = "error"
+            with open(filename, encoding='utf8') as json_file:
+                data = json.load(json_file)
+                translated_sentence = str(data['sentences'][str(status_code)]["response"])
+                status = str(data['sentences'][str(status_code)]["status"])
+            return translated_sentence, status
+        except KeyError as e:
+            self.logging.info("Error getting translation : " + str(e))
+            return "error", "error"
 
     def get_response_text(self, status_code):
         print("Sending response {}".format(status_code))

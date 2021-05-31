@@ -4,9 +4,11 @@
   <a href="https://github.com/elblogbruno/NotionAI-MyMind/">
     <img src="Chrome%20and%20Firefox%20Extension/icon/icon.png" alt="Logo" width="80" height="80">
   </a>
+  
 
+  
   <h3 align="center">NotionAI MyMind</h3>
-
+  
   <p align="center">
     This repo uses AI and the wonderful Notion to enable you to add anything on the web to your "Mind" and forget about everything else.
     <br />
@@ -23,6 +25,9 @@
     <a href='https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 '><img align="center" style="overflow: hidden; display: inline-block;" alt='Get it on Chrome Web Store' width=200          height=60 src='https://storage.googleapis.com/chrome-gcs-uploader.appspot.com/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/HRs9MPufa1J1h5glNhut.png'/></a>  <a href='https://addons.mozilla.org/en-US/firefox/addon/notion-ai-my-mind/'><img align="center" style="overflow: hidden; display: inline-block;" alt='Get it on Firefox Add-On Store' width=172 height=60  src='https://ffp4g1ylyit3jdyti1hqcvtb-wpengine.netdna-ssl.com/addons/files/2015/11/get-the-addon.png'/></a>  <a href='https://play.google.com/store/apps/details?id=com.elblogbruno.notion_ai_my_mind&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img align="center" style=" overflow: hidden; display: inline-block;" alt='Get it on Google Play' width=250 height=100 src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a>
   
   </p>
+  <a href="https://github.com/elblogbruno/NotionAI-MyMind/blob/master/readme-translations/README.es.md">
+    <img src="https://img.shields.io/badge/lang-disponible%20en%20espa%C3%B1ol-brightgreen.svg" alt="Logo">
+  </a>
 </p>
 
 ### Add content 
@@ -51,6 +56,7 @@
       <ul>
         <li><a href="#examples-of-what-you-can-do">Examples</a></li>
         <li><a href="#extensions">Mind Extensions</a></li>
+        <li><a href="#multilanguage-support-and-translation-collaboration">Translation into your language</a></li>
       </ul>
     </li>
     <li>
@@ -105,6 +111,16 @@ Users can install the android app from android store. On Ios you can clone the f
 
 I won't be releasing the app on the Apple App Store, as I don't have an Apple Developer Account either Mac OS based computer.
 Meanwhile, you can clone the flutter project and build the app yourself.
+
+## Multilanguage Support and Translation Collaboration
+
+Since version 2.0.4 NotionAI-MyMind has multilanguage support! Now server, phone app and extension is translated to English and Spanish! 
+Would you like to have it translated into your own language? 
+
+You can have more info on how to collaborate it helps out people from all comunities and languages access this amazing tool! 
+More info here:
+
+https://github.com/elblogbruno/NotionAI-MyMind-Translations
 
 ## Installation Tutorial
 [![Installation Tutorial](https://img.youtube.com/vi/v2wWtCYED1U/0.jpg)](https://www.youtube.com/watch?v=v2wWtCYED1U)

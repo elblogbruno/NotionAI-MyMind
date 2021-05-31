@@ -5,7 +5,7 @@
 *.jks
 key.properties
 /Python-Server/output
-/Python-Server/app/.idea
+/Python-Server/.idea
 /Python-Server/app/image_tagging/temp_image_folder
 /Python-Server/app/__pycache__
 /Python-Server/app/uploads
