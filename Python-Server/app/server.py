@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+from urllib.error import HTTPError
 
 import werkzeug
 from quart import Quart, render_template, request, send_file
@@ -13,7 +14,7 @@ from server_utils.handle_options_data import process_formulary
 from notion_ai.notion_ai import *
 from notion.client import NotionClient
 from server_utils.utils import ask_server_port, createFolder, allowed_file, is_a_sound_file, is_a_video_file, \
-    SETTINGS_FOLDER,UPLOAD_FOLDER
+    SETTINGS_FOLDER, UPLOAD_FOLDER
 from server_utils.check_update import *
 from notion_ai.utils import create_json_response
 import tempfile
@@ -50,7 +51,7 @@ async def add_url_to_mind():
         title = request.args.get('title')
         collection_index = request.args.get('collection_index') if request.args.get('collection_index') else 0
         notion_ai.set_mind_extension(request)
-        return str(notion_ai.add_url_to_database(url, title, int(collection_index)))
+        return str(notion_ai.add_url_to_database(url, title, int(collection_index), False))
     except OnServerNotConfigured as e:
         logging.error(e)
         return str(create_json_response(notion_ai, status_code=e.status_code, port=port))
@@ -132,7 +133,8 @@ async def get_mind_structure():
 
 
 def toDate(dateString):
-    return datetime.datetime.strptime(dateString, "%Y-%m-%d %H:%M").date()
+    return datetime.strptime(dateString, "%Y-%m-%dT%H:%M") #example datetime input 2021-07-01T13:45
+
 
 
 @app_quart.route('/set_reminder_date_to_block')
@@ -140,16 +142,27 @@ async def set_reminder_date_to_block():
     id = request.args.get("id")
 
     # if there is a week beetwen start and end 1 week before option appears. ({'time': '09:00', 'unit': 'week', 'value': 1})
+    try:
+        start = request.args.get('start', type=toDate)
 
-    start = request.args.get('start', default=datetime.today(), type=toDate)
-    end = request.args.get('end', default=datetime.today(), type=toDate)
-    unit = request.args.get('unit', default='minute')  # if unit is minute and value is 0 it means At Time of Event
-    remind_value = request.args.get('remind_value',
-                                    default=0)  # it can be 5 minutes 10 15 or 30.  Aswell as 1 2 hours or 1 2 days before
+        logging.info("Start date: " + str(start))
+        # end = request.args.get('end', default=datetime.today(), type=toDate)
+        unit = request.args.get('unit', default='minute')  # if unit is minute and value is 0 it means At Time of Event
+        auto_destroy = request.args.get('autodestroy',
+                                        default=False)  # if unit is minute and value is 0 it means At Time of Event
+        remind_value = request.args.get('remind_value',
+                                        default=0)  # it can be 5 minutes 10 15 or 30.  Aswell as 1 2 hours or 1 2 days before
 
-    return str(
-        notion_ai.set_reminder_date_to_block(logging, id=id, start=start, end=end, unit=unit,
-                                             remind_value=remind_value))
+        return str(notion_ai.set_reminder_date_to_block(logging, id=id, start=start, unit=unit,
+                                                        remind_value=remind_value, self_destruction=auto_destroy))
+
+    except ValueError as e:
+        logging.error("Error parsing reminder start date" + str(e))
+        return str(create_json_response(notion_ai, error_sentence=str(e), status_code=305))
+    except HTTPError as e:
+        logging.error("Error parsing reminder start date" + str(e))
+        return str(create_json_response(notion_ai, error_sentence=str(e), status_code=305))
+
 
 
 @app_quart.route('/modify_element_by_id')
@@ -323,6 +336,7 @@ if __name__ == "__main__":
     app_quart.secret_key = secret
     createFolder("settings")
     createFolder("uploads")
+
     check_update(logging, app_quart.static_folder)
     port = ask_server_port(logging)
     notion_ai = NotionAI(logging, port, app_quart.static_folder)

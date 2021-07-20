@@ -2,8 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+import 'package:metadata_fetch/metadata_fetch.dart';
+import 'package:notion_ai_my_mind/api/models/api_response.dart';
+import 'package:notion_ai_my_mind/api/models/mind_collection.dart';
 import 'package:notion_ai_my_mind/api/models/mind_collection_list_response.dart';
 import 'package:notion_ai_my_mind/api/models/multi_select_tag_list_response.dart';
+import 'package:notion_ai_my_mind/api/models/tag.dart';
 
 
 import 'package:notion_ai_my_mind/resources/strings.dart';
@@ -13,30 +17,30 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 
 import 'package:url_launcher/url_launcher.dart';
-
-import 'models/mind_collection.dart';
-import 'models/api_response.dart';
-import 'models/tag.dart';
-
 import 'package:notion_ai_my_mind/locales/main.i18n.dart';
 
 class Api {
   static const int TIMEOUT_TIME = 5;
-  Future<MindCollectionListResponse> refreshCollections() async {
+
+  //Gets mind structure
+  Future<MindCollectionListResponse> getMindStructure() async {
     try {
       String _serverUrl = await getServerUrl();
 
-      String serverUrl = _serverUrl + "get_mind_structure";
-      print("get_mind_structure: " + serverUrl);
-      http.Response response = await http.get(serverUrl).timeout(
+      String finalUrl = _serverUrl + "get_mind_structure";
+
+      Uri url = Uri.parse(finalUrl);
+      print("Final get_mind_structure: " + url.toString());
+
+      http.Response response = await http.get(url).timeout(
         Duration(seconds: TIMEOUT_TIME),
       );
 
       if (response.statusCode == 200) {
         Map map = jsonDecode(response.body);
-        MindCollectionListResponse api_response = MindCollectionListResponse.fromJson(map);
+        MindCollectionListResponse apiResponse = MindCollectionListResponse.fromJson(map);
         setCollections(response.body);
-        return api_response;
+        return apiResponse;
       } else {
         return Future.error(Strings.serverTimeout.i18n.i18n);
       }
@@ -48,13 +52,18 @@ class Api {
       return Future.error(Strings.noInternet.i18n.i18n);
     }
   }
+
+  //Gets mind url asking to the server
   Future<String> getMindUrl() async {
     try {
       String _serverUrl = await getServerUrl();
 
-      String serverUrl = _serverUrl + "get_current_mind_url";
-      print("GetMindUrl: " + serverUrl);
-      http.Response response = await http.get(serverUrl).timeout(
+      String finalUrl = _serverUrl + "get_current_mind_url";
+
+      Uri url = Uri.parse(finalUrl);
+      print("Final GetMindUrl: " + url.toString());
+
+      http.Response response = await http.get(url).timeout(
         Duration(seconds: TIMEOUT_TIME),
       );
 
@@ -70,6 +79,9 @@ class Api {
     }
     on SocketException catch (_) {
       return Future.error(Strings.noInternet.i18n);
+    }
+    on ArgumentError  catch (_) {
+      return Future.error(Strings.appNoConfigured.i18n);
     }
   }
 
@@ -87,8 +99,10 @@ class Api {
             String title = "Extract from unknown url added to your mind from Phone";
             String _serverUrl = await getServerUrl();
             String finalUrl = _serverUrl + "add_text_to_mind?collection_index="+collectionIndex.toString() + "&url=" + title + "&text=" + urlToAdd;
-            print("Final sharing url: " + finalUrl);
-            http.Response response = await http.get(finalUrl).timeout(
+
+            Uri url = Uri.parse(finalUrl);
+            print("Final sharing url: " + url.toString());
+            http.Response response = await http.get(url).timeout(
               Duration(seconds: TIMEOUT_TIME),
             );
 
@@ -99,16 +113,23 @@ class Api {
             }
           }
           else if(urlToAdd == matches.first.group(0)) { //It is just an url, as the text and the url extracted from it are equal.
-            print(matches.first.group(0));
-
             final matchedText = matches.first.group(0);
-            print("Match: " + matchedText); // my
+
+            var data = await MetadataFetch.extract(matchedText);
+
+            print("Web title: " + data.title); // my
 
             String title = matchedText + " added to your mind from Phone";
+
+            if(data.title.isNotEmpty)
+                title = data.title;
+
             String _serverUrl = await getServerUrl();
             String finalUrl = _serverUrl + "add_url_to_mind?collection_index="+collectionIndex.toString() + "&url=" + matchedText + "&title=" + title;
-            print("Final sharing url: " + finalUrl);
-            http.Response response = await http.get(finalUrl).timeout(
+
+            Uri url = Uri.parse(finalUrl);
+            print("Final sharing url: " + url.toString());
+            http.Response response = await http.get(url).timeout(
               Duration(seconds: TIMEOUT_TIME),
             );
 
@@ -117,17 +138,17 @@ class Api {
             } else {
               return APIResponse.createBadResponse(Strings.badResultResponse.i18n);
             }
-          }else{
-            print(matches.first.group(0));
-
+          }else{ //some text with urls on it
             final matchedText = matches.first.group(0);
             print("Match: " + matchedText); // my
 
             String _serverUrl = await getServerUrl();
+
             String finalUrl = _serverUrl + "add_text_to_mind?collection_index="+collectionIndex.toString() + "&url=" + matchedText + "&text=" + urlToAdd;
 
-            print("Final sharing url: " + finalUrl);
-            http.Response response = await http.get(finalUrl).timeout(
+            Uri url = Uri.parse(finalUrl);
+            print("Final sharing url: " + url.toString());
+            http.Response response = await http.get(url).timeout(
               Duration(seconds: TIMEOUT_TIME),
             );
 
@@ -157,9 +178,9 @@ class Api {
       String _serverUrl = await getServerUrl();
       String finalUrl = _serverUrl + "add_image_to_mind?url="+urlToAdd+"&image_src="+title+"&image_src_url="+title;
 
-      print("Final sharing url: " + finalUrl);
-
-      http.Response response = await http.get(finalUrl).timeout(
+      Uri url = Uri.parse(finalUrl);
+      print("Final sharing url: " + url.toString());
+      http.Response response = await http.get(url).timeout(
         Duration(seconds: TIMEOUT_TIME),
       );
 
@@ -179,9 +200,10 @@ class Api {
       String _serverUrl = await getServerUrl();
       String finalUrl = _serverUrl + "set_collection_index?collection_index="+index.toString();
 
-      print("Final setCollectionIndex url: " + finalUrl);
+      Uri url = Uri.parse(finalUrl);
+      print("Final setCollectionIndex url: " + url.toString());
 
-      http.Response response = await http.get(finalUrl).timeout(
+      http.Response response = await http.get(url).timeout(
         Duration(seconds: TIMEOUT_TIME),
       );
 
@@ -198,7 +220,7 @@ class Api {
     }
   }
 
-  Future<APIResponse> modify_element_by_id(String url,String newTitle,String newUrl,APIResponse block) async {
+  Future<APIResponse> modifyElementById(String blockUrl,String newTitle,String newUrl) async {
     try {
       if(newTitle == null){
         newTitle = "";
@@ -209,11 +231,39 @@ class Api {
       }
 
       String _serverUrl = await getServerUrl();
-      String finalUrl = _serverUrl + "modify_element_by_id?id=" + url+"&new_title="+newTitle+"&new_url="+newUrl;
+      String finalUrl = _serverUrl + "modify_element_by_id?id=" + blockUrl+"&new_title="+newTitle+"&new_url="+newUrl;
 
-      print("Final modify_element_by_id url: " + finalUrl);
 
-      http.Response response = await http.get(finalUrl).timeout(
+      Uri url = Uri.parse(finalUrl);
+      print("Final modify_element_by_id url: " + url.toString());
+
+      http.Response response = await http.get(url).timeout(
+        Duration(seconds: TIMEOUT_TIME),
+      );
+
+      if (response.statusCode == 200) {
+        return  parseResponse(response.body);
+      } else {
+        return APIResponse.createBadResponse(Strings.badResultResponse.i18n);
+      }
+    } on TimeoutException catch (e) {
+      return Future.error(APIResponse.createBadResponse(Strings.serverTimeout.i18n));
+    }
+    on SocketException catch (e) {
+      return Future.error(APIResponse.createBadResponse(Strings.noInternet.i18n));
+    }
+  }
+
+  Future<APIResponse> setReminderDateToBlock(String blockUrl, String reminderStartDate,String unit,int remindValue, bool autoDestroy) async {
+    try {
+      String _serverUrl = await getServerUrl();
+      String finalUrl = _serverUrl + "set_reminder_date_to_block?id="+blockUrl+"&start="+reminderStartDate+"&unit="+unit+"&remind_value="+remindValue.toString()+"&auto_destroy="+autoDestroy.toString();
+
+
+      Uri url = Uri.parse(finalUrl);
+      print("Final set_reminder_date_to_block url: " + url.toString());
+
+      http.Response response = await http.get(url).timeout(
         Duration(seconds: TIMEOUT_TIME),
       );
 
@@ -276,25 +326,23 @@ class Api {
     }
   }
 
-  Future<APIResponse> set_multi_select_tags(int collection_index,String block_id,List<dynamic> jsonList) async{
+  Future<APIResponse> setMultiSelectTags(int collectionIndex,String blockId,List<dynamic> jsonList) async{
     try {
       String _serverUrl = await getServerUrl();
       String finalUrl = _serverUrl + "update_multi_select_tags";
 
-      print("Final set_multi_select_tags url: " + finalUrl);
-      /*String jsonTags = "";
-      for(int i = 0; i < jsonList.length;i++){
-        jsonTags = jsonTags + "," + jsonList[i].toJson();
-        print(jsonTags);
-      }*/
+
+      Uri url = Uri.parse(finalUrl);
+      print("Final set_multi_select_tags url: " + url.toString());
+
       String jsonTags = jsonEncode(jsonList);
       print(jsonTags);
       final http.Response response = await http.post(
-        finalUrl,
+        url,
         headers: <String, String>{
           'Content-Type': 'application/json;  charset=UTF-8',
-          'id': '${block_id}',
-          'collection_index': '${collection_index}',
+          'id': '${blockId}',
+          'collection_index': '${collectionIndex}',
         },
 
         body: jsonTags,
@@ -320,9 +368,10 @@ class Api {
       String _serverUrl = await getServerUrl();
       String finalUrl = _serverUrl + "get_multi_select_tags?collection_index="+collectionIndex.toString();
 
-      print("Final get_multi_select_tags url: " + finalUrl);
+      Uri url = Uri.parse(finalUrl);
+      print("Final get_multi_select_tags url: " + url.toString());
 
-      http.Response response = await http.get(finalUrl).timeout(
+      http.Response response = await http.get(url).timeout(
         Duration(seconds: TIMEOUT_TIME),
       );
 
@@ -339,40 +388,12 @@ class Api {
     }
   }
 
-  Future<List<String>> get_multi_select_tags_as_string(int collectionIndex) async{
-    try {
-      String _serverUrl = await getServerUrl();
-      String finalUrl = _serverUrl + "get_multi_select_tags?collection_index="+collectionIndex.toString();
-
-      print("Final get_multi_select_tags url: " + finalUrl);
-
-      http.Response response = await http.get(finalUrl).timeout(
-        Duration(seconds: TIMEOUT_TIME),
-      );
-
-      if (response.statusCode == 200) {
-        Map map = jsonDecode(response.body);
-        List<String> data = map["multi_select_tag_list"];
-        print(data);
-        return  data;
-      } else {
-        List<String> data = new List<String>();
-        return  data;
-      }
-    } on TimeoutException catch (e) {
-      return Future.error(APIResponse.createBadResponse(Strings.serverTimeout.i18n));
-    }
-    on SocketException catch (e) {
-      return Future.error(APIResponse.createBadResponse(Strings.noInternet.i18n));
-    }
-  }
-
-  Future<APIResponse> addContentToMind(String url,bool isImage,int index) async{
-    print("addContentToMind: " + url + " " + isImage.toString());
+  Future<APIResponse> addContentToMind(String url,bool isNotUrl,int index) async{
+    print("addContentToMind: " + url + " " + isNotUrl.toString());
     if(url != null){
       print("Widget url: " + url);
-      if(isImage){
-        print("Widget is image");
+      if(isNotUrl){
+        print("Widget is an image, video or sound");
         var myFile = new File(url);
         return uploadImage(myFile,index);
       }else{
@@ -397,12 +418,12 @@ class Api {
 
     List<dynamic> data = m.extra_content;
 
-    m.multi_select_tag_list = new List<Tag>();
+    m.multi_select_tag_list = [];
     //List<TAGResponse> collectionList = new List<TAGResponse>();
 
     for(int i = 0; i < data.length;i++){
       Map<String, dynamic> myMap = new Map<String, dynamic>.from(data[i]);
-      var response = Tag.fromJson(myMap);
+      Tag response = Tag.fromJson(myMap);
       m.multi_select_tag_list.add(response);
     }
 
@@ -428,28 +449,34 @@ class Api {
     await prefs.setString("structure", value);
   }
 
-  Future<List<MindCollection>> getCollections() async {
+  Future<MindCollectionListResponse> getCollections() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String structure = prefs.getString("structure") ?? null;
     return parseStructure(structure);
   }
 
-  List<MindCollection> parseStructure(String responseBody) {
-    Map map = jsonDecode(responseBody);
+  MindCollectionListResponse parseStructure(String responseBody) {
+    if (responseBody != null) {
+      Map map = jsonDecode(responseBody);
 
-    MindCollectionListResponse resp = MindCollectionListResponse.fromJson(map);
+      MindCollectionListResponse resp = MindCollectionListResponse.fromJson(
+          map);
 
-    List<dynamic> data = resp.extra_content;
+      List<dynamic> data = resp.extra_content;
 
-    resp.collections = new List<MindCollection>();
+      resp.collections = new List<MindCollection>();
 
-    for(int i = 0; i < data.length;i++){
-      //Map userMap = jsonDecode(data[i]);
-      Map<String, dynamic> myMap = new Map<String, dynamic>.from(data[i]);
-      var response = MindCollection.fromJson(myMap);
-      resp.collections.add(response);
+      for (int i = 0; i < data.length; i++) {
+        //Map userMap = jsonDecode(data[i]);
+        Map<String, dynamic> myMap = new Map<String, dynamic>.from(data[i]);
+        var response = MindCollection.fromJson(myMap);
+        resp.collections.add(response);
+      }
+      return resp;
     }
-    return  resp.collections;
+    else{
+      return MindCollectionListResponse.createBadResponse(Strings.collectionsNotRefreshed.i18n);
+    }
   }
 
   /*Server API*/

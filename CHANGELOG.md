@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [2.0.6]
+
+### Added 
+- Now you can add a reminder to the content, so you get whatever you added reminded on the future whenever you want. If you select the Autodestroy option, booom , content will be auto-deleted from your mind at that specified time (Wish you had that in real life right?) pd: you can restore deleted notion content from the trash bin :wink:.
+- Added a background worker that maintains the database, cleaning blank content added that fills the mind with garbage. (Check for duplicated content coming soon)
+- Android app redesign as well, with bug fixes and less immersive experience.
+
+### Fixed
+- More error handling and structure fix to make everything faster and reliable.
+
 ## [2.0.5]
 
 ### Added 
@@ -133,6 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fixed server issues adding callback capabilities. Before some websites images were not added due to timeouts.
 
+[2.0.6]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.6
 [2.0.5]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.5
 [2.0.4]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.4
 [2.0.3]: https://github.com/elblogbruno/NotionAI-MyMind/releases/tag/2.0.3

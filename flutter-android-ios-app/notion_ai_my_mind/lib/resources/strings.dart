@@ -10,14 +10,15 @@ class Strings {
   static const addTagsText = 'Update Tags';
   static const currentUrlTitle = "Current URL:";
   static const currentTitleTitle = "Current Title:";
-
+  static const addReminderText = "Add reminder";
   static const waitText = 'Awaiting result...';
   static const badResultResponse = 'Content could not be added to your mind.';
 
   /*error exceptions text*/
   static const serverTimeout = 'Error during accessing server. Make sure the ip/port are corrects, and the server is running.';
   static const noInternet = 'Failed to contact server. Make sure you have internet.';
-
+  static const appNoConfigured = 'Please, enter app settings and configure your Notion AI My Mind Server URL.';
+  static const collectionsNotRefreshed = 'Please, refresh your collections before adding content. To do so go into the main menu and hit Refresh Collections.';
   /*Main menu buttons*/
   static const openMindButton = 'Open your mind';
   static const openServerButton = 'Open Server Settings';

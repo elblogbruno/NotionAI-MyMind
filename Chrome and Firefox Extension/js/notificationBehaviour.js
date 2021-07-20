@@ -41,110 +41,19 @@
 	
 	if (status === "success" && show_tags == 'true') 
 	{
+		let { notificationTags, notificationTagSuggestions,notificationTagsLoading,notificationTagSuggestionsStorage,notificationInput,notificationTagsUpdateButton,notificationTagsDivButton,notificationTagsStorage,notificationTagsButtonParent,notificationTagsStatus } = createSuggestionsInput();
+		let { notificationEdit, notificationEditButton,editInput1,editInput2,notificationEditStatus, notificationEditLoading, notificationEditInputDiv } = createEditMenu(block_title, block_attached_url);
+		let { notificationTime, notificationNotionTimeOption, notificationTimeLoading,notificationAutoDestroyCheck,notificationTimeButton,notificationTimeInputDiv,notificationTimeStatus } = createTimeInput();
 		
-		const notificationTags = document.createElement("div");
-		notificationTags.className = "naimm-notification-tags";
-
-		const notificationTagsStorage = document.createElement("div");
-		notificationTagsStorage.className = "naimm-tagstorage";
-
-		const notificationInput = document.createElement("input");
-		notificationInput.type = "text";
-		notificationInput.placeholder = chrome.i18n.getMessage("add_tags_placeholder");
-
-
-		const notificationTagsUpdateButton = document.createElement("button");
-		notificationTagsUpdateButton.className = "naimm-tags-update-button";
-		notificationTagsUpdateButton.innerHTML = "Update Tags";
-
-		const notificationTagsDivButton = document.createElement("div");
-		notificationTagsDivButton.className = "naimm-notification-tags-button-div";
-		
-		notificationTagsDivButton.style.display = 'none';
-
-		/*Suggestions*/
-		const notificationTagSuggestions = document.createElement("div");
-		notificationTagSuggestions.className = "naimm-notification-suggestions";
-
-		const notificationTagSuggestionsTitle = document.createElement("p");
-		notificationTagSuggestionsTitle.className = "naimm-notification-suggestions-title";
-		notificationTagSuggestionsTitle.innerText = chrome.i18n.getMessage("tag_title");
-
-		const notificationTagSuggestionsStorage = document.createElement("div");
-		notificationTagSuggestionsStorage.className = "naimm-notification-suggestions-storage";
-
-
-		const notificationTagsLoading = document.createElement("img");
-		notificationTagsLoading.id = "loading-edit-icon"
-		notificationTagsLoading.setAttribute("loading", false);
-
-		const notificationTagsStatus = document.createElement("p");
-		notificationTagsStatus.innerHTML = "";
-		notificationTagsStatus.id = "naimm-edit-status";
-
-		const notificationTagsButtonParent = document.createElement("div");
-		notificationTagsButtonParent.appendChild(notificationTagsUpdateButton)
-
-		const notificationTagsLoadingStatusDiv = document.createElement("div");
-		notificationTagsLoadingStatusDiv.appendChild(notificationTagsLoading);
-		notificationTagsLoadingStatusDiv.appendChild(notificationTagsStatus);
-
-		notificationTagsDivButton.appendChild(notificationTagsButtonParent);
-		notificationTagsDivButton.appendChild(notificationTagsLoadingStatusDiv);
-		
-
-		/*Edit menu*/
-		
-		const notificationEdit = document.createElement("div");
-		notificationEdit.className = "naimm-notification-edit";
-
-		const notificationEditTitle = document.createElement("p");
-		notificationEditTitle.innerHTML = chrome.i18n.getMessage("modify_block_title");
-		notificationEditTitle.className = "naimm-edit-title";
-
-		const notificationEditStorage = document.createElement("div");
-		notificationEditStorage.className = "naimm-editstorage";
-
-		const editInput1 = document.createElement("input");
-		editInput1.type = "text";
-		editInput1.placeholder = block_title;
-
-		const editInput2 = document.createElement("input");
-		editInput2.type = "text";
-		editInput2.placeholder = block_attached_url;
-
-		editInput1.style.visibility = 'visible';
-		editInput2.style.visibility = 'visible';
-
-		const notificationEditInputDiv= document.createElement("div");
-		notificationEditInputDiv.className = "naimm-editinputdiv";
-
-		notificationEditInputDiv.appendChild(editInput1);
-		notificationEditInputDiv.appendChild(editInput2);
-
-		const notificationEditLoading = document.createElement("img");
-		notificationEditLoading.id = "loading-edit-icon"
-		notificationEditLoading.setAttribute("loading", false);
-
-		const notificationEditStatus = document.createElement("p");
-		notificationEditStatus.innerHTML = "";
-		notificationEditStatus.id = "naimm-edit-status";
-
-		notificationEditStorage.appendChild(notificationEditInputDiv);
-		notificationEditStorage.appendChild(notificationEditLoading);
-		notificationEditStorage.appendChild(notificationEditStatus);
-
-		const notificationEditButton = document.createElement("button");
-		notificationEditButton.innerHTML = chrome.i18n.getMessage("modify_block_button");
-		notificationEditButton.className = "edit_button";
-
-		notificationEdit.appendChild(notificationEditTitle);
-		notificationEdit.appendChild(notificationEditStorage);
-		notificationEdit.appendChild(notificationEditButton);
-		
-		notificationEdit.setAttribute("closing", true);
 		notification.setAttribute("requesting", false);
+		
+		notificationWrap.appendChild(notificationTags);
+		notificationWrap.appendChild(notificationTagsDivButton);
+		notificationWrap.appendChild(notificationEdit);
+		notificationWrap.appendChild(notificationTime);
 
+		notificationWrap.appendChild(notificationTagSuggestions);
+		
 		createListener("keyup", notificationInput, "keyup", event => {
 			const value = event.target.value.trim();
 
@@ -220,17 +129,6 @@
 			}
 		});
 
-		notificationTags.appendChild(notificationTagsStorage);
-		notificationTags.appendChild(notificationInput);
-		
-		notificationWrap.appendChild(notificationTags);
-		notificationWrap.appendChild(notificationTagsDivButton);
-		notificationWrap.appendChild(notificationEdit);
-
-		notificationTagSuggestions.appendChild(notificationTagSuggestionsTitle);
-		notificationTagSuggestions.appendChild(notificationTagSuggestionsStorage);
-		notificationWrap.appendChild(notificationTagSuggestions);
-
 		createListener("suggestion-click", notificationTagSuggestionsStorage, "click", event => {
 			const value = event.target.dataset.value;
 
@@ -248,12 +146,22 @@
 		});
 
 		createListener("click", notificationIcon, "click", event => {
-			if(notificationEdit.getAttribute("closing") == 'true')
+
+			//if the user clicks on the icon, show notificationEdit and notificationTime objects if they are not visible and they are not doing any requests. If they are visible, hide them.
+		
+
+			if (notificationEdit.getAttribute("requesting") === "false" && notificationTime.getAttribute("requesting") === "false") 
 			{
-				notificationEdit.setAttribute("closing", false);
-			}else{
-				notificationEdit.setAttribute("closing", true);
+				if (notificationEdit.getAttribute("closing") === "false" && notificationTime.getAttribute("closing") === "false")
+				{
+					notificationEdit.setAttribute("closing", true);
+					notificationTime.setAttribute("closing", true);
+				}else{
+					notificationEdit.setAttribute("closing", false);
+					notificationTime.setAttribute("closing", false);
+				}
 			}
+
 		});
 		
 		createListener("click", notificationTagsUpdateButton, "click", event => {
@@ -264,6 +172,10 @@
 			modifyTitleUrl(editInput1.value,editInput2.value);
 		});
 		
+		createListener("click", notificationTimeButton, "click", event => {
+			addReminder(notificationNotionTimeOption,notificationAutoDestroyCheck);
+		});
+
 		window.setTimeout(() => {
 			notificationInput.focus();
 
@@ -281,7 +193,7 @@
 		createListener("blur", notificationInput, "blur", event => {
 			console.log("Blur event from notifiaction");
 			notification.removeAttribute("focus");
-			createRemovalTimeout(timeout);
+			//createRemovalTimeout(timeout);
 		});
 		
 		const getSuggestionsList = function() {
@@ -422,9 +334,13 @@
 						notificationEditInputDiv.style.display = 'block';
 						notificationEditStatus.innerHTML = "";
 						notificationEdit.setAttribute("closing", true);	
+						notificationEdit.setAttribute("requesting", false);	
 	
+
 						editInput1.placeholder = String(response['block_title']);
 						editInput2.placeholder = String(response['block_attached_url']);
+
+
 						notification.setAttribute("mouse", false);
 						notification.setAttribute("requesting", false);
 					}, timeout);		
@@ -447,8 +363,52 @@
 				notificationEditLoading.setAttribute("loading", true);
 				notification.setAttribute("mouse",true);
 				notification.setAttribute("requesting", true);
+				notificationEdit.setAttribute("requesting", true);	
 			}
 			
+		}.bind(this);
+
+		const addReminder = function(dropdown, auto_destroy) {
+			if (dropdown.value == undefined){
+				console.log("Undefined reminder");
+			}
+			{
+				function callback(response) {
+					console.log(response);
+					notificationTimeLoading.setAttribute("loading", false);
+					notificationTimeStatus.innerHTML = String(response['text_response']);
+					setTimeout(function () {
+						notificationTimeInputDiv.style.display = 'block';
+						notificationTimeButton.style.display = 'block';
+						notificationTimeStatus.innerHTML = "";
+						
+						notificationTime.setAttribute("closing", true);	
+						notificationTime.setAttribute("requesting", false);
+
+						notification.setAttribute("mouse", false);
+						notification.setAttribute("requesting", false);
+					}, timeout);		
+				};
+				var dic = JSON.parse(dropdown.value);
+
+				var msg = {start_date: dic["start_date"], unit_value: dic["unit_value"], time_value: dic["time_value"], should_auto_destroy: auto_destroy.checked,block_id_add_reminder: redirect};
+				
+				console.log(msg);
+
+				if (usePromise) {
+					browser.runtime.sendMessage(msg).then(callback);
+				} else {
+					chrome.runtime.sendMessage(msg, callback);
+				}
+
+				notificationTimeStatus.innerHTML = "";
+				notificationTimeInputDiv.style.display = 'none';
+				notificationTimeButton.style.display = 'none';
+				notificationTimeLoading.setAttribute("loading", true);
+				notification.setAttribute("mouse",true);
+				notification.setAttribute("requesting", true);
+				notificationTime.setAttribute("requesting", true);
+			}
 		}.bind(this);
 
 		const showSuggestions = function(data) {
@@ -490,11 +450,7 @@
 	createListener("mouseleave", notification, "mouseleave", event => {
 		console.log("Mouse leave event from notifiaction");
 		notification.removeAttribute("mouse");
-		createRemovalTimeout(timeout);
-		// if (notification.getAttribute("mouse") == 'false'){
-		// 	notification.removeAttribute("mouse");
-		// 	createRemovalTimeout(timeout);
-		// }
+		//createRemovalTimeout(timeout);
 	});
 
 	createListener("mouseenter", notification, "mouseenter", event => {
@@ -530,7 +486,7 @@
 	};
 
 	setTimeout(() => {
-		createRemovalTimeout(0);
+		//createRemovalTimeout(0);
 	}, timeout);
 })();
 
@@ -550,9 +506,252 @@ function createNewTagObject(tagCache,tag_value)
 	return { option_name: tag_value, option_id: id ,option_color: color_item }
 	
 }
+
 function uuidv4() {
 	return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
 	  (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
 	);
 }
-  
+
+function createTimeInput(){
+	console.log("Creating time menu");
+	/*Timer menu*/
+	const notificationTime = document.createElement("div");
+	notificationTime.className = "naimm-notification-time";
+
+	const notificationTimeTitle = document.createElement("p");
+	notificationTimeTitle.innerHTML = "Set reminder";
+	notificationTimeTitle.className = "naimm-time-title";
+
+	const notificationTimeStorage = document.createElement("div");
+	notificationTimeStorage.className = "naimm-timestorage";
+
+	const notificationTimeLoading = document.createElement("img");
+	notificationTimeLoading.id = "loading-time-icon";
+	notificationTimeLoading.setAttribute("loading", false);
+
+	const notificationTimeStatus = document.createElement("p");
+	notificationTimeStatus.innerHTML = "";
+	notificationTimeStatus.id = "naimm-time-status";
+
+	const notificationTimeButton = document.createElement("button");
+	notificationTimeButton.innerHTML = "Set Reminder";
+	notificationTimeButton.className = "time_button";
+
+	
+	const notificationTimeInputDiv = document.createElement("div");
+	notificationTimeInputDiv.className = "naimm-editinputdiv";
+
+	var today = new Date();
+
+	var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
+
+	const notificationDateTimeInput = document.createElement("input");
+	notificationDateTimeInput.type = "datetime-local";
+	notificationDateTimeInput.min = date;
+	notificationDateTimeInput.name = "time_input";
+	notificationDateTimeInput.className = "time_input";
+	notificationDateTimeInput.onchange = function(){
+		handleChangeDateInput(this.value,notificationNotionTimeOption);
+	 }
+
+	const label = document.createElement("label");
+	label.className = "container";
+	label.innerHTML = "Autodestroy?";
+
+	const notificationNotionTimeOption = document.createElement("select");
+	notificationNotionTimeOption.className = "select_option";
+
+	const notificationAutoDestroyCheck = document.createElement("input");
+	notificationAutoDestroyCheck.type = "checkbox";
+	notificationAutoDestroyCheck.className = "should_auto_destroy";
+	notificationAutoDestroyCheck.checked = "checked";
+
+	label.appendChild(notificationAutoDestroyCheck);
+    
+	notificationTimeInputDiv.appendChild(notificationDateTimeInput);
+	notificationTimeInputDiv.appendChild(notificationNotionTimeOption);
+	notificationTimeInputDiv.appendChild(label);
+	
+	notificationTimeStorage.appendChild(notificationTimeInputDiv);
+	notificationTimeStorage.appendChild(notificationTimeLoading);
+	notificationTimeStorage.appendChild(notificationTimeStatus);
+	
+
+	notificationTime.appendChild(notificationTimeTitle);
+	notificationTime.appendChild(notificationTimeStorage);
+	notificationTime.appendChild(notificationTimeButton);
+	notificationTime.setAttribute("closing", true);
+	notificationTime.setAttribute("requesting", false);
+	
+
+	return {notificationTime,notificationNotionTimeOption,notificationTimeLoading,notificationAutoDestroyCheck,notificationTimeButton,notificationTimeInputDiv,notificationTimeStatus};
+}
+
+
+function handleChangeDateInput(e, notificationNotionTimeOption){
+	const today = new Date();
+
+	console.log(today);
+
+	const inputDate = new Date(e);
+	console.log(e);
+	console.log(inputDate);
+	// To calculate the time difference of two dates
+	var Difference_In_Time = inputDate.getTime() - today.getTime();
+	
+	// To calculate the no. of days between two dates
+	var Difference_In_Days = Difference_In_Time / (1000 * 3600 * 24);
+
+	console.log(Difference_In_Days);
+
+	notificationNotionTimeOption.innerHTML = " ";
+
+	var time_options = ["At time of event", "5 minutes before", "10 minutes before", "15 minutes before", "30 minutes before", "1 hour before", "2 hours before","On day of event (9:00 AM)", "1 day before (9:00 AM)"]
+	var time_unit = ["minute", "minute","minute","minute","minute","hour","hour","day","day"]
+	var time_values = [0,5,10,15,30,1,2,0,1]
+	
+
+	if (Difference_In_Days > 2){
+		time_options.push("2 day before (9:00 AM)");
+		time_unit.push("day");
+		time_values.push(2);
+		// if (Difference_In_Days > 7){
+		// 	options.push("1 week before (9:00 AM)");
+		// }
+	}
+
+	for(var i = 0; i < time_options.length; i++) 
+	{
+		var opt = time_options[i];
+		var unit = time_unit[i];
+		var value = time_values[i];
+
+		var dic = { 'start_date': e, 'unit_value': unit, 'time_value': value }
+
+		var el = document.createElement("option");
+		el.textContent = opt;
+		el.value = JSON.stringify(dic);
+
+		notificationNotionTimeOption.appendChild(el);
+	}
+}
+
+function createSuggestionsInput()
+{
+	/*Suggestions*/
+
+	const notificationTags = document.createElement("div");
+	notificationTags.className = "naimm-notification-tags";
+
+	const notificationTagsStorage = document.createElement("div");
+	notificationTagsStorage.className = "naimm-tagstorage";
+
+	const notificationInput = document.createElement("input");
+	notificationInput.type = "text";
+	notificationInput.placeholder = chrome.i18n.getMessage("add_tags_placeholder");
+
+
+	const notificationTagsUpdateButton = document.createElement("button");
+	notificationTagsUpdateButton.className = "naimm-tags-update-button";
+	notificationTagsUpdateButton.innerHTML = "Update Tags";
+
+	const notificationTagsDivButton = document.createElement("div");
+	notificationTagsDivButton.className = "naimm-notification-tags-button-div";
+	
+	notificationTagsDivButton.style.display = 'none';
+
+	const notificationTagSuggestions = document.createElement("div");
+	notificationTagSuggestions.className = "naimm-notification-suggestions";
+
+	const notificationTagSuggestionsTitle = document.createElement("p");
+	notificationTagSuggestionsTitle.className = "naimm-notification-suggestions-title";
+	notificationTagSuggestionsTitle.innerText = chrome.i18n.getMessage("tag_title");
+
+	const notificationTagSuggestionsStorage = document.createElement("div");
+	notificationTagSuggestionsStorage.className = "naimm-notification-suggestions-storage";
+
+
+	const notificationTagsLoading = document.createElement("img");
+	notificationTagsLoading.id = "loading-edit-icon"
+	notificationTagsLoading.setAttribute("loading", false);
+
+	const notificationTagsStatus = document.createElement("p");
+	notificationTagsStatus.innerHTML = "";
+	notificationTagsStatus.id = "naimm-edit-status";
+
+	const notificationTagsButtonParent = document.createElement("div");
+	notificationTagsButtonParent.appendChild(notificationTagsUpdateButton)
+
+	const notificationTagsLoadingStatusDiv = document.createElement("div");
+	notificationTagsLoadingStatusDiv.appendChild(notificationTagsLoading);
+	notificationTagsLoadingStatusDiv.appendChild(notificationTagsStatus);
+
+	notificationTagsDivButton.appendChild(notificationTagsButtonParent);
+	notificationTagsDivButton.appendChild(notificationTagsLoadingStatusDiv);
+
+	notificationTagSuggestions.appendChild(notificationTagSuggestionsTitle);
+	notificationTagSuggestions.appendChild(notificationTagSuggestionsStorage);
+
+
+	notificationTags.appendChild(notificationTagsStorage);
+	notificationTags.appendChild(notificationInput);
+
+	return {notificationTags, notificationTagSuggestions,notificationTagsLoading,notificationTagSuggestionsStorage,notificationInput,notificationTagsUpdateButton, notificationTagsDivButton, notificationTagsStorage,notificationTagsButtonParent,notificationTagsStatus};
+}
+
+function createEditMenu(block_title, block_attached_url){
+	/*Edit menu*/
+		
+	const notificationEdit = document.createElement("div");
+	notificationEdit.className = "naimm-notification-edit";
+
+	const notificationEditTitle = document.createElement("p");
+	notificationEditTitle.innerHTML = chrome.i18n.getMessage("modify_block_title");
+	notificationEditTitle.className = "naimm-edit-title";
+
+	const notificationEditStorage = document.createElement("div");
+	notificationEditStorage.className = "naimm-editstorage";
+
+	const editInput1 = document.createElement("input");
+	editInput1.type = "text";
+	editInput1.placeholder = block_title;
+
+	const editInput2 = document.createElement("input");
+	editInput2.type = "text";
+	editInput2.placeholder = block_attached_url;
+
+	editInput1.style.visibility = 'visible';
+	editInput2.style.visibility = 'visible';
+
+	const notificationEditInputDiv= document.createElement("div");
+	notificationEditInputDiv.className = "naimm-editinputdiv";
+
+	notificationEditInputDiv.appendChild(editInput1);
+	notificationEditInputDiv.appendChild(editInput2);
+
+	const notificationEditLoading = document.createElement("img");
+	notificationEditLoading.id = "loading-edit-icon"
+	notificationEditLoading.setAttribute("loading", false);
+
+	const notificationEditStatus = document.createElement("p");
+	notificationEditStatus.innerHTML = "";
+	notificationEditStatus.id = "naimm-edit-status";
+
+	notificationEditStorage.appendChild(notificationEditInputDiv);
+	notificationEditStorage.appendChild(notificationEditLoading);
+	notificationEditStorage.appendChild(notificationEditStatus);
+
+	const notificationEditButton = document.createElement("button");
+	notificationEditButton.innerHTML = chrome.i18n.getMessage("modify_block_button");
+	notificationEditButton.className = "edit_button";
+
+	notificationEdit.appendChild(notificationEditTitle);
+	notificationEdit.appendChild(notificationEditStorage);
+	notificationEdit.appendChild(notificationEditButton);
+	
+	notificationEdit.setAttribute("closing", true);
+	notificationEdit.setAttribute("requesting", false);
+	
+	return { notificationEdit, notificationEditButton,editInput1,editInput2,notificationEditStatus, notificationEditLoading,notificationEditInputDiv };
+}

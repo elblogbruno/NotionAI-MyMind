@@ -5,11 +5,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:notion_ai_my_mind/Arguments.dart';
-import 'package:notion_ai_my_mind/list_view.dart';
-
-import 'package:notion_ai_my_mind/overlay_view.dart';
 import 'package:notion_ai_my_mind/resources/strings.dart';
-import 'package:notion_ai_my_mind/settings.dart';
+import 'package:notion_ai_my_mind/view/collection_list_view.dart';
+import 'package:notion_ai_my_mind/view/overlay_view.dart';
+import 'package:notion_ai_my_mind/view/settings/settings_view.dart';
 import 'package:receive_sharing_intent/receive_sharing_intent.dart';
 
 import 'package:notion_ai_my_mind/api/api.dart';
@@ -59,8 +58,8 @@ Future<void> main() async {
 
 
 class MyHomePage extends StatefulWidget {
-    @override
-    _MyAppState createState() => _MyAppState();
+  @override
+  _MyAppState createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
@@ -187,13 +186,13 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
 
       }
 
-        setState(() {
-          _sharedText = null;
-        });
+      setState(() {
+        _sharedText = null;
+      });
     });
   }
 
-  void showListOfCollections(context,bool isImage,String sharingText){
+  void showListOfCollections(context,bool isNotUrl,String sharingText){
     final context1 = navigatorKey.currentState.overlay.context;
 
     if (sharingText != "" && sharingText != null){
@@ -203,7 +202,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
       final dialog = Dialog(
         backgroundColor: Colors.transparent,
         insetPadding: EdgeInsets.all(10),
-        child: CollectionListPage(args: Arguments(sharingText,isImage,0,navigatorKey)),
+        child: CollectionListPage(args: Arguments(sharingText,isNotUrl,0,navigatorKey)), //we create the arguments we passed to the api.
       );
       showDialog(context: context1, builder: (x) => dialog);
     }
@@ -263,15 +262,25 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
               return _buildButtons(context,snapshot.data);
             } else if (snapshot.hasError) {
               children = <Widget>[
-                Icon(
+                /*Icon(
                   Icons.error_outline,
                   color: Colors.red,
                   size: 60,
-                ),
+                ),*/
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
-                  child: Text('Error: ${snapshot.error}'),
-                )
+                  child: Text('Error: ${snapshot.error}', textAlign: TextAlign.center,),
+                ),
+                InkWell(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Icon(
+                        Icons.refresh,
+                        color: Colors.red,
+                        size: 60,
+                      ),
+                    ),
+                    onTap: () => setState(() {_calculation = Api().getMindUrl(); }))
               ];
             } else {
               children = <Widget>[
@@ -283,7 +292,8 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
                 Padding(
                   padding: EdgeInsets.only(top: 16),
                   child: Text(Strings.waitText.i18n),
-                )
+                ),
+
               ];
             }
             return Center(
@@ -312,7 +322,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => settings()),
+              MaterialPageRoute(builder: (context) => settings_view()),
             );
           },
           tooltip: 'Settings',
@@ -329,90 +339,90 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
   Widget _buildButtons(BuildContext context,String url) {
     return new Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            SizedBox(height: 30),
-            Text(Strings.welcomeTitle.i18n,textAlign: TextAlign.center,
-              overflow: TextOverflow.visible,
-              style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30)),
-            SizedBox(height: 30),
-            ElevatedButton.icon(
-                key: keyOpenMindButton,
-                icon: Icon(Icons.open_in_browser),
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(height: 30),
+              Text(Strings.welcomeTitle.i18n,textAlign: TextAlign.center,
+                  overflow: TextOverflow.visible,
+                  style: TextStyle(fontWeight: FontWeight.bold,fontSize: 30)),
+              SizedBox(height: 30),
+              ElevatedButton.icon(
+                  key: keyOpenMindButton,
+                  icon: Icon(Icons.open_in_browser),
+                  label: Text(
+                      Strings.openMindButton.i18n,
+                      style: new TextStyle(fontSize: 20.0, color: Colors.white)),
+                  onPressed:() => Api().launchURL(url),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.teal,
+                  )
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              ElevatedButton.icon(
+                key: keyOpenServerButton,
+                icon: Icon(Icons.web),
                 label: Text(
-                    Strings.openMindButton.i18n,
-                  style: new TextStyle(fontSize: 20.0, color: Colors.white)),
-                onPressed:() => Api().launchURL(url),
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.teal,
-                )
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            ElevatedButton.icon(
-              key: keyOpenServerButton,
-              icon: Icon(Icons.web),
-              label: Text(
-                  Strings.openServerButton.i18n,
-                  style: new TextStyle(fontSize: 20.0, color: Colors.white)),
+                    Strings.openServerButton.i18n,
+                    style: new TextStyle(fontSize: 20.0, color: Colors.white)),
                 onPressed:() => Api().launchSettings(),
                 style: ElevatedButton.styleFrom(
                   primary: Colors.teal,
                 ),
               ),
-            SizedBox(
-              height: 20,
-            ),
-            ElevatedButton.icon(
-              key: keyRefreshCollections,
-              icon: Icon(Icons.refresh),
-              label: Text(
-                  Strings.refreshCollectionButton.i18n,
-                  style: new TextStyle(fontSize: 20.0, color: Colors.white)),
+              SizedBox(
+                height: 20,
+              ),
+              ElevatedButton.icon(
+                key: keyRefreshCollections,
+                icon: Icon(Icons.refresh),
+                label: Text(
+                    Strings.refreshCollectionButton.i18n,
+                    style: new TextStyle(fontSize: 20.0, color: Colors.white)),
                 onPressed:() => showDialog(context: context, builder: (x) => _buildRefreshNot()),
                 style: ElevatedButton.styleFrom(
                   primary: Colors.teal,
                 ),
-            ),
-            SizedBox(height: 30),
-            Text(Strings.sloganBottom.i18n, textAlign: TextAlign.center,
-                overflow: TextOverflow.visible,
-                style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20)),
-            SizedBox(height: 25),
-            ElevatedButton.icon(
-              icon: Icon(Icons.feedback),
-              label: Text(
-                  Strings.openGithubRepo.i18n,
-                  style: new TextStyle(fontSize: 20.0, color: Colors.white)),
-              onPressed:() => Api().launchRepo(false),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.teal,
               ),
-            ),
-            SizedBox(height: 25),
-            ElevatedButton.icon(
-              icon: Icon(Icons.report_problem),
-              label: Text(
-                  Strings.openGithubRepoIssue.i18n,
-                  style: new TextStyle(fontSize: 20.0, color: Colors.white)),
-              onPressed:() => Api().launchRepo(true),
-              style: ElevatedButton.styleFrom(
-                primary: Colors.teal,
+              SizedBox(height: 30),
+              Text(Strings.sloganBottom.i18n, textAlign: TextAlign.center,
+                  overflow: TextOverflow.visible,
+                  style: TextStyle(fontWeight: FontWeight.bold,fontSize: 20)),
+              SizedBox(height: 25),
+              ElevatedButton.icon(
+                icon: Icon(Icons.feedback),
+                label: Text(
+                    Strings.openGithubRepo.i18n,
+                    style: new TextStyle(fontSize: 20.0, color: Colors.white)),
+                onPressed:() => Api().launchRepo(false),
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.teal,
+                ),
               ),
-            ),
-          ],
-        )
+              SizedBox(height: 25),
+              ElevatedButton.icon(
+                icon: Icon(Icons.report_problem),
+                label: Text(
+                    Strings.openGithubRepoIssue.i18n,
+                    style: new TextStyle(fontSize: 20.0, color: Colors.white)),
+                onPressed:() => Api().launchRepo(true),
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.teal,
+                ),
+              ),
+            ],
+          )
       ),
     );
   }
 
   Widget _buildRefreshNot() {
     return FutureBuilder<MindCollectionListResponse>(
-        future:  Api().refreshCollections(), // a previously-obtained Future<String> or null
+        future:  Api().getMindStructure(), // a previously-obtained Future<String> or null
         builder: (BuildContext context, AsyncSnapshot<MindCollectionListResponse> snapshot) {
           List<Widget> children;
           if (snapshot.hasData) {
@@ -450,7 +460,7 @@ class _MyAppState extends State<MyHomePage> with WidgetsBindingObserver {
             ),
           );
         });
-    }
+  }
 
 
 

@@ -209,6 +209,7 @@ def download_image_from_url(image_url):
         print('Image sucessfully Downloaded: ', filename)
     else:
         print('Image Couldn\'t be retreived')
+        return None
     return filename
 
 

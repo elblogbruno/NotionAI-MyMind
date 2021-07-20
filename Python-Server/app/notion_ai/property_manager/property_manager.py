@@ -21,8 +21,9 @@ class PropertyManager:
         for key, value in kwargs.items():
             block.set_property(self.current_properties[str(key)], value)
 
-    def get_properties(self, block, **kwargs):
-        self.logging.info("Getting properties {0} for this block {1}".format(kwargs.keys(), block.id))
+    def get_properties(self, block, debug=False, **kwargs):
+        if debug:
+            self.logging.info("Getting properties {0} for this block {1}".format(kwargs.keys(), block.id))
         for key, value in kwargs.items():
             return block.get_property(self.current_properties[str(key)])
 

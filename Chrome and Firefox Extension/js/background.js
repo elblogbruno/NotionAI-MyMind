@@ -400,7 +400,7 @@ chrome.cookies.onChanged.addListener(function(info)
 
 // Runtime Message
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    const {action, updateMultiSelectTags,getMultiSelectTags, openTab, new_url, new_title,block_id,block_id_modify} = request;
+    const {action, updateMultiSelectTags,getMultiSelectTags, openTab, new_url, new_title,block_id,block_id_modify,unit_value,time_value,should_auto_destroy,block_id_add_reminder,start_date} = request;
 
     if (action == 'refresh_collections')
     {
@@ -413,6 +413,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     else if (openTab) 
     {
       openNewTab(openTab);
+    }
+    else if(block_id_add_reminder)
+    {
+      AddReminderRequest(start_date,unit_value,time_value,should_auto_destroy,block_id_add_reminder,sendResponse);
     }
 
     chrome.storage.sync.get("collection_index", function(items) {
@@ -461,6 +465,28 @@ async function ModifyTitleUrlRequest(newTitle,newUrl,id,replyToApp){
   let baseUrl = await getFromStorage("serverIP");
   if(!isEmpty(baseUrl)){
     urlParams = `modify_element_by_id?id=${id}&new_title=${newTitle}&new_url=${newUrl}`;
+    req.open("GET", baseUrl+urlParams, true);
+    
+    req.onreadystatechange = function() { // Call a function when the state changes.
+        if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+            var myObj = JSON.parse(this.responseText);
+            replyToApp(myObj);
+        } else if (this.status === 0) {
+            switchResponse("-1");
+        }
+    }
+    req.send();
+  }else{
+    switchResponse("-1");
+  }
+}
+
+async function AddReminderRequest(start_date, unit_value,time_value,autodestroy,id,replyToApp){
+  const req = new XMLHttpRequest();
+  let baseUrl = await getFromStorage("serverIP");
+  if(!isEmpty(baseUrl)){
+    urlParams = `set_reminder_date_to_block?id=${id}&start=${start_date}&unit=${unit_value}&remind_value=${time_value}&autodestroy=${autodestroy}`;
+    console.log(urlParams);
     req.open("GET", baseUrl+urlParams, true);
     
     req.onreadystatechange = function() { // Call a function when the state changes.

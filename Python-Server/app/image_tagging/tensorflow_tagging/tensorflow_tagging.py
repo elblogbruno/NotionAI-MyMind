@@ -23,26 +23,29 @@ class TensorFlowTag:
         else:
             file = download_image_from_url(image_url)
 
-        try:
-            img = image.load_img(file, target_size=(299, 299))
-            x = image.img_to_array(img)
-            x = np.expand_dims(x, axis=0)
-            x = preprocess_input(x)
+        if file:
+            try:
+                img = image.load_img(file, target_size=(299, 299))
+                x = image.img_to_array(img)
+                x = np.expand_dims(x, axis=0)
+                x = preprocess_input(x)
 
-            preds = self.model.predict(x)
-            prediction_decoded = decode_predictions(preds, top=20)[0]
+                preds = self.model.predict(x)
+                prediction_decoded = decode_predictions(preds, top=20)[0]
 
-            print('Predicted:', prediction_decoded)
+                print('Predicted:', prediction_decoded)
 
-            tags = []
-            for element in prediction_decoded:
-                if element[2] > treshold:
-                    tags.append(element[1])
+                tags = []
+                for element in prediction_decoded:
+                    if element[2] > treshold:
+                        tags.append(element[1])
 
-            if self.delete_after_tagging:
-                os.remove(file)
+                if self.delete_after_tagging:
+                    os.remove(file)
 
-        except UnidentifiedImageError as e:
-            self.logging.info(str(e))
+            except UnidentifiedImageError as e:
+                self.logging.info(str(e))
 
-        return tags
+            return tags
+        else:
+            return []

@@ -37,11 +37,13 @@ class MultiTagManager:
         if "options" in prop_schema:
             for element in prop_schema["options"]:
                 color = DEFAULT_COLOR
-
-                if element["color"]:
+                print(element)
+                if "color" in element:
                     color = self._notion_color_to_hex(element["color"])
+                else:
+                    element["color"] = color
 
-                x = TagObject().parse_from_notion_element(element=element,tag_color=color)
+                x = TagObject().parse_from_notion_element(element=element, tag_color=color)
 
                 l.append(x)
 

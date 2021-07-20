@@ -14,6 +14,7 @@ from .mind_structure import *
 from .property_manager.property_manager import PropertyManager
 from .utils import web_clipper_request, extract_image_from_content, \
     get_current_extension_name, open_browser_at_start
+from background_worker.task.remove_task import RemoveTask
 
 
 class NotionAI:
@@ -77,7 +78,7 @@ class NotionAI:
             open_browser_at_start(self, self.port)
         return self.loaded
 
-    def add_url_to_database(self, url, title, collection_index=0):
+    def add_url_to_database(self, url, title, collection_index=0, debug=True):
         if url is None:
             return create_json_response(self, status_code=500)
         else:
@@ -87,13 +88,14 @@ class NotionAI:
             self.logging.info("Adding url to mind: {0} {1}".format(url.encode('utf8'), title.encode('utf8')))
             self.status_code = 200  # at start we asume everything will go ok
             try:
-
+                rowId = "df75a7c5c874496e878d4b31951db41a"
                 self.mind_structure.set_current_collection(collection_index)
-                rowId = web_clipper_request(self, url, title, self.mind_structure.current_mind_id, logging=self.logging)
+                if not debug:
+                    rowId = web_clipper_request(self, url, title, self.mind_structure.current_mind_id, logging=self.logging)
 
-                thread = Thread(target=self._add_url_thread, args=(rowId,))
-                thread.daemon = True  # Daemonize thread
-                thread.start()  # Start the execution
+                    thread = Thread(target=self._add_url_thread, args=(rowId,))
+                    thread.daemon = True  # Daemonize thread
+                    thread.start()  # Start the execution
 
                 return create_json_response(self, rowId=rowId)
             except OnWebClipperError as e:
@@ -340,7 +342,7 @@ class NotionAI:
                 self.property_manager.update_properties(self.row, ai_tags_property=tags_string)
 
         except AttributeError as e:
-            self.logging.info("Add tags to row: " + str(e))
+            self.logging.info("Add tags to row error: " + str(e))
 
     def _analyze_image_thread(self, image_src, row, is_image_local=False):
         try:
@@ -361,21 +363,28 @@ class NotionAI:
         self.logging.info("Setting this mind extension user agent: {0}".format(str(extension_platform_name)))
         self.request_platform = str(extension_platform_name)
 
-    def set_reminder_date_to_block(self, logging, id, start=None, end=None, unit=None, remind_value=None,
+    def set_reminder_date_to_block(self, logging, id, start=None, unit=None, remind_value=None,
                                    self_destruction=False):
-        logging.info(
-            "Setting reminder date for this block {0} {1} {2} {3} {4}".format(id, start, end, unit, remind_value))
+        logging.info("Setting reminder date for this block {0} {1} {2} {3}".format(id, start, unit, remind_value))
 
         block = self.client.get_block(id)
-        block.refresh()
 
-        # start = datetime.strptime("2020-01-01 09:30", "%Y-%m-%d %H:%M")
-        # end = datetime.strptime("2020-01-05 20:45", "%Y-%m-%d %H:%M")
-        print(self.property_manager.get_properties(block, notion_date_property=1).reminder)
-        if remind_value:
+        if remind_value and start and unit:
+            block.refresh()
+
             reminder = {'unit': unit, 'value': remind_value}
 
-        date = NotionDate(start=start, end=end, reminder=reminder)
+            date = NotionDate(start=start, reminder=reminder)
 
-        self.property_manager.update_properties(block=block, notion_date_property=date)
-        return str(date.reminder)
+            self.property_manager.update_properties(block=block, notion_date_property=date)
+
+            if self_destruction:
+                self.logging("Block with id {0} will be auto destroyed at {1}".format(id, start))
+                task = RemoveTask(id, start, self.client)
+                self.worker.task_manager.add_task(task)
+            else:
+                self.logging("Block with id {0} will be reminded at {1}".format(id, start))
+
+            return create_json_response(self, rowId=block.id, status_code=304)
+        else:
+            return create_json_response(self, rowId=block.id, status_code=305)

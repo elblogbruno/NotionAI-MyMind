@@ -40,6 +40,16 @@
           "response": "Succesfully refreshed available collections.",
           "status": "success"
         },
+      "304":
+        {
+          "response": "Reminder set succesfully.",
+          "status": "success"
+        },
+      "305":
+        {
+          "response": "Invalid date for a reminder.",
+          "status": "error"
+        },
       "403":
         {
           "response": "Invalid url or text was provided.",

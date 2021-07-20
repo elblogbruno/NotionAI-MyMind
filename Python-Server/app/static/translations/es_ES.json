@@ -40,6 +40,16 @@
           "response": "Se han renovado con éxito las colecciones disponibles.",
           "status": "success"
         },
+      "304":
+        {
+          "response": "Recordatorio configurado correctamente.",
+          "status": "success"
+        },
+      "305":
+        {
+          "response": "Fecha no válida para recordatorio.",
+          "status": "error"
+        },
       "403":
         {
           "response": "Se ha proporcionado una url o un texto no válido.",

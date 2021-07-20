@@ -182,12 +182,12 @@
  * Suggestions
  */
 
- #naimm-notification .naimm-notification-suggestions {
+#naimm-notification .naimm-notification-suggestions {
 	position: relative;
 	z-index: 1;
 	background: #F0F2F5;
 	border-radius: 0 0 4px 4px;
-	margin-top: -10px;
+	/* margin-top: -10px; */
 	display: none;
 }
 
@@ -273,6 +273,7 @@
 #naimm-notification .naimm-notification-edit {
   position: relative;
   z-index: 1;
+  margin-top: 5px;
   background: #F0F2F5;
   border-radius: 4px;
   text-align: center;
@@ -333,7 +334,7 @@
 }
 
 
-#naimm-notification .naimm-edittorage {
+#naimm-notification .naimm-editstorage {
 	display: flex;
 	flex-direction: column;
 	border-radius: 0 0 4px 4px;
@@ -399,3 +400,102 @@
 	white-space: nowrap !important;
 	text-transform: uppercase !important;
 }
+
+
+/*time*/
+
+
+#naimm-notification .naimm-notification-time {
+	position: relative;
+	z-index: 1;
+	background: #F0F2F5;
+	border-radius: 4px;
+	text-align: center;
+}
+  
+.container {
+margin-right: 50px;
+color: #000000 !important;
+}
+
+#naimm-notification .naimm-timestorage .time_input,select {
+	font-family: Avenir, sans-serif !important;
+	border-top: none !important;
+	border-bottom: none !important;
+	border-left: none !important;
+	border-right: none !important;
+	border-radius: 0 !important;
+	outline: 0 !important;
+	background: none !important;
+	min-width: 80% !important;
+	-webkit-appearance: none !important;
+	box-shadow: none !important;
+
+	color: inherit !important;
+	font-family: Avenir, sans-serif !important;
+	font-weight: normal !important;
+	font-size: 18px !important;
+	line-height: 30px !important;
+	letter-spacing: 0 !important;
+	color: #000000 !important;
+}
+
+#naimm-notification .naimm-timestorage .time_input::placeholder {
+	color: #414956 !important;
+}
+
+#naimm-notification .naimm-time-title {
+	padding: 30px 20px 15px !important;
+	margin: 5px !important;
+
+	font-family: Avenir, sans-serif !important;
+	font-weight: normal !important;
+	font-size: 12px !important;
+	line-height: 16px !important;
+	letter-spacing: 0 !important;
+	color: #B3BCCA !important;
+	white-space: nowrap !important;
+	text-transform: uppercase !important;
+}
+
+#naimm-notification .naimm-timestorage {
+	display: flex;
+	flex-direction: column;
+	border-radius: 0 0 4px 4px;
+	overflow: hidden;
+}
+
+.naimm-notification-time[closing="true"] {
+	pointer-events: none !important;
+	display: none;
+}
+
+.naimm-notification-time {
+	display: block;
+}
+
+.time_button {
+margin: 10px;
+background-color: #414956;
+border: none;
+border-radius: 2px;
+color: white;
+padding: 10px 32px;
+text-align: center;
+text-decoration: none;
+display: inline-block;
+font-size: 16px;
+}
+
+#naimm-time-status {
+	font-family: Avenir, sans-serif !important;
+	font-weight: normal !important;
+	font-size: 12px !important;
+	line-height: 16px !important;
+	letter-spacing: 0 !important;
+	color: #B3BCCA !important;
+	white-space: nowrap !important;
+	text-transform: uppercase !important;
+}
+  
+  

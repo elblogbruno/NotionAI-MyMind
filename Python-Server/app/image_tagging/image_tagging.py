@@ -25,13 +25,13 @@ class ImageTagging:
                 self.treshold = float(options['confidence_treshold'])
             if options['use_clarifai']:
                 self.predictor = ClarifaiAI(data['clarifai_key'])
-                logging.info("Using clarifai predictor")
+                self.logging.info("Using clarifai predictor")
             else:
                 self.predictor = TensorFlowTag(options['delete_after_tagging'])
-                logging.info("Using tensorflow predictor, with delete_after_tagging = {}".format(
+                self.logging.info("Using tensorflow predictor, with delete_after_tagging = {}".format(
                     options['delete_after_tagging']))
         except FileNotFoundError:
-            logging.info("options.json not found")
+            self.logging.info("options.json not found")
             print("Wrong file or file path")
 
     def get_tags(self, image_url, is_image_local):
