@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from task.task import Task
+from background_worker.task.task import Task
 
 
 class RemoveTask(Task):

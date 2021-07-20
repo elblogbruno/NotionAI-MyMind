@@ -9,8 +9,6 @@ import sys
 import os
 import tempfile
 
-from task.task_manager import TaskManager
-
 dir_path = 'background_worker.log'
 if getattr(sys, 'frozen', False):
     tmp = tempfile.mkdtemp()
