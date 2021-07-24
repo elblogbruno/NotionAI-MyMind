@@ -379,11 +379,11 @@ class NotionAI:
             self.property_manager.update_properties(block=block, notion_date_property=date)
 
             if self_destruction:
-                self.logging("Block with id {0} will be auto destroyed at {1}".format(id, start))
+                self.logging.info("Block with id {0} will be auto destroyed at {1}".format(id, start))
                 task = RemoveTask(id, start, self.client)
                 self.worker.task_manager.add_task(task)
             else:
-                self.logging("Block with id {0} will be reminded at {1}".format(id, start))
+                self.logging.info("Block with id {0} will be reminded at {1}".format(id, start))
 
             return create_json_response(self, rowId=block.id, status_code=304)
         else:
