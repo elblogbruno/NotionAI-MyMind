@@ -22,7 +22,7 @@
     <a href="https://github.com/elblogbruno/NotionAI-MyMind/discussions/categories/ideas">Request Feature</a>
   </p>
   <p align="center">
-    <a href='https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 '><img align="center" style="overflow: hidden; display: inline-block;" alt='Get it on Chrome Web Store' width=200          height=60 src='https://storage.googleapis.com/chrome-gcs-uploader.appspot.com/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/HRs9MPufa1J1h5glNhut.png'/></a>  <a href='https://addons.mozilla.org/en-US/firefox/addon/notion-ai-my-mind/'><img align="center" style="overflow: hidden; display: inline-block;" alt='Get it on Firefox Add-On Store' width=172 height=60  src='https://ffp4g1ylyit3jdyti1hqcvtb-wpengine.netdna-ssl.com/addons/files/2015/11/get-the-addon.png'/></a>  <a href='https://play.google.com/store/apps/details?id=com.elblogbruno.notion_ai_my_mind&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img align="center" style=" overflow: hidden; display: inline-block;" alt='Get it on Google Play' width=250 height=100 src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a>
+    <a href='https://play.google.com/store/apps/details?id=com.elblogbruno.notion_ai_my_mind&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img align="center" style=" overflow: hidden; display: inline-block;" alt='Get it on Google Play' width=250 height=100 src='https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png'/></a> 
   
   </p>
   <a href="https://github.com/elblogbruno/NotionAI-MyMind/blob/master/readme-translations/README.es.md">
@@ -92,15 +92,8 @@ Add websites to your mind |  Search on your mind
 ![](doc/add_website.gif)  |  ![](doc/header_gif_search.gif)
 
 ### Extensions
-### Chromium users
-The chromium based browsers such as Google Chrome,Brave or Microsoft edge among others, can install the extension from the store!
 
-<a href='https://chrome.google.com/webstore/detail/notion-ai-my-mind/eaheecglpekjjlegffodbfhbhdmnjaph?hl=es&authuser=0 '><img alt='Get it on Chrome Web Store' width=200 height=60 src='https://storage.googleapis.com/chrome-gcs-uploader.appspot.com/image/WlD8wC6g8khYWPJUsQceQkhXSlv1/HRs9MPufa1J1h5glNhut.png'/></a>
-
-### Firefox users
-Firefox users can install the extension from the store!
-
-<a href='https://addons.mozilla.org/en-US/firefox/addon/notion-ai-my-mind/'><img alt='Get it on Firefox Add-On Store' width=172 height=60 src='https://ffp4g1ylyit3jdyti1hqcvtb-wpengine.netdna-ssl.com/addons/files/2015/11/get-the-addon.png'/></a>
+[mymind](https://mymind.com/) company, friendly asked me to remove the browser extension as it infringes its copyright. Until further re-design of the browser extension code and style, extension will not be available for download on the Chrome Web Store and Firefox Addon Store.
 
 ### Android and Ios users
 

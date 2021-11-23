@@ -1,7 +1,7 @@
 # Created by https://www.toptal.com/developers/gitignore/api/images,video
 # Edit at https://www.toptal.com/developers/gitignore?templates=images,video
 
-
+/Chrome and Firefox Extension
 *.jks
 key.properties
 /Python-Server/output
