@@ -93,7 +93,7 @@ Add websites to your mind |  Search on your mind
 
 ### Extensions
 
-[mymind](https://mymind.com/) company, friendly asked me to remove the browser extension as it infringes its copyright. Until further re-design of the browser extension code and style, extension will not be available for download on the Chrome Web Store and Firefox Addon Store.
+[mymind](https://mymind.com/) company, friendly asked me to remove the browser extension as it infringes its copyright. Until further re-design of the browser extension, extension will not be available for download on the Chrome Web Store and Firefox Addon Store.
 
 ### Android and Ios users
 
