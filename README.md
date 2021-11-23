@@ -2,7 +2,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/elblogbruno/NotionAI-MyMind/">
-    <img src="Chrome%20and%20Firefox%20Extension/icon/icon.png" alt="Logo" width="80" height="80">
+    <img src="icon.png" alt="Logo" width="80" height="80">
   </a>
   
 
